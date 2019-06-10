@@ -3,8 +3,6 @@ library(readxl)
 library(stringr)
 
 ## GOPHER, COWPIE, BARE, LITTER
-datpath <- "C:/Users/eliza/University Of Oregon/O365.hallett-lab - Documents/Tulare-LabPaper/Serpentine_Plants2001_2018_MK_working.xlsx"
-
 dat <- read_excel(datpath, 
                   sheet = "Plants 2002", skip = 3)
 
