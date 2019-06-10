@@ -4,10 +4,10 @@ library(stringr)
 
 ## GOPHER, COWPIE, BARE, LITTER
 
-dat <- read_excel("~/University of Oregon/O365.hallett-lab - Documents/Tulare-LabPaper/Serpentine_Plants2001_2018_MK_working.xlsx", 
+dat <- read_excel(datpath, 
                   sheet = "Plants2001", skip = 3)
 
-datnames <- read_excel("~/University of Oregon/O365.hallett-lab - Documents/Tulare-LabPaper/Serpentine_Plants2001_2018_MK_working.xlsx", 
+datnames <- read_excel(datpath, 
                        sheet = "Plants2001")[0,]
 
 names(dat) = names(datnames)
