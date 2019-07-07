@@ -25,7 +25,7 @@ dat2015 <- dat %>%
   filter(dummyspp != "X__") %>%
   select(-dummyspp) %>%
   #mutate(site = substr(quadrat, 1,2)) %>%
-  filter(site =="TH" | site =="TH-MEC" | site == "TH-North") %>%
+  filter(site =="TH" | site =="TH-MEC" | site == "TH-North" | site == "PGE") %>%
   mutate(year = 2015)
 
 
