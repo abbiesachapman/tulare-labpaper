@@ -28,7 +28,7 @@ dat2013 <- dat %>%
   filter(site == "TH"| site == "TH-BUG") 
 
 
-key2012 <- dat2012 %>%
+key2013 <- dat2013 %>%
   select(quadrat, site, year, transect) %>%
   unique()
 
