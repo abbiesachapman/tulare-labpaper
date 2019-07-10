@@ -20,12 +20,18 @@ source("Data_cleaning/dataformatting_2016.R")
 source("Data_cleaning/dataformatting_2017.R")
 source("Data_cleaning/dataformatting_2018.R")
 
+
 unique(key2001$quadrat)
-length(unique(key2002$quadrat))
+unique(key2002$quadrat)
 
 length(intersect(unique(key2001$quadrat),
-          unique(key2002$quadrat)))
+          unique(key2005$quadrat)))
 
+length(intersect(unique(key2001$quadrat),
+                 unique(key2003$quadrat)))
+
+length(outersect(unique(key2001$quadrat),
+                 unique(key2003$quadrat)))
 
 length(intersect(unique(key2001$quadrat),
                  unique(key2006$quadrat)))
