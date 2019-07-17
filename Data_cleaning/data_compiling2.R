@@ -62,7 +62,7 @@ length(outersect(unique(a$quadrat),unique(b$quadrat),unique(c$quadrat),
                  unique(p$quadrat),unique(q$quadrat),unique(r$quadrat)))
 
 # names of different quadrats across all years
-outersect(unique(a$quadrat),unique(b$quadrat),unique(c$quadrat),
+diffquad <- outersect(unique(a$quadrat),unique(b$quadrat),unique(c$quadrat),
           unique(d$quadrat),unique(e$quadrat),unique(f$quadrat),
           unique(g$quadrat),unique(h$quadrat),unique(i$quadrat),
           unique(j$quadrat),unique(k$quadrat),unique(l$quadrat),
@@ -81,9 +81,12 @@ length(intersect2(unique(key2001$quadrat),unique(key2002$quadrat),
                  unique(key2017$quadrat),unique(key2018$quadrat)))
 
 # names of same quadrats across all years
-intersect2(unique(a$quadrat),unique(b$quadrat),unique(c$quadrat),
+samequad <- intersect2(unique(a$quadrat),unique(b$quadrat),unique(c$quadrat),
           unique(d$quadrat),unique(e$quadrat),unique(f$quadrat),
           unique(g$quadrat),unique(h$quadrat),unique(i$quadrat),
           unique(j$quadrat),unique(k$quadrat),unique(l$quadrat),
           unique(m$quadrat),unique(n$quadrat),unique(o$quadrat),
           unique(p$quadrat),unique(q$quadrat),unique(r$quadrat))
+
+write.csv(samequad, "same_quadrats_Tulare")
+write.csv(diffquad, "diff_quadrats_Tulare")
