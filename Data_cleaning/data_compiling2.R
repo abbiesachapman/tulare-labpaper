@@ -40,6 +40,14 @@ p <- key2016
 q <- key2017
 r <- key2018
 
+tog <- rbind.fill(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r)
+
+tog2 <- tog %>%
+  select(quadrat, year) %>%
+  mutate(exist = 1) %>%
+  spread(year, exist, fill="")
+
+write.csv(tog2, "Datacheck.csv")
 # create outersect and intersect function  
 outersect <- function(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r) {
   big.vec <- c(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r)
