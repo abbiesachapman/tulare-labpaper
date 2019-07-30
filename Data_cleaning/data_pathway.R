@@ -10,4 +10,6 @@ datpath <- "C:/Users/Lina/University Of Oregon/O365.hallett-lab - Documents/Tula
 
 datpath_clean <- "~/University of Oregon/O365.hallett-lab - Documents/Tulare-LabPaper/Lab day/"
 
+datpath_clean <- "C:/Users/eliza/University Of Oregon/O365.hallett-lab - Documents/Tulare-LabPaper/Lab day/"
+
 datpath_clean <- "C:/Users/Lina/University Of Oregon/O365.hallett-lab - Documents/Tulare-LabPaper/Lab day/"
