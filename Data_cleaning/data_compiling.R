@@ -80,21 +80,22 @@ alldat <- rbind(dat2001, dat2002, dat2003, dat2004, dat_2005, dat_2006,
 names(alldat)[3]=c("spcode")
 
 # species code check
-uniquesp <- data.frame(unique(alldat$species))
+uniquesp <- data.frame(unique(alldat$spcode))
 names(uniquesp)[1]=c("spcode")
 
-spkey <- read_excel("SpeciesCodes.xlsx") 
+spkey <- read_excel("SpeciesCodes.xlsx") %>%
+  select(-X__1)
 names(spkey)[1:2]=c("spcode","spname")
 
-diffsp <- full_join(spkey, uniquesp, by = "Code")
+diffsp <- full_join(spkey, uniquesp, by = "spcode")
 
 # DEL SP is only species code that does not have a full plant name
 delcheck <- alldat %>%
-  filter(species == "DEL SP")
+  filter(spcode == "DEL SP")
 
 # link species key to alldat
-alldatsp <- inner_join(alldat, spkey, by = "spcode") %>%
-  select(-X__1)
+alldatsp <- inner_join(alldat, spkey, by = "spcode")
+
 
 # join datasets to include thermal treatment 
 quadkey <- read_excel("MasterQuadratKey.xlsx")
@@ -105,13 +106,14 @@ bugr <- inner_join(alldatsp, quadkey, by = "quadrat") %>%
   select(quadratNew, treatment, spcode, spname, cover, year, thermal) %>%
   filter(treatment == "burned grazed")
 
-datacheck <- bugr %>%
+bugrcheck <- bugr %>%
   select(-cover, -spcode,-spname) %>%
   unique() %>%
   mutate(exist = 1) %>%
   spread(year, exist, fill="")
 
-write.csv(datacheck, "Datacheck.csv")
+write.csv(bugrcheck, "BUGRdatacheck.csv")
+write.csv(alldatsp, "alldatsp.csv")
 
 
 
