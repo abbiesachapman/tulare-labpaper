@@ -6,6 +6,8 @@ library(ggplot2)
 
 dat <- read_csv(paste(datpath_clean, "/bugrdat.csv", sep=""))
 
+SC <- read_csv(paste(datpath_clean, "/SpeciesCodes.csv", sep=""))
+
 
 View(dat)
 
@@ -19,3 +21,14 @@ richness <- dat %>%
 ggplot(richness, aes(year, mean_rich)) +
   geom_point() +
   geom_line()
+
+
+tog<-left_join(dat, SC)
+
+functog<-tog%>%
+  group_by(quadratNew, year, status, func)%>%
+  summarize(sumcov=sum(cover))%>%
+  filter(!is.na(status), !is.na(func))
+
+ggplot(functog, aes(year, sumcov))+geom_boxplot()+facet_grid(status~func)
+
