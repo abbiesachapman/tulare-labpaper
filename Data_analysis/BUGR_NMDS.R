@@ -80,12 +80,12 @@ spscoresall<-data.frame(tplots,spscores1,spscores2)
 
 #plots colored based on treatment #help(ordiplot)
 bio.plot <- ordiplot(spp.mds,choices=c(1,2), type = "none")   #Set up the plot
-#cols1 <- rep(c("Red","Orange","purple", "black"), each = 18) #color based on drought treatment
+cols1 <- rep(c("Red","Orange","purple", "black", "blue"), each = 180) #color based on drought treatment
 #Lcols <- rep(c("Red", "Orange", "purple", "black"))
 #shapes <- rep(c(15, 3, 17, 19, 5), each=3) #shapes on subplot
 #Lshapes <- rep(c(15,3,17,19,5))
-points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols1,pch=12) 
-#text(spp.mds, display = "species", cex=0.5, col="grey30") #label species
+points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols1,pch=15) 
+text(spp.mds, display = "species", cex=0.5, col="grey30") #label species
 #legend("bottomright",legend=levels(Treatment), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 # add legend for treatment
 #legend("topright",legend=levels(data$subplot), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
