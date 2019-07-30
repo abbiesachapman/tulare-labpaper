@@ -6,4 +6,8 @@ datpath <- "~/University of Oregon/O365.hallett-lab - Documents/Tulare-LabPaper/
 
 datpath <- "C:/Users/eliza/University Of Oregon/O365.hallett-lab - Documents/Tulare-LabPaper/Serpentine_Plants2001_2018_MK_working.xlsx"
 
+datpath <- "C:/Users/Lina/University Of Oregon/O365.hallett-lab - Documents/Tulare-LabPaper/Serpentine_Plants2001_2018_MK_working.xlsx"
+
 datpath_clean <- "~/University of Oregon/O365.hallett-lab - Documents/Tulare-LabPaper/Lab day/"
+
+datpath_clean <- "C:/Users/Lina/University Of Oregon/O365.hallett-lab - Documents/Tulare-LabPaper/Lab day/"
