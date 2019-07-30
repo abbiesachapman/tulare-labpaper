@@ -19,7 +19,7 @@ dat2001env <- dat %>%
 
 dat2001 <- dat %>%
   select(-c(GOPHER, BARE, ROCK, LITTER, COWPIE)) %>%
-  gather(species, cover, "X__3":"X__43") %>%
+  gather(species, cover, "X__3":"X__47") %>%
   mutate(dummyspp = substr(species, 1,3)) %>%
   filter(dummyspp != "X__") %>%
   select(-dummyspp) %>%
