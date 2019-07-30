@@ -106,12 +106,14 @@ bugr <- inner_join(alldatsp, quadkey, by = "quadrat") %>%
   select(quadratNew, treatment, spcode, spname, cover, year, thermal) %>%
   filter(treatment == "burned grazed")
 
+#check existence of bugr data across years
 bugrcheck <- bugr %>%
   select(-cover, -spcode,-spname) %>%
   unique() %>%
   mutate(exist = 1) %>%
   spread(year, exist, fill="")
 
+# print data frames
 write.csv(bugrcheck, "BUGRdatacheck.csv")
 write.csv(alldatsp, "alldatsp.csv")
 
