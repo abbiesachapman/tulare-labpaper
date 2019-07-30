@@ -115,7 +115,7 @@ bugrcheck <- bugr %>%
 
 # print data frames
 write.csv(bugrcheck, "BUGRdatacheck.csv")
-write.csv(alldatsp, "alldatsp.csv")
+write.csv(bugr, "bugrdat.csv")
 
 
 
