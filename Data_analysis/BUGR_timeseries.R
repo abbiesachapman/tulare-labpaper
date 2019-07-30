@@ -29,6 +29,10 @@ functog<-tog%>%
   group_by(quadratNew, year, status, func)%>%
   summarize(sumcov=sum(cover))%>%
   filter(!is.na(status), !is.na(func))
+functogagg<-functog%>%
+  group_by(year, status, func)%>%
+  summarize(meancov=mean(sumcov))
 
-ggplot(functog, aes(year, sumcov))+geom_boxplot()+facet_grid(status~func)
+ggplot(functog, aes(as.factor(year), sumcov))+geom_boxplot()+facet_grid(status~func)
+ggplot(functogagg, aes((year), meancov))+geom_line(aes(color=interaction(status, func)))+geom_point(aes(color=interaction(status, func)))
 
