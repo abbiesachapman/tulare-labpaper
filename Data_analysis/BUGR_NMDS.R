@@ -49,12 +49,12 @@ cover.Biodrop<-cover.Bio[rowSums(cover.Bio[, (1:157)]) ==0, ] #no empty rows, ne
 ######################
 
 #make bray-curtis dissimilarity matrix
-spp.bcd <- vegdist(cover.relrow)
+spp.bcd <- vegdist(cover.Bio)
 
-#run NMS ordination
+#quick run to check out NMS ordination
 spp.mds0 <-isoMDS(spp.bcd) #runs nms only once
-spp.mds0  #by default 2 dimensions returned, stress is 7.5, converged
-ordiplot(spp.mds0)
+spp.mds0  #by default 2 dimensions returned, stress is 6.4, converged
+ordiplot(spp.mds0) #ugly
 
 #prefer to run multiple NMS ordinations
 #with different starting configurations, and choose the best
