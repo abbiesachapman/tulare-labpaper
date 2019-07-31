@@ -11,10 +11,11 @@ library(RVAideMemoire) #for posthoc tests on permanova
 dat <- read_csv(paste(datpath_clean, "/bugrdat.csv", sep=""))
 dat<-as.data.frame(dat)
 #dat2<-dat %>% mutate(cover=cover+0.00001) #a work around for data with lots of zeros
-data<- dat2 %>% dplyr::select(-X1, -spcode) %>% spread(spname, cover)
+data<- dat %>% dplyr::select(-X1, -spcode) %>% spread(spname, cover)
 data[is.na(data)] <- 0 #replace NAs with 0 (species not counted in plots have NAs when wide dataset created)
 levels(as.factor(dat$quadratNew))
 levels(as.factor(dat$thermal))
+levels(as.factor(dat$spname)) #any to remove?
 
 data %>% 
   group_by(thermal) %>%
@@ -34,8 +35,8 @@ cover.Biodrop<-cover.Bio[rowSums(cover.Bio[, (1:157)]) ==0, ] #no empty rows, ne
 
 
 #if needed, relativize by row or column or calculate presence/absence
-cover.rowsums <- rowSums(cover.Bio [1:157])
-cover.relrow <- data.frame(cover.Bio /cover.rowsums)
+#cover.rowsums <- rowSums(cover.Bio [1:157])
+#cover.relrow <- data.frame(cover.Bio /cover.rowsums)
 #cover.colmax<-sapply(cover.Bio ,max)
 #cover.relcolmax <- data.frame(sweep(cover.Bio ,2,cover.colmax,'/'))
 #cover.pa <- cover.Bio %>% mutate_each(funs(ifelse(.>0,1,0)), 1:57)
@@ -65,7 +66,7 @@ ordiplot(spp.mds0)
 #calculate species scores based on weighted averaging
 #help(metaMDS)
 
-spp.mds<-metaMDS(cover.relrow, trace = TRUE, autotransform=T, trymax=100, k=6) #runs several with different starting configurations
+spp.mds<-metaMDS(cover.Bio, trace = TRUE, autotransform=T, trymax=100, k=6) #runs several with different starting configurations
 #trace= TRUE will give output for step by step what its doing
 #default is 2 dimensions, can put k=4 for 4 dimensions
 spp.mds #solution did not converge after 100 tries
