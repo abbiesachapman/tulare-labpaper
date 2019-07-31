@@ -34,7 +34,7 @@ cover.Biodrop<-cover.Bio[rowSums(cover.Bio[, (1:157)]) ==0, ] #no empty rows, ne
 #cover.Biodrop<-cover.Bio[rowSums(cover.Bio[, (1:157)])  >0 ]#remove empty rows
 
 
-#if needed, relativize by row or colum or calculate presence/absence
+#if needed, relativize by row or column or calculate presence/absence
 cover.rowsums <- rowSums(cover.Bio [1:157])
 cover.relrow <- data.frame(cover.Bio /cover.rowsums)
 #cover.colmax<-sapply(cover.Bio ,max)
@@ -58,8 +58,7 @@ ordiplot(spp.mds0)
 
 #prefer to run multiple NMS ordinations
 #with different starting configurations, and choose the best
-#this function does that, and in addition does several other steps too
-#including: 
+#this function does that, and in addition does several other steps too including: 
 #standardizing the data (though fuction call below turns this off with autotransform=F)
 #calculating distance matrix (default bray-curtis)
 #running NMDS with random starts
@@ -67,13 +66,13 @@ ordiplot(spp.mds0)
 #calculate species scores based on weighted averaging
 
 help(metaMDS)
-spp.mds<-metaMDS(cover.relrow, trace = TRUE, autotransform=F, trymax=100, k=6) #runs several with different starting configurations
+spp.mds<-metaMDS(cover.relrow, trace = TRUE, autotransform=F, trymax=100, k=2) #runs several with different starting configurations
 #trace= TRUE will give output for step by step what its doing
 #default is 2 dimensions, can put k=4 for 4 dimensions
-spp.mds #solution converged after 49 tries, stress = 3.0
+spp.mds #solution did not converge after 100 tries
 summary(spp.mds)
 
-#plot results
+#quick plot of results
 stressplot(spp.mds, spp.bcd) #stressplot to show fit
 ordiplot(spp.mds)
 spscores1<-scores(spp.mds,display="sites",choices=1)
@@ -82,7 +81,8 @@ tplots<-data[,4]
 tplot_levels<-levels(tplots)
 spscoresall<-data.frame(tplots,spscores1,spscores2)
 
-#plots colored based on treatment #help(ordiplot)
+#make nicer plot colored based on thermal, shapes on pre/post fire
+#help(ordiplot)
 bio.plot <- ordiplot(spp.mds, choices=c(1,2), type = "none")   #Set up the plot
 cols1<- data %>% dplyr::select(thermal) %>% mutate(color = "black", 
        color = ifelse(thermal == "cool", "purple", 
@@ -95,7 +95,7 @@ shapes <- data %>% dplyr::select(year) %>%
       ifelse(year>="2005", 16, shape))) #shapes based on year 
 shapes<-shapes %>% mutate(time="Pre-Fire", 
                         time= ifelse(year==2004, "Fire",
-                          ifelse(year>=2006, "Post-Fire", time)))
+                          ifelse(year>=2006, "Post-Fire", time))) 
 Lshapes <-rep(c(8,16,1))#shapes for legend
 points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols1$color,pch=shapes$shape) 
 #text(spp.mds, display = "species", cex=0.5, col="grey30") #label species
