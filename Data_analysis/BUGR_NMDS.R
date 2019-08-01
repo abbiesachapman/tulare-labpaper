@@ -19,12 +19,14 @@ levels(as.factor(dat$quadratNew))
 levels(as.factor(dat$thermal))
 levels(as.factor(dat$spname)) #any to remove?
 
+#merge env to match full data
+all.env<-merge(env,data) %>% dplyr::select(NH4, NO3, totalN, ppt)
+
 data %>% 
   group_by(thermal) %>%
   summarise(no_rows = length(thermal)) #note very uneven
 
 str(data)
-
 
 data$ID <- seq.int(nrow(data))
 plotnames<-data[,1]
@@ -83,9 +85,15 @@ tplots<-data[,4]
 tplot_levels<-levels(tplots)
 spscoresall<-data.frame(tplots,spscores1,spscores2)
 
+#overlay environmental variables on full data
+envvec.nms<-envfit(spp.mds,all.env, na.rm=TRUE)
+envvec.nms
+plot(spp.mds)
+plot(envvec.nms) #add vectors to previous ordination
+
 #make nicer plot colored based on thermal, shapes on pre/post fire
 #help(ordiplot)
-bio.plot <- ordiplot(spp.mds, choices=c(1,2), type = "none")   #Set up the plot
+#first, set colors and shapes
 cols1<- data %>% dplyr::select(thermal) %>% mutate(color = "black", 
        color = ifelse(thermal == "cool", "purple", 
                       ifelse(thermal=="moderate", "orange", 
@@ -99,7 +107,10 @@ shapes<-shapes %>% mutate(time="Pre-Fire",
                         time= ifelse(year==2004, "Fire",
                           ifelse(year>=2005, "Post-Fire", time))) 
 Lshapes <-rep(c(8,16,1))#shapes for legend
+#make the plot
+bio.plot <- ordiplot(spp.mds, choices=c(1,2), type = "none")   #Set up the plot
 points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols1$color,pch=shapes$shape) 
+plot(envvec.nms)
 text(spp.mds, display = "species", cex=0.5, col="grey30") #label species
 legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 legend("topright",legend=levels(as.factor(shapes$time)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
@@ -116,18 +127,10 @@ cover.mod<-data %>% subset (thermal=="moderate") %>% dplyr::select(-c(1:4))
 cover.vcool<-data %>% subset(thermal=="very cool") %>% dplyr::select(-c(1:4))
 cover.vwarm<-data %>% subset(thermal=="very warm") %>% dplyr::select(-c(1:4))
 
+
+##start with COOL
 #make bray-curtis dissimilarity matrix
 spp.bcd.cool <- vegdist(cover.cool)
-
-#prefer to run multiple NMS ordinations
-#with different starting configurations, and choose the best
-#this function does that, and in addition does several other steps too including: 
-#standardizing the data (though fuction call below turns this off with autotransform=F)
-#calculating distance matrix (default bray-curtis)
-#running NMDS with random starts
-#rotation of axes to maximize variance of site scores on axis 1
-#calculate species scores based on weighted averaging
-#help(metaMDS)
 
 spp.mds.cool<-metaMDS(cover.cool, trace = TRUE, autotransform=T, trymax=100, k=2) #runs several with different starting configurations
 #trace= TRUE will give output for step by step what its doing
@@ -151,7 +154,7 @@ envvec.nms.cool
 plot(spp.mds.cool)
 plot(envvec.nms.cool) #add vectors to previous ordination
 
-#make nicer plot colored based on thermal, shapes on pre/post fire
+#COOL thermal only, shapes on pre/post fire
 #help(ordiplot)
 bio.plot.cool <- ordiplot(spp.mds.cool, choices=c(1,2), type = "none")   #Set up the plot
 cols1<- rep(c("purple"))
