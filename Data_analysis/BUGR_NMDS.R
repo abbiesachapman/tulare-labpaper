@@ -271,3 +271,49 @@ plot(envvec.nms.mod, col="green")
 text(spp.mds.mod, display = "species", cex=0.5, col="grey30") #label species
 legend("topright",legend=levels(as.factor(shapes.mod$time)), col="black", pch=Lshapesm, cex=0.9,inset=0.05,bty="n",y.intersp=0.25,x.intersp=0.4,pt.cex=1.1)
 
+##################
+####VERY WARM#####
+#make bray-curtis dissimilarity matrix
+spp.bcd.vwarm <- vegdist(cover.vwarm)
+
+spp.mds.vwarm<-metaMDS(cover.vwarm, trace = TRUE, autotransform=T, trymax=100, k=2) #runs several with different starting configurations
+#trace= TRUE will give output for step by step what its doing
+#default is 2 dimensions, can put k=4 for 4 dimensions
+spp.mds.vwarm #solution converged after 20 tries, stress is 25.9%
+summary(spp.mds.vwarm)
+
+#quick plot of results
+stressplot(spp.mds.vwarm, spp.bcd.vwarm) #stressplot to show fit
+ordiplot(spp.mds.vwarm)
+spscores1.vwarm<-scores(spp.mds.vwarm,display="sites",choices=1)
+spscores2.vwarm<-scores(spp.mds.vwarm,display="sites",choices=2)
+tplots.vwarm<-vwarm[,4]
+tplot_levels_vwarm<-levels(tplots.vwarm)
+spscoresall.vwarm<-data.frame(tplots.vwarm,spscores1.vwarm,spscores2.vwarm)
+
+#overlay environmental variables on plot
+vwarm.env<-merge(vwarm, env) %>% dplyr::select(NH4, NO3, totalN, ppt,temp)
+envvec.nms.vwarm<-envfit(spp.mds.vwarm,vwarm.env, na.rm=TRUE)
+envvec.nms.vwarm
+plot(spp.mds.vwarm)
+plot(envvec.nms.vwarm) #add vectors to previous ordination
+
+#VERY WARM thermal only, shapes on pre/post fire
+#help(ordiplot)
+#set colors and shapes
+colsw<- rep(c("red"))
+shapes.vwarm <- vwarm %>% dplyr::select(year) %>%
+  mutate(shape = 1, shape = ifelse(year == "2004", 8, 
+                                   ifelse(year>="2005"& year<="2013", 16, 
+                                          ifelse(year>="2014", 15, shape)))) #shapes based on year 
+shapes.vwarm<-shapes.vwarm %>% mutate(time="Pre-Fire", 
+                                      time= ifelse(year==2004, "Fire",
+                                                   ifelse(year>=2005 & year<="2013", "Post-Fire",
+                                                          ifelse(year>=2014, "2014 and later", time)))) 
+Lshapesw <-rep(c(15,8,16,1))#shapes for legend
+bio.plot.vwarm <- ordiplot(spp.mds.vwarm, choices=c(1,2), type = "none")   #Set up the plot
+points(spscoresall.vwarm$NMDS1,spscoresall.vwarm$NMDS2,col=colsw,pch=shapes.vwarm$shape) 
+plot(envvec.nms.vwarm, col="green")
+text(spp.mds.vwarm, display = "species", cex=0.5, col="grey30") #label species
+legend("topright",legend=levels(as.factor(shapes.vwarm$time)), col="black", pch=Lshapesw, cex=0.9,inset=0.05,bty="n",y.intersp=0.25,x.intersp=0.4,pt.cex=1.1)
+
