@@ -11,6 +11,9 @@ library(RVAideMemoire) #for posthoc tests on permanova
 dat <- read_csv(paste(datpath_clean, "/bugrdat.csv", sep=""))
 env <- read_csv(paste(datpath_clean, "/NTN-CA66-deposition.csv", sep=""))
 env<-env %>% rename(year=yr)
+temp <- read_csv(paste(datpath_clean, "/san_jose_clim.csv", sep=""),skip=9)
+temp <- temp %>% rename(year=DATE, temp=TAVG) %>% dplyr::select(year, temp)
+env<-merge(env,temp)
 dat<-as.data.frame(dat)
 #dat2<-dat %>% mutate(cover=cover+0.00001) #a work around for data with lots of zeros
 data<- dat %>% dplyr::select(-X1, -spcode) %>% spread(spname, cover)
@@ -20,7 +23,7 @@ levels(as.factor(dat$thermal))
 levels(as.factor(dat$spname)) #any to remove?
 
 #merge env to match full data
-all.env<-merge(env,data) %>% dplyr::select(NH4, NO3, totalN, ppt)
+all.env<-merge(env,data) %>% dplyr::select(NH4, NO3, totalN, ppt, temp)
 
 data %>% 
   group_by(thermal) %>%
@@ -169,4 +172,49 @@ points(spscoresall.cool$NMDS1,spscoresall.cool$NMDS2,col=cols1,pch=shapes.cool$s
 plot(envvec.nms.cool)
 text(spp.mds.cool, display = "species", cex=0.5, col="grey30") #label species
 legend("topright",legend=levels(as.factor(shapes$time)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+
+##start with VERY COOL
+#make bray-curtis dissimilarity matrix
+spp.bcd.vcool <- vegdist(cover.vcool)
+
+spp.mds.vcool<-metaMDS(cover.vcool, trace = TRUE, autotransform=T, trymax=100, k=2) #runs several with different starting configurations
+#trace= TRUE will give output for step by step what its doing
+#default is 2 dimensions, can put k=4 for 4 dimensions
+spp.mds.vcool #solution converged after 20 tries, stress is 22.4%
+summary(spp.mds.vcool)
+
+#quick plot of results
+stressplot(spp.mds.vcool, spp.bcd.vcool) #stressplot to show fit
+ordiplot(spp.mds.vcool)
+spscores1.vcool<-scores(spp.mds.vcool,display="sites",choices=1)
+spscores2.vcool<-scores(spp.mds.vcool,display="sites",choices=2)
+tplots.vcool<-vcool[,4]
+tplot_levels_vcool<-levels(tplots.vcool)
+spscoresall.vcool<-data.frame(tplots.vcool,spscores1.vcool,spscores2.vcool)
+
+#overlay environmental variables on plot
+vcool.env<-merge(vcool, env) %>% dplyr::select(NH4, NO3, totalN, ppt,temp)
+envvec.nms.vcool<-envfit(spp.mds.vcool,vcool.env, na.rm=TRUE)
+envvec.nms.vcool
+plot(spp.mds.vcool)
+plot(envvec.nms.vcool) #add vectors to previous ordination
+
+#COOL thermal only, shapes on pre/post fire
+#help(ordiplot)
+#set colors and shapes
+colsvc<- rep(c("blue"))
+shapes.vcool <- vcool %>% dplyr::select(year) %>%
+  mutate(shape = 1, shape = ifelse(year == "2004", 8, 
+                                   ifelse(year>="2005"& year<="2013", 16, 
+                                          ifelse(year>="2014", 15, shape)))) #shapes based on year 
+shapes.vcool<-shapes.vcool %>% mutate(time="Pre-Fire", 
+                               time= ifelse(year==2004, "Fire",
+                                            ifelse(year>=2005 & year<="2013", "Post-Fire",
+                                                   ifelse(year>=2014, "2014 and later", time)))) 
+Lshapesvc <-rep(c(15,8,16,1))#shapes for legend
+bio.plot.vcool <- ordiplot(spp.mds.vcool, choices=c(1,2), type = "none")   #Set up the plot
+points(spscoresall.vcool$NMDS1,spscoresall.vcool$NMDS2,col=colsvc,pch=shapes.vcool$shape) 
+plot(envvec.nms.vcool, col="green")
+text(spp.mds.vcool, display = "species", cex=0.5, col="grey30") #label species
+legend("topright",legend=levels(as.factor(shapes.vcool$time)), col="black", pch=Lshapesvc, cex=0.9,inset=0.05,bty="n",y.intersp=0.25,x.intersp=0.4,pt.cex=1.1)
 
