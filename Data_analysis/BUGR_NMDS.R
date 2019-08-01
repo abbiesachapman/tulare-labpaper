@@ -9,6 +9,8 @@ library(RVAideMemoire) #for posthoc tests on permanova
 
 # Import csv file, transform to wide data, call it data
 dat <- read_csv(paste(datpath_clean, "/bugrdat.csv", sep=""))
+env <- read_csv(paste(datpath_clean, "/NTN-CA66-deposition.csv", sep=""))
+env<-env %>% rename(year=yr)
 dat<-as.data.frame(dat)
 #dat2<-dat %>% mutate(cover=cover+0.00001) #a work around for data with lots of zeros
 data<- dat %>% dplyr::select(-X1, -spcode) %>% spread(spname, cover)
@@ -95,10 +97,73 @@ shapes <- data %>% dplyr::select(year) %>%
       ifelse(year>="2005", 16, shape))) #shapes based on year 
 shapes<-shapes %>% mutate(time="Pre-Fire", 
                         time= ifelse(year==2004, "Fire",
-                          ifelse(year>=2006, "Post-Fire", time))) 
+                          ifelse(year>=2005, "Post-Fire", time))) 
 Lshapes <-rep(c(8,16,1))#shapes for legend
 points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols1$color,pch=shapes$shape) 
 text(spp.mds, display = "species", cex=0.5, col="grey30") #label species
 legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+legend("topright",legend=levels(as.factor(shapes$time)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+
+#separate NMDS plots by thermal designation
+#subset data by thermal
+cool<-data %>% subset (thermal=="cool") 
+mod<-data %>% subset (thermal=="moderate")
+vcool<-data %>% subset(thermal=="very cool") 
+vwarm<-data %>% subset(thermal=="very warm") 
+
+cover.cool<-data %>% subset (thermal=="cool") %>% dplyr::select(-c(1:4))
+cover.mod<-data %>% subset (thermal=="moderate") %>% dplyr::select(-c(1:4))
+cover.vcool<-data %>% subset(thermal=="very cool") %>% dplyr::select(-c(1:4))
+cover.vwarm<-data %>% subset(thermal=="very warm") %>% dplyr::select(-c(1:4))
+
+#make bray-curtis dissimilarity matrix
+spp.bcd.cool <- vegdist(cover.cool)
+
+#prefer to run multiple NMS ordinations
+#with different starting configurations, and choose the best
+#this function does that, and in addition does several other steps too including: 
+#standardizing the data (though fuction call below turns this off with autotransform=F)
+#calculating distance matrix (default bray-curtis)
+#running NMDS with random starts
+#rotation of axes to maximize variance of site scores on axis 1
+#calculate species scores based on weighted averaging
+#help(metaMDS)
+
+spp.mds.cool<-metaMDS(cover.cool, trace = TRUE, autotransform=T, trymax=100, k=2) #runs several with different starting configurations
+#trace= TRUE will give output for step by step what its doing
+#default is 2 dimensions, can put k=4 for 4 dimensions
+spp.mds.cool #solution did not converge after 100 tries
+summary(spp.mds.cool)
+
+#quick plot of results
+stressplot(spp.mds.cool, spp.bcd.cool) #stressplot to show fit
+ordiplot(spp.mds.cool)
+spscores1.cool<-scores(spp.mds.cool,display="sites",choices=1)
+spscores2.cool<-scores(spp.mds.cool,display="sites",choices=2)
+tplots.cool<-cool[,4]
+tplot_levels_cool<-levels(tplots.cool)
+spscoresall.cool<-data.frame(tplots.cool,spscores1.cool,spscores2.cool)
+
+#overlay environmental variables on plot
+cool.env<-merge(cool, env) %>% dplyr::select(NH4, NO3, totalN, ppt)
+envvec.nms.cool<-envfit(spp.mds.cool,cool.env, na.rm=TRUE)
+envvec.nms.cool
+plot(spp.mds.cool)
+plot(envvec.nms.cool) #add vectors to previous ordination
+
+#make nicer plot colored based on thermal, shapes on pre/post fire
+#help(ordiplot)
+bio.plot.cool <- ordiplot(spp.mds.cool, choices=c(1,2), type = "none")   #Set up the plot
+cols1<- rep(c("purple"))
+shapes.cool <- cool %>% dplyr::select(year) %>%
+  mutate(shape = 1, shape = ifelse(year == "2004", 8, 
+                                   ifelse(year>="2005", 16, shape))) #shapes based on year 
+shapes.cool<-shapes %>% mutate(time="Pre-Fire", 
+                               time= ifelse(year==2004, "Fire",
+                                            ifelse(year>=2005, "Post-Fire", time))) 
+Lshapes <-rep(c(8,16,1))#shapes for legend
+points(spscoresall.cool$NMDS1,spscoresall.cool$NMDS2,col=cols1,pch=shapes.cool$shape) 
+plot(envvec.nms.cool)
+text(spp.mds.cool, display = "species", cex=0.5, col="grey30") #label species
 legend("topright",legend=levels(as.factor(shapes$time)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 
