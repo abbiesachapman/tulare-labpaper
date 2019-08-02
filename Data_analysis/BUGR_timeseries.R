@@ -4,6 +4,12 @@ library(tidyverse)
 library(readr)
 library(ggplot2)
 
+##FN for Calculating SE
+calcSE<-function(x){
+  x <- x[!is.na(x)]
+  sd(x)/sqrt(length(x))
+}
+
 #load data
 dat <- read_csv(paste(datpath_clean, "/bugrdat.csv", sep=""))
 SC <- read_csv(paste(datpath_clean, "/SpeciesCodes.csv", sep=""))
@@ -19,11 +25,11 @@ richness <- dat %>%
   group_by(year, quadratNew) %>%
   summarize(richness = length(unique(spname))) %>%
   group_by(year) %>%
-  summarize(mean_rich = mean(richness))
+  summarize(mean_rich = mean(richness), se_rich=calcSE(richness))
 
 ggplot(richness, aes(year, mean_rich)) +
-  geom_point() +
-  geom_line()
+  geom_point() + geom_errorbar(aes(ymin=mean_rich-se_rich, ymax=mean_rich+se_rich), width=.2) +
+  geom_line() + ylab("mean species richness +/-se")
 
 #join data and species key
 tog<-left_join(dat, SC)
@@ -36,23 +42,25 @@ functog<-tog%>%
   filter(!is.na(status), !is.na(func))
 functogagg<-functog%>%
   group_by(year, status, func)%>%
-  summarize(meancov=mean(sumcov))
+  summarize(meancov=mean(sumcov), se_cov=calcSE(sumcov))
 
 View(functoagg)
 View(functog)
 
 thermal_trend <- functog %>%
   group_by(year, status, func, thermal) %>%
-  summarize(meancov = mean(sumcov)) %>%
+  summarize(meancov = mean(sumcov), se_cov=calcSE(sumcov)) %>%
   filter(thermal != "?")
 
 ggplot(functog, aes(as.factor(year), sumcov))+geom_boxplot()+facet_grid(status~func)
-ggplot(functogagg, aes((year), meancov))+geom_line(aes(color=interaction(status, func)))+geom_point(aes(color=interaction(status, func)))
+ggplot(functogagg, aes((year), meancov))+geom_line(aes(color=interaction(status, func)))+geom_point(aes(color=interaction(status, func)))+
+  geom_errorbar(aes(ymin=meancov-se_cov, ymax=meancov+se_cov, color=interaction(status, func)), width=.2)
 
 #cover by thermal transposed on annual precip
 ggplot(thermal_trend, aes((year), meancov)) + facet_grid(status~func) +
   geom_bar(data = clim, aes(x = DATE, y = PRCP*3), stat = "identity", fill = "lightgrey") +
   geom_line(aes(color= thermal))+ geom_point(aes(color = thermal))  +
+  geom_errorbar(aes(ymin=meancov-se_cov, ymax=meancov+se_cov, color=thermal), width=.2)+
   scale_y_continuous(sec.axis = sec_axis(~./3, name = "Annual Precipitation in inches"))
 
 #timeseries of ppt
@@ -62,6 +70,7 @@ ggplot(clim, aes(DATE,PRCP)) + geom_line() + geom_point()
 ggplot(thermal_trend, aes((year), meancov)) + facet_grid(status~func) +
   geom_bar(data = clim, aes(x = DATE, y = stand_temp*30), stat = "identity", fill = "lightgrey") +
   geom_line(aes(color= thermal))+ geom_point(aes(color = thermal))  +
+  geom_errorbar(aes(ymin=meancov-se_cov, ymax=meancov+se_cov, color=thermal), width=.2)+
   scale_y_continuous(sec.axis = sec_axis(~./30, name = "Annual Mean Temp Deviation (z-scores)"))
 
 #join clim and thermal_trend
@@ -72,4 +81,5 @@ joined_dat <- left_join(thermal_trend, clim1)
 #cover by temp
 ggplot(joined_dat, aes((PRCP), meancov)) + facet_grid(status~func) +
    geom_point(aes(color = thermal)) + geom_smooth(aes(color = thermal), method = "lm", se = F)
+
 

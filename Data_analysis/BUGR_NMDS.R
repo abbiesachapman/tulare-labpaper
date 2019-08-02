@@ -75,7 +75,6 @@ ordiplot(spp.mds0) #ugly
 #rotation of axes to maximize variance of site scores on axis 1
 #calculate species scores based on weighted averaging
 #help(metaMDS)
-
 spp.mds<-metaMDS(cover.Bio, trace = TRUE, autotransform=T, trymax=100, k=6) #runs several with different starting configurations
 #trace= TRUE will give output for step by step what its doing
 #default is 2 dimensions, can put k=4 for 4 dimensions
@@ -85,17 +84,19 @@ summary(spp.mds)
 #quick plot of results
 stressplot(spp.mds, spp.bcd) #stressplot to show fit
 ordiplot(spp.mds)
-spscores1<-scores(spp.mds,display="sites",choices=1)
-spscores2<-scores(spp.mds,display="sites",choices=2)
-tplots<-data[,4]
-tplot_levels<-levels(tplots)
-spscoresall<-data.frame(tplots,spscores1,spscores2)
 
 #overlay environmental variables on full data
 envvec.nms<-envfit(spp.mds,all.env, na.rm=TRUE)
 envvec.nms
 plot(spp.mds)
 plot(envvec.nms) #add vectors to previous ordination
+
+#store scores in new dataframe
+spscores1<-scores(spp.mds,display="sites",choices=1)
+spscores2<-scores(spp.mds,display="sites",choices=2)
+tplots<-data[,4]
+tplot_levels<-levels(tplots)
+spscoresall<-data.frame(tplots,spscores1,spscores2)
 
 #make nicer plot colored based on thermal, shapes on pre/post fire
 #help(ordiplot)
@@ -135,25 +136,18 @@ cover.mod<-data %>% subset (thermal=="moderate") %>% dplyr::select(-c(1:4))
 cover.vcool<-data %>% subset(thermal=="very cool") %>% dplyr::select(-c(1:4))
 cover.vwarm<-data %>% subset(thermal=="very warm") %>% dplyr::select(-c(1:4))
 
-
 ##start with COOL
 #make bray-curtis dissimilarity matrix
 spp.bcd.cool <- vegdist(cover.cool)
 
-spp.mds.cool<-metaMDS(cover.cool, trace = TRUE, autotransform=T, trymax=100, k=2) #runs several with different starting configurations
-#trace= TRUE will give output for step by step what its doing
-#default is 2 dimensions, can put k=4 for 4 dimensions
+#perform ordinations
+spp.mds.cool<-metaMDS(cover.cool, trace = TRUE, autotransform=T, trymax=100, k=2) 
 spp.mds.cool #solution did not converge after 100 tries
 summary(spp.mds.cool)
 
 #quick plot of results
 stressplot(spp.mds.cool, spp.bcd.cool) #stressplot to show fit
 ordiplot(spp.mds.cool)
-spscores1.cool<-scores(spp.mds.cool,display="sites",choices=1)
-spscores2.cool<-scores(spp.mds.cool,display="sites",choices=2)
-tplots.cool<-cool[,4]
-tplot_levels_cool<-levels(tplots.cool)
-spscoresall.cool<-data.frame(tplots.cool,spscores1.cool,spscores2.cool)
 
 #overlay environmental variables on plot
 cool.env<-merge(cool, env) %>% dplyr::select(NH4, NO3, totalN, ppt, temp)
@@ -162,7 +156,14 @@ envvec.nms.cool
 plot(spp.mds.cool)
 plot(envvec.nms.cool) #add vectors to previous ordination
 
-#COOL thermal only, shapes on pre/post fire
+#store scores
+spscores1.cool<-scores(spp.mds.cool,display="sites",choices=1)
+spscores2.cool<-scores(spp.mds.cool,display="sites",choices=2)
+tplots.cool<-cool[,4]
+tplot_levels_cool<-levels(tplots.cool)
+spscoresall.cool<-data.frame(tplots.cool,spscores1.cool,spscores2.cool)
+
+#plot ordination for COOL thermal only, shapes on pre/post fire
 #help(ordiplot)
 bio.plot.cool <- ordiplot(spp.mds.cool, choices=c(1,2), type = "none")   #Set up the plot
 colsc<- rep(c("purple"))
@@ -185,20 +186,14 @@ legend("topright",legend=levels(as.factor(shapes.cool$time)), col="black", pch=L
 #make bray-curtis dissimilarity matrix
 spp.bcd.vcool <- vegdist(cover.vcool)
 
-spp.mds.vcool<-metaMDS(cover.vcool, trace = TRUE, autotransform=T, trymax=100, k=2) #runs several with different starting configurations
-#trace= TRUE will give output for step by step what its doing
-#default is 2 dimensions, can put k=4 for 4 dimensions
+#ordination
+spp.mds.vcool<-metaMDS(cover.vcool, trace = TRUE, autotransform=T, trymax=100, k=2) 
 spp.mds.vcool #solution converged after 20 tries, stress is 22.4%
 summary(spp.mds.vcool)
 
 #quick plot of results
 stressplot(spp.mds.vcool, spp.bcd.vcool) #stressplot to show fit
 ordiplot(spp.mds.vcool)
-spscores1.vcool<-scores(spp.mds.vcool,display="sites",choices=1)
-spscores2.vcool<-scores(spp.mds.vcool,display="sites",choices=2)
-tplots.vcool<-vcool[,4]
-tplot_levels_vcool<-levels(tplots.vcool)
-spscoresall.vcool<-data.frame(tplots.vcool,spscores1.vcool,spscores2.vcool)
 
 #overlay environmental variables on plot
 vcool.env<-merge(vcool, env) %>% dplyr::select(NH4, NO3, totalN, ppt,temp)
@@ -207,7 +202,14 @@ envvec.nms.vcool
 plot(spp.mds.vcool)
 plot(envvec.nms.vcool) #add vectors to previous ordination
 
-#VERY COOL thermal only, shapes on pre/post fire
+#store scores
+spscores1.vcool<-scores(spp.mds.vcool,display="sites",choices=1)
+spscores2.vcool<-scores(spp.mds.vcool,display="sites",choices=2)
+tplots.vcool<-vcool[,4]
+tplot_levels_vcool<-levels(tplots.vcool)
+spscoresall.vcool<-data.frame(tplots.vcool,spscores1.vcool,spscores2.vcool)
+
+#plot ordinations for VERY COOL thermal only, shapes on pre/post fire
 #help(ordiplot)
 #set colors and shapes
 colsvc<- rep(c("blue"))
@@ -230,20 +232,22 @@ legend("topright",legend=levels(as.factor(shapes.vcool$time)), col="black", pch=
 ####MODERATE#####
 #make bray-curtis dissimilarity matrix
 spp.bcd.mod <- vegdist(cover.mod)
-spp.mds.mod<-metaMDS(cover.mod, trace = TRUE, autotransform=T, trymax=100, k=2) #runs several with different starting configurations
-#trace= TRUE will give output for step by step what its doing
-#default is 2 dimensions, can put k=4 for 4 dimensions
+
+#run ordinations
+spp.mds.mod<-metaMDS(cover.mod, trace = TRUE, autotransform=T, trymax=100, k=2) 
 spp.mds.mod #no solution after 100 tries
 summary(spp.mds.mod)
 
-#quick plot of results
-stressplot(spp.mds.mod, spp.bcd.mod) #stressplot to show fit
-ordiplot(spp.mds.mod)
+#store scores
 spscores1.mod<-scores(spp.mds.mod,display="sites",choices=1)
 spscores2.mod<-scores(spp.mds.mod,display="sites",choices=2)
 tplots.mod<-mod[,4]
 tplot_levels_mod<-levels(tplots.mod)
 spscoresall.mod<-data.frame(tplots.mod,spscores1.mod,spscores2.mod)
+
+#quick plot of results
+stressplot(spp.mds.mod, spp.bcd.mod) #stressplot to show fit
+ordiplot(spp.mds.mod)
 
 #overlay environmental variables on plot
 mod.env<-merge(mod, env) %>% dplyr::select(NH4, NO3, totalN, ppt,temp)
@@ -252,7 +256,7 @@ envvec.nms.mod
 plot(spp.mds.mod)
 plot(envvec.nms.mod) #add vectors to previous ordination
 
-#MODERATE thermal only, shapes on pre/post fire
+#plot ordinations for MODERATE thermal only, shapes on pre/post fire
 #help(ordiplot)
 #set colors and shapes
 colsm<- rep(c("orange"))
@@ -276,20 +280,21 @@ legend("topright",legend=levels(as.factor(shapes.mod$time)), col="black", pch=Ls
 #make bray-curtis dissimilarity matrix
 spp.bcd.vwarm <- vegdist(cover.vwarm)
 
-spp.mds.vwarm<-metaMDS(cover.vwarm, trace = TRUE, autotransform=T, trymax=100, k=2) #runs several with different starting configurations
-#trace= TRUE will give output for step by step what its doing
-#default is 2 dimensions, can put k=4 for 4 dimensions
+#run ordinations
+spp.mds.vwarm<-metaMDS(cover.vwarm, trace = TRUE, autotransform=T, trymax=100, k=2) 
 spp.mds.vwarm #solution converged after 20 tries, stress is 25.9%
 summary(spp.mds.vwarm)
 
-#quick plot of results
-stressplot(spp.mds.vwarm, spp.bcd.vwarm) #stressplot to show fit
-ordiplot(spp.mds.vwarm)
+#store scores
 spscores1.vwarm<-scores(spp.mds.vwarm,display="sites",choices=1)
 spscores2.vwarm<-scores(spp.mds.vwarm,display="sites",choices=2)
 tplots.vwarm<-vwarm[,4]
 tplot_levels_vwarm<-levels(tplots.vwarm)
 spscoresall.vwarm<-data.frame(tplots.vwarm,spscores1.vwarm,spscores2.vwarm)
+
+#quick plot of results
+stressplot(spp.mds.vwarm, spp.bcd.vwarm) #stressplot to show fit
+ordiplot(spp.mds.vwarm)
 
 #overlay environmental variables on plot
 vwarm.env<-merge(vwarm, env) %>% dplyr::select(NH4, NO3, totalN, ppt,temp)
@@ -298,7 +303,7 @@ envvec.nms.vwarm
 plot(spp.mds.vwarm)
 plot(envvec.nms.vwarm) #add vectors to previous ordination
 
-#VERY WARM thermal only, shapes on pre/post fire
+#plot ordination for VERY WARM thermal only, shapes on pre/post fire
 #help(ordiplot)
 #set colors and shapes
 colsw<- rep(c("red"))
