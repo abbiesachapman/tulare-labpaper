@@ -82,4 +82,29 @@ joined_dat <- left_join(thermal_trend, clim1)
 ggplot(joined_dat, aes((PRCP), meancov)) + facet_grid(status~func) +
    geom_point(aes(color = thermal)) + geom_smooth(aes(color = thermal), method = "lm", se = F)
 
+dat1<-dat%>%
+  select(-1)%>%
+  group_by(year, spname, quadratNew, thermal)%>%
+  summarize(cover=sum(cover))%>%
+  ungroup()%>%
+  mutate(sitetrt=as.factor(paste(quadratNew, thermal, sep="_")))%>%
+  filter(thermal!="?")
+
+#year by year turnover
+turnover1<-turnover(dat1,
+                    time.var="year",
+                    species.var="spname",
+                    abundance.var="cover",
+                    replicate.var="sitetrt")%>%
+  separate(sitetrt, into=c("site", "trt"), sep="_")%>%
+  group_by( trt, year)%>%
+  summarize(mean.turnover=mean(as.numeric(total)), se.turnover=calcSE(as.numeric(total)))
+
+
+ggplot(turnover1)+
+  geom_point(aes((year), mean.turnover, color=trt))+
+  geom_line(aes((year), mean.turnover, color=trt))+
+  labs(x="Year", y="Annual Turnover")+
+  geom_errorbar(aes(color=trt, (year), ymin=mean.turnover-se.turnover, ymax=mean.turnover+se.turnover, ), width=.2)
+
 
