@@ -90,7 +90,7 @@ dat1<-dat%>%
   mutate(sitetrt=as.factor(paste(quadratNew, thermal, sep="_")))%>%
   filter(thermal!="?")
 
-#year by year turnover
+#year by year species turnover
 turnover1<-turnover(dat1,
                     time.var="year",
                     species.var="spname",
@@ -107,4 +107,18 @@ ggplot(turnover1)+
   labs(x="Year", y="Annual Turnover")+
   geom_errorbar(aes(color=trt, (year), ymin=mean.turnover-se.turnover, ymax=mean.turnover+se.turnover, ), width=.2)
 
+# year by year species rank abundance shift
+rankshift <- rank_shift(dat1,
+                        time.var="year",
+                        species.var="spname",
+                        abundance.var="cover",
+                        replicate.var="sitetrt")%>%
+  separate(sitetrt, into=c("site", "trt"), sep="_")%>%
+  group_by( trt, year_pair)%>%
+  summarize(mean.MRS=mean(MRS), se.MRS=calcSE(MRS))%>%
+  mutate(year=substr(year_pair, 6,9))
 
+ggplot(rankshift)+
+  geom_line(aes(as.factor(year), mean.MRS, group=trt, color=trt))+
+  geom_errorbar(aes(color=trt, as.factor(year), ymin=mean.MRS-se.MRS, ymax=mean.MRS+se.MRS, ), width=.1)+
+  labs(x="Year", y="Mean Rank Shift")
