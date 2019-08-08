@@ -11,11 +11,16 @@ library(RVAideMemoire) #for posthoc tests on permanova
 dat <- read_csv(paste(datpath_clean, "/bugrdat.csv", sep=""))
 dat<-as.data.frame(dat)
 #dat2<-dat %>% mutate(cover=cover+0.00001) #a work around for data with lots of zeros
+
+#convert to wide data
 data<- dat %>% dplyr::select(-X1, -spcode) %>% spread(spname, cover)
 data[is.na(data)] <- 0 #replace NAs with 0 (species not counted in plots have NAs when wide dataset created)
 levels(as.factor(dat$quadratNew))
 levels(as.factor(dat$thermal))
 levels(as.factor(dat$spname)) #any to remove?
+
+M <- table(dat$quadratNew, dat$thermal)
+M
 
 #Import environmental data - NADP pinnacles deposition data and NOAA San Jose temperature data
 env <- read_csv(paste(datpath_clean, "/NTN-CA66-deposition.csv", sep=""))
@@ -34,6 +39,7 @@ data %>%
 
 str(data)
 
+#use full wide data, separate species only
 data$ID <- seq.int(nrow(data))
 plotnames<-data[,1]
 cover.Bio<- data %>% dplyr::select(-c(1:4)) #wide data with ID columns removed, only species/cover for NMDS
@@ -53,7 +59,7 @@ cover.Biodrop<-cover.Bio[rowSums(cover.Bio[, (1:157)]) ==0, ] #no empty rows, ne
 
 
 ######################
-#2. NMS
+#2. NMDS
 #see also section 2.1 of vegan tutorial: 
 #http://cc.oulu.fi/~jarioksa/opetus/metodi/vegantutor.pdf
 ######################
@@ -66,7 +72,7 @@ spp.mds0 <-isoMDS(spp.bcd) #runs nms only once
 spp.mds0  #by default 2 dimensions returned, stress is 6.4, converged
 ordiplot(spp.mds0) #ugly
 
-#prefer to run multiple NMS ordinations
+#prefer to run multiple NMDS ordinations
 #with different starting configurations, and choose the best
 #this function does that, and in addition does several other steps too including: 
 #standardizing the data (though fuction call below turns this off with autotransform=F)
