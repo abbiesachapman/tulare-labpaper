@@ -19,9 +19,6 @@ levels(as.factor(dat$quadratNew))
 levels(as.factor(dat$thermal))
 levels(as.factor(dat$spname)) #any to remove?
 
-M <- table(dat$quadratNew, dat$thermal)
-M
-
 #Import environmental data - NADP pinnacles deposition data and NOAA San Jose temperature data
 env <- read_csv(paste(datpath_clean, "/NTN-CA66-deposition.csv", sep=""))
 env<-env %>% rename(year=yr)
@@ -130,6 +127,70 @@ text(spp.mds, display = "species", cex=0.5, col="grey30") #label species
 legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 legend("topright",legend=levels(as.factor(shapes$time)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 
+
+#################
+#Subset data to look at early years only
+#-3/+3 years around the fire (2004)
+#################
+#First, create new data frame, select desired years
+early<-data %>% subset(year<=2007)
+#remove ID columns for NMDS ordinations
+cover.early<- early %>% dplyr::select(-c(1:4))
+#env variables for early
+early.env<-merge(env,early) %>% dplyr::select(NH4, NO3, totalN, ppt, temp)
+
+#make bray-curtis dissimilarity matrix
+early.bcd <- vegdist(cover.early)
+#run NMDS
+early.mds<-metaMDS(cover.early, trace = TRUE, autotransform=T, trymax=100, k=6) #runs several with different starting configurations
+#trace= TRUE will give output for step by step what its doing
+#default is 2 dimensions, can put k=4 for 4 dimensions
+early.mds #solution did not converge after 100 tries
+summary(early.mds)
+
+#quick plot of results
+stressplot(early.mds, early.bcd) #stressplot to show fit
+ordiplot(early.mds)
+
+#overlay environmental variables on full data
+envvec.early<-envfit(early.mds,early.env, na.rm=TRUE)
+envvec.early
+plot(early.mds)
+plot(envvec.early) #add vectors to previous ordination
+
+#store scores in new dataframe
+spscores1_early<-scores(early.mds,display="sites",choices=1)
+spscores2_early<-scores(early.mds,display="sites",choices=2)
+tplots_early<-early[,4]
+spscoresall_early<-data.frame(tplots_early,spscores1_early,spscores2_early)
+
+#make nicer plot colored based on thermal, shapes on pre/post fire
+#help(ordiplot)
+#first, set colors and shapes
+cols1e<- early %>% dplyr::select(thermal) %>% mutate(color = "black", 
+                                                   color = ifelse(thermal == "cool", "purple", 
+                                                                  ifelse(thermal=="moderate", "orange", 
+                                                                         ifelse(thermal=="very cool", "blue",
+                                                                                ifelse(thermal=="very warm", "red", color))))) #colors based on thermal group
+Lcolse <- rep(c("Black", "Purple", "Orange", "Blue", "Red")) #colors for the legend
+shapes.e <- data %>% dplyr::select(year) %>%
+  mutate(shape = 1, shape = ifelse(year == "2004", 8, 
+                                   ifelse(year>="2005", 16,shape))) #shapes based on year 
+shapes.e<-shapes.e %>% mutate(time="Pre-Fire (2001-2003)", 
+                          time= ifelse(year==2004, "Fire (2004)",
+                                       ifelse(year>=2005, "Post-Fire (2005-2007)",time))) 
+Lshapes.e <-rep(c(8,16,1))#shapes for legend
+#make the plot
+early.plot <- ordiplot(early.mds, choices=c(1,2), type = "none")   #Set up the plot
+points(spscoresall_early$NMDS1,spscoresall_early$NMDS2,col=cols1e$color,pch=shapes.e$shape) 
+plot(envvec.early, col="green")
+#text(early.mds, display = "species", cex=0.5, col="grey30") #label species
+legend("bottomright",legend=levels(as.factor(cols1e$thermal)), col=Lcolse, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.4,x.intersp=0.8,pt.cex=1.1)
+legend("topright",legend=levels(as.factor(shapes.e$time)), col="black", pch=Lshapes.e, cex=0.9,inset=0.03,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+
+
+
+#########################################
 #separate NMDS plots by thermal designation
 #subset data by thermal
 cool<-data %>% subset (thermal=="cool") 
