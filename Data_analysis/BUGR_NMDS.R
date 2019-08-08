@@ -389,3 +389,9 @@ plot(envvec.nms.vwarm, col="green")
 text(spp.mds.vwarm, display = "species", cex=0.5, col="grey30") #label species
 legend("topright",legend=levels(as.factor(shapes.vwarm$time)), col="black", pch=Lshapesw, cex=0.9,inset=0.05,bty="n",y.intersp=0.25,x.intersp=0.4,pt.cex=1.1)
 
+#####################
+#indicator species analysis
+######################
+#indicator species by treatment
+#trt_isa = multipatt(cover.relrow2, May_all_XC$treatment, control=how(nperm=999))
+#summary(trt_isa)
