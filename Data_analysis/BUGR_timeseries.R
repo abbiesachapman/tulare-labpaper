@@ -188,22 +188,54 @@ nitro_lag <- nitro %>%
   
 
 #year by year species turnover
-turnover1<-turnover(dat1,
-                    time.var="year",
-                    species.var="spname",
-                    abundance.var="cover",
-                    replicate.var="sitetrt")%>%
+  turnover1<-turnover(dat1,
+                      time.var="year",
+                      species.var="spname",
+                      abundance.var="cover",
+                      replicate.var="sitetrt")%>%
   separate(sitetrt, into=c("site", "trt"), sep="_")%>%
   group_by( trt, year)%>%
   summarize(mean.turnover=mean(as.numeric(total)), se.turnover=calcSE(as.numeric(total)))
 
+turnoverg<-turnover(dat1,
+                    time.var="year",
+                    species.var="spname",
+                    abundance.var="cover",
+                    replicate.var="sitetrt", metric="appearance")%>%
+  separate(sitetrt, into=c("site", "trt"), sep="_")%>%
+  group_by( trt, year)%>%
+  summarize(mean.app=mean(as.numeric(appearance)), se.app=calcSE(as.numeric(appearance)))
 
-ggplot(turnover1)+
+turnoverl<-turnover(dat1,
+                    time.var="year",
+                    species.var="spname",
+                    abundance.var="cover",
+                    replicate.var="sitetrt", metric="disappearance")%>%
+  separate(sitetrt, into=c("site", "trt"), sep="_")%>%
+  group_by( trt, year)%>%
+  summarize(mean.dapp=mean(as.numeric(disappearance)), se.dapp=calcSE(as.numeric(disappearance)))
+
+turnover<-left_join(turnover1, turnoverg)
+turnover<-left_join(turnover, turnoverl)
+rm(turnover1, turnoverg, turnoverl)
+
+ggplot(turnover)+
   geom_point(aes((year), mean.turnover, color=trt))+
   geom_line(aes((year), mean.turnover, color=trt))+
   labs(x="Year", y="Annual Turnover")+
   geom_errorbar(aes(color=trt, (year), ymin=mean.turnover-se.turnover, ymax=mean.turnover+se.turnover ), width=.2)
 
+ggplot(turnover)+
+  geom_point(aes((year), mean.app, color=trt))+
+  geom_line(aes((year), mean.app, color=trt))+
+  labs(x="Year", y="Annual Gains")+
+  geom_errorbar(aes(color=trt, (year), ymin=mean.app-se.app, ymax=mean.app+se.app ), width=.2)
+
+ggplot(turnover)+
+  geom_point(aes((year), mean.dapp, color=trt))+
+  geom_line(aes((year), mean.dapp, color=trt))+
+  labs(x="Year", y="Annual Losses")+
+  geom_errorbar(aes(color=trt, (year), ymin=mean.dapp-se.dapp, ymax=mean.dapp+se.dapp ), width=.2)
 # year by year species rank abundance shift
 rankshift <- rank_shift(dat1,
                         time.var="year",
