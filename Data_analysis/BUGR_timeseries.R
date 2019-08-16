@@ -184,8 +184,18 @@ ggplot(nitro_dat, aes(NO3, meancov)) +
 
 #lag effect of nitrogen?
 nitro_lag <- nitro %>%
-  mutate(year_1 = year + 1) %>%
-  
+  mutate(year_1 = year + 1)
+nitro_lag <- left_join(thermal_trend, nitro_lag)  
+
+ggplot(nitro_lag, aes(NH4, meancov)) +
+  facet_grid(status~func) +
+  geom_point(aes(color = thermal)) +
+  geom_smooth(aes(color = thermal), method = "lm", se = F)
+
+ggplot(nitro_lag, aes(NO3, meancov)) +
+  facet_grid(status~func) +
+  geom_point(aes(color = thermal)) +
+  geom_smooth(aes(color = thermal), method = "lm", se = F)
 
 #year by year species turnover
   turnover1<-turnover(dat1,
