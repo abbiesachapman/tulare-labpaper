@@ -263,6 +263,9 @@ ggplot(turnover)+
   labs(x="Year", y="Annual Losses")+
   geom_errorbar(aes(color=trt, (year), ymin=mean.dapp-se.dapp, ymax=mean.dapp+se.dapp ), width=.2)
 
+ggplot(turnover, aes(x=trt, y=mean.turnover))+geom_boxplot()
+
+
 # year by year species rank abundance shift
 rankshift <- rank_shift(dat1,
                         time.var="year",
