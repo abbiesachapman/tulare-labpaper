@@ -17,8 +17,13 @@ SC <- read_csv(paste(datpath_clean, "/SpeciesCodes.csv", sep=""))
 clim <- read_csv(paste(datpath_clean, "/san_jose_clim.csv", sep =""), skip = 9) %>%
   mutate(stand_ppt = scale(PRCP, center = T, scale = T)) %>% #standardize to z-scores
   mutate(stand_temp = scale(TAVG, center = T, scale = T)) #standardize to z-scores
-
-View(clim)
+dat1<-dat%>%
+  select(-1)%>%
+  group_by(year, spname, quadratNew, thermal)%>%
+  summarize(cover=sum(cover))%>%
+  ungroup()%>%
+  mutate(sitetrt=as.factor(paste(quadratNew, thermal, sep="_")))%>%
+  filter(thermal!="?")
 
 #plot timeseries of richness 
 dat2<-left_join(dat, SC)
@@ -130,14 +135,6 @@ joined_dat <- left_join(thermal_trend, clim1)
 #cover by temp
 ggplot(joined_dat, aes((PRCP), meancov)) + facet_grid(status~func) +
    geom_point(aes(color = thermal)) + geom_smooth(aes(color = thermal), method = "lm", se = F)
-
-dat1<-dat%>%
-  select(-1)%>%
-  group_by(year, spname, quadratNew, thermal)%>%
-  summarize(cover=sum(cover))%>%
-  ungroup()%>%
-  mutate(sitetrt=as.factor(paste(quadratNew, thermal, sep="_")))%>%
-  filter(thermal!="?")
 
 #year by year species turnover
 turnover1<-turnover(dat1,
