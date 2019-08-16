@@ -3,6 +3,7 @@
 library(tidyverse)
 library(readr)
 library(ggplot2)
+library(vegan)
 
 ##FN for Calculating SE
 calcSE<-function(x){
@@ -36,7 +37,7 @@ ggplot(richness, aes(year, mean_rich)) +
   geom_line(aes(color=as.factor(func))) + ylab("mean species richness +/-se")
 
 #plot time series of shannon diversity
-shandiv<- community_diversity(dat1, time.var = "year", abundance.var="count", replicate.var="site.trt", metric = c("Shannon")))%>%
+shandiv<- community_diversity(dat1, time.var = "year", abundance.var="count", replicate.var="site.trt", metric = c("Shannon")) %>%
   group_by(year, site, alltrt, Shannon)%>%
   summarize(richness=length(unique(as.factor(code))))%>%
   group_by(year, alltrt)%>%
@@ -48,7 +49,7 @@ ggplot(richsum)+geom_line(aes(as.factor(year), meanshan, group=alltrt, color=all
 tog<-left_join(dat, SC)
 View(tog)
 
-#plot timeseries of cover by thermal
+#plot timeseries of cover by functional group
 functog<-tog%>%
   group_by(quadratNew, year, status, func, thermal)%>%
   summarize(sumcov=sum(cover))%>%
@@ -60,14 +61,52 @@ functogagg<-functog%>%
 View(functoagg)
 View(functog)
 
+ggplot(functog, aes(as.factor(year), sumcov))+
+  geom_boxplot()+
+  facet_grid(status~func)
+ggplot(functogagg, aes((year), meancov))+
+  geom_line(aes(color=interaction(status, func)))+
+  geom_point(aes(color=interaction(status, func)))+
+  geom_errorbar(aes(ymin=meancov-se_cov, ymax=meancov+se_cov, color=interaction(status, func)), width=.2)
+
+#plot timeseries of cover by functional group by thermal
 thermal_trend <- functog %>%
   group_by(year, status, func, thermal) %>%
   summarize(meancov = mean(sumcov), se_cov=calcSE(sumcov)) %>%
   filter(thermal != "?")
 
-ggplot(functog, aes(as.factor(year), sumcov))+geom_boxplot()+facet_grid(status~func)
-ggplot(functogagg, aes((year), meancov))+geom_line(aes(color=interaction(status, func)))+geom_point(aes(color=interaction(status, func)))+
-  geom_errorbar(aes(ymin=meancov-se_cov, ymax=meancov+se_cov, color=interaction(status, func)), width=.2)
+ggplot(thermal_trend, aes(year, meancov)) +
+  geom_line(aes(color = thermal)) +
+  geom_point(aes(color = thermal)) +
+  facet_grid(status~func)
+
+#plot timeseries of richness by functional group
+richtog <- tog %>%
+  filter(cover != 0, spname != c("Unknown", "Moss")) %>%
+  group_by(quadratNew, year, status, func, thermal) %>%
+  summarize(richness = length(unique(spname))) %>%
+  filter(status != "NA") 
+richtogagg <- richtog %>%
+  group_by(year, status, func) %>%
+  summarize(meanrich = mean(richness))
+
+ggplot(richtogagg, aes(year, meanrich)) +
+  geom_line(aes(color = interaction(status, func))) +
+  geom_point(aes(color = interaction(status, func)))
+
+#plot timeseries of richness by functional group and thermal
+thermal_rich <- richtog %>%
+  filter(thermal != "?") %>%
+  group_by(year, status, func, thermal) %>%
+  summarize(meanrich = mean(richness))
+
+ggplot(thermal_rich, aes(year, meanrich)) +
+  geom_line(aes(color = thermal)) +
+  geom_point(aes(color = thermal)) +
+  facet_grid(status~func)
+
+#timeseries of ppt
+ggplot(clim, aes(DATE,PRCP)) + geom_line() + geom_point()
 
 #cover by thermal transposed on annual precip
 ggplot(thermal_trend, aes((year), meancov)) + facet_grid(status~func) +
@@ -75,9 +114,6 @@ ggplot(thermal_trend, aes((year), meancov)) + facet_grid(status~func) +
   geom_line(aes(color= thermal))+ geom_point(aes(color = thermal))  +
   geom_errorbar(aes(ymin=meancov-se_cov, ymax=meancov+se_cov, color=thermal), width=.2)+
   scale_y_continuous(sec.axis = sec_axis(~./3, name = "Annual Precipitation in inches"))
-
-#timeseries of ppt
-ggplot(clim, aes(DATE,PRCP)) + geom_line() + geom_point()
 
 #cover by thermal transpoesd on annual mean temp
 ggplot(thermal_trend, aes((year), meancov)) + facet_grid(status~func) +
@@ -118,7 +154,7 @@ ggplot(turnover1)+
   geom_point(aes((year), mean.turnover, color=trt))+
   geom_line(aes((year), mean.turnover, color=trt))+
   labs(x="Year", y="Annual Turnover")+
-  geom_errorbar(aes(color=trt, (year), ymin=mean.turnover-se.turnover, ymax=mean.turnover+se.turnover, ), width=.2)
+  geom_errorbar(aes(color=trt, (year), ymin=mean.turnover-se.turnover, ymax=mean.turnover+se.turnover ), width=.2)
 
 # year by year species rank abundance shift
 rankshift <- rank_shift(dat1,
@@ -133,5 +169,5 @@ rankshift <- rank_shift(dat1,
 
 ggplot(rankshift)+
   geom_line(aes(as.factor(year), mean.MRS, group=trt, color=trt))+
-  geom_errorbar(aes(color=trt, as.factor(year), ymin=mean.MRS-se.MRS, ymax=mean.MRS+se.MRS, ), width=.1)+
+  geom_errorbar(aes(color=trt, as.factor(year), ymin=mean.MRS-se.MRS, ymax=mean.MRS+se.MRS ), width=.1)+
   labs(x="Year", y="Mean Rank Shift")
