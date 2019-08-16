@@ -246,6 +246,7 @@ ggplot(turnover)+
   geom_line(aes((year), mean.dapp, color=trt))+
   labs(x="Year", y="Annual Losses")+
   geom_errorbar(aes(color=trt, (year), ymin=mean.dapp-se.dapp, ymax=mean.dapp+se.dapp ), width=.2)
+
 # year by year species rank abundance shift
 rankshift <- rank_shift(dat1,
                         time.var="year",
@@ -261,3 +262,11 @@ ggplot(rankshift)+
   geom_line(aes(as.factor(year), mean.MRS, group=trt, color=trt))+
   geom_errorbar(aes(color=trt, as.factor(year), ymin=mean.MRS-se.MRS, ymax=mean.MRS+se.MRS ), width=.1)+
   labs(x="Year", y="Mean Rank Shift")
+
+meanmeanrank<-rankshift%>%
+  group_by(trt)%>%
+  summarize(meanmean=mean(mean.MRS), se=calcSE(mean.MRS))
+
+ggplot(meanmeanrank, aes(x=trt, y=meanmean))+geom_bar(stat="identity")
+
+ggplot(rankshift, aes(x=trt, y=mean.MRS))+geom_boxplot()
