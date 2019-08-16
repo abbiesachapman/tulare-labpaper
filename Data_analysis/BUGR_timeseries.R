@@ -161,9 +161,31 @@ ggplot(thermal_trend, aes(year, meancov)) +
   facet_grid(status~func) +
   geom_bar(data = nitro, aes(x = year, y = stand_NH4*20), stat = "identity", fill = "lightgrey") +
   geom_line(aes(color = thermal)) + 
-  geom_point(aes(color = thermal))
+  geom_point(aes(color = thermal)) +
+  scale_y_continuous(sec.axis = sec_axis(~./30, name = "Annual Mean NH4 Deviation (z-scores)"))
 
-ggplot()
+ggplot(thermal_trend, aes(year, meancov)) +
+  facet_grid(status~func) +
+  geom_bar(data = nitro, aes(x = year, y = stand_NO3*20), stat = "identity", fill = "lightgrey") +
+  geom_line(aes(color = thermal)) + 
+  geom_point(aes(color = thermal)) +
+  scale_y_continuous(sec.axis = sec_axis(~./30, name = "Annual Mean NO3 Deviation (z-scores)"))
+
+#cover by nitrogen
+ggplot(nitro_dat, aes(NH4, meancov)) +
+  facet_grid(status~func) +
+  geom_point(aes(color = thermal)) +
+  geom_smooth(aes(color = thermal), method = "lm", se = F)
+
+ggplot(nitro_dat, aes(NO3, meancov)) +
+  facet_grid(status~func) +
+  geom_point(aes(color = thermal)) +
+  geom_smooth(aes(color = thermal), method = "lm", se = F)
+
+#lag effect of nitrogen?
+nitro_lag <- nitro %>%
+  mutate(year_1 = year + 1) %>%
+  
 
 #year by year species turnover
 turnover1<-turnover(dat1,
