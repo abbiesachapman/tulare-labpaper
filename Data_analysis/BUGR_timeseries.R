@@ -24,6 +24,11 @@ dat1<-dat%>%
   ungroup()%>%
   mutate(sitetrt=as.factor(paste(quadratNew, thermal, sep="_")))%>%
   filter(thermal!="?")
+nitro <- read_csv(paste(datpath_clean, "/NTN-CA66-deposition.csv", sep = "")) %>%
+  mutate(stand_NH4 = scale(NH4, center = T, scale = T)) %>%
+  mutate(stand_NO3 = scale(NO3, center = T, scale = T)) %>%
+  mutate(stand_N = scale(totalN, center = T, scale = T)) 
+colnames(nitro)[colnames(nitro)=="yr"] <- "year"
 
 #plot timeseries of richness 
 dat2<-left_join(dat, SC)
@@ -135,6 +140,18 @@ joined_dat <- left_join(thermal_trend, clim1)
 #cover by temp
 ggplot(joined_dat, aes((PRCP), meancov)) + facet_grid(status~func) +
    geom_point(aes(color = thermal)) + geom_smooth(aes(color = thermal), method = "lm", se = F)
+
+#join nitro and thermal trend 
+nitro_dat <- left_join(thermal_trend, nitro)
+
+#plot cover by thermal transposed on nitrogen
+ggplot(thermal_trend, aes(year, meancov)) +
+  facet_grid(status~func) +
+  geom_bar(data = nitro, aes(x = year, y = stand_NH4*20), stat = "identity", fill = "lightgrey") +
+  geom_line(aes(color = thermal)) + 
+  geom_point(aes(color = thermal))
+
+ggplot()
 
 #year by year species turnover
 turnover1<-turnover(dat1,
