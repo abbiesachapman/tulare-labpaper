@@ -33,6 +33,7 @@ colnames(nitro)[colnames(nitro)=="yr"] <- "year"
 #plot timeseries of richness 
 dat2<-left_join(dat, SC)
 richness0 <- dat2 %>%
+  filter(func!="NA", status!="NA")%>%
   mutate(func=paste(func, status))%>%
   filter(cover != 0, spname != c("Unknown", "Moss")) %>%
   group_by(year, quadratNew, func, thermal)%>%
