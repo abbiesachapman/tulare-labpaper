@@ -153,6 +153,21 @@ joined_dat <- left_join(thermal_trend, clim1)
 ggplot(joined_dat, aes((PRCP), meancov)) + facet_grid(status~func) +
    geom_point(aes(color = thermal)) + geom_smooth(aes(color = thermal), method = "lm", se = F)
 
+#lag effect of clim?
+clim_lag <- clim1 %>%
+  mutate(year = year + 1)
+clim_lag <- left_join(thermal_trend, clim_lag)  
+
+ggplot(clim_lag, aes((year), meancov)) + facet_grid(status~func) +
+  geom_bar(data = clim_lag, aes(x = year, y = stand_ppt*5), stat = "identity", fill = "lightgrey") +
+  geom_line(aes(color= thermal))+ geom_point(aes(color = thermal))  +
+  scale_y_continuous(sec.axis = sec_axis(~./20, name = "Previous Year's Precipitation Deviation (z-scores)"))
+
+ggplot(clim_lag, aes((year), meancov)) + facet_grid(status~func) +
+  geom_bar(data = clim_lag, aes(x = year, y = stand_temp*5), stat = "identity", fill = "lightgrey") +
+  geom_line(aes(color= thermal))+ geom_point(aes(color = thermal))  +
+  scale_y_continuous(sec.axis = sec_axis(~./15, name = "Previous Year's Temperature Deviation (z-scores)"))
+
 #join nitro and thermal trend 
 nitro_dat <- left_join(thermal_trend, nitro)
 
@@ -184,7 +199,7 @@ ggplot(nitro_dat, aes(NO3, meancov)) +
 
 #lag effect of nitrogen?
 nitro_lag <- nitro %>%
-  mutate(year_1 = year + 1)
+  mutate(year = year + 1)
 nitro_lag <- left_join(thermal_trend, nitro_lag)  
 
 ggplot(nitro_lag, aes(NH4, meancov)) +
