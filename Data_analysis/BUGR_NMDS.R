@@ -322,7 +322,7 @@ plot(envvec.nms.vwarm, col="green")
 text(spp.mds.vwarm, display = "species", cex=0.5, col="grey30") #label species
 legend("topright",legend=levels(as.factor(shapes.vwarm$time)), col="black", pch=Lshapesw, cex=0.9,inset=0.05,bty="n",y.intersp=0.25,x.intersp=0.4,pt.cex=1.1)
 
-<<<<<<< HEAD
+
 #################################################################
 #######Subsetting MODERATE thermal by quadrat and year###########
 #################################################################
@@ -340,39 +340,44 @@ library(RVAideMemoire) #for posthoc tests on permanova
 dat <- read_csv(paste(datpath_clean, "/bugrdat.csv", sep=""))
 dat<-as.data.frame(dat)
 #dat2<-dat %>% mutate(cover=cover+0.00001) #a work around for data with lots of zeros
-data<- dat %>%
+moddat<- dat %>%
   dplyr::select(-X1, -spcode) %>% 
   separate(quadratNew, sep ="-", c("quadrat", "replicate")) %>%
-  spread(spname, cover)
-data[is.na(data)] <- 0 #replace NAs with 0 (species not counted in plots have NAs when wide dataset created)
-levels(as.factor(dat$quadratNew))
-levels(as.factor(dat$thermal))
-levels(as.factor(dat$spname)) #any to remove?
-
+  filter(thermal == "moderate") %>%
+  spread(spname, cover) 
 #Import environmental data - NADP pinnacles deposition data and NOAA San Jose temperature data
 env <- read_csv(paste(datpath_clean, "/NTN-CA66-deposition.csv", sep=""))
 env<-env %>% rename(year=yr)
 temp <- read_csv(paste(datpath_clean, "/san_jose_clim.csv", sep=""),skip=9)
 temp <- temp %>% rename(year=DATE, temp=TAVG) %>% dplyr::select(year, temp)
 env<-merge(env,temp)
-
 #merge env to match full data
-all.env<-merge(env,data) %>% dplyr::select(NH4, NO3, totalN, ppt, temp)
+all.env<-merge(env,moddat) %>% dplyr::select(NH4, NO3, totalN, ppt, temp)
+#wide data with ID columns removed, only species/cover for NMDS
+cover.Bio<- moddat %>% dplyr::select(-c(1:5)) 
+#NMDS ordination
+spp.mds<-metaMDS(cover.Bio, trace = TRUE, autotransform = T, trymax=100, k=6)
+
+
+#data[is.na(data)] <- 0 #replace NAs with 0 (species not counted in plots have NAs when wide dataset created)
+#levels(as.factor(dat$quadratNew))
+#levels(as.factor(dat$thermal))
+#levels(as.factor(dat$spname)) #any to remove?
+
 
 #check count of thermal factor
-data %>% 
-  group_by(thermal) %>%
-  summarise(no_rows = length(thermal)) #note very uneven
+#data %>% 
+#  group_by(thermal) %>%
+#  summarise(no_rows = length(thermal)) #note very uneven
 
-str(data)
+#str(data)
 
-data$ID <- seq.int(nrow(data))
-plotnames<-data[,1]
-cover.Bio<- data %>% dplyr::select(-c(1:4)) #wide data with ID columns removed, only species/cover for NMDS
-rownames(cover.Bio)<-plotnames
+#data$ID <- seq.int(nrow(data))
+#plotnames<-data[,1]
+#rownames(cover.Bio)<-plotnames
 
 #check for empty rows
-cover.Biodrop<-cover.Bio[rowSums(cover.Bio[, (1:157)]) ==0, ] #no empty rows, next step not needed
+#cover.Biodrop<-cover.Bio[rowSums(cover.Bio[, (1:157)]) ==0, ] #no empty rows, next step not needed
 #cover.Biodrop<-cover.Bio[rowSums(cover.Bio[, (1:157)])  >0 ]#remove empty rows
 
 
@@ -407,7 +412,7 @@ ordiplot(spp.mds0) #ugly
 #rotation of axes to maximize variance of site scores on axis 1
 #calculate species scores based on weighted averaging
 #help(metaMDS)
-spp.mds<-metaMDS(cover.Bio, trace = TRUE, autotransform=T, trymax=100, k=6) #runs several with different starting configurations
+spp.mds<-metaMDS(cover.Bio, trace = TRUE, autotransform = T, trymax=100, k=6) #runs several with different starting configurations
 #trace= TRUE will give output for step by step what its doing
 #default is 2 dimensions, can put k=4 for 4 dimensions
 spp.mds #solution did not converge after 100 tries
