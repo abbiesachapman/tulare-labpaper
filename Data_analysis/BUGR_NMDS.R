@@ -345,6 +345,7 @@ moddat<- dat %>%
   separate(quadratNew, sep ="-", c("quadrat", "replicate")) %>%
   filter(thermal == "moderate") %>%
   spread(spname, cover) 
+moddat[is.na(moddat)] <- 0 
 #Import environmental data - NADP pinnacles deposition data and NOAA San Jose temperature data
 env <- read_csv(paste(datpath_clean, "/NTN-CA66-deposition.csv", sep=""))
 env<-env %>% rename(year=yr)
