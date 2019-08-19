@@ -480,6 +480,7 @@ moddat<- dat %>%
   separate(quadratNew, sep ="-", c("quadrat", "replicate")) %>%
   filter(thermal == "moderate") %>%
   spread(spname, cover) 
+#data[is.na(data)] <- 0 #replace NAs with 0 (species not counted in plots have NAs when wide dataset created)
 moddat[is.na(moddat)] <- 0 
 #Import environmental data - NADP pinnacles deposition data and NOAA San Jose temperature data
 env <- read_csv(paste(datpath_clean, "/NTN-CA66-deposition.csv", sep=""))
@@ -490,12 +491,59 @@ env<-merge(env,temp)
 #merge env to match full data
 all.env<-merge(env,moddat) %>% dplyr::select(NH4, NO3, totalN, ppt, temp)
 #wide data with ID columns removed, only species/cover for NMDS
-cover.Bio<- moddat %>% dplyr::select(-c(1:5)) 
+cover.Bio.mod<- moddat %>% dplyr::select(-c(1:5)) 
+#make bray-curtis dissimilarity matrix
+spp.bcd.mod <- vegdist(cover.Bio.mod)
+#quick run to check out NMS ordination
+spp.mod.mds0 <-isoMDS(spp.bcd.mod) #runs nms only once
+spp.mod.mds0  #by default 2 dimensions returned, stress is 24.5, converged
+ordiplot(spp.mod.mds0) #ugly
 #NMDS ordination
-spp.mds<-metaMDS(cover.Bio, trace = TRUE, autotransform = T, trymax=100, k=6)
+spp.mod.mds<-metaMDS(cover.Bio.mod, trace = TRUE, autotransform = T, trymax=100, k=6)
+spp.mod.mds #solution did not converge after 100 tries
+summary(spp.mod.mds)
+#quick plot of results
+stressplot(spp.mod.mds, spp.bcd.mod) #stressplot to show fit
+ordiplot(spp.mod.mds)
+#overlay environmental variables on full data
+envvec.nms<-envfit(spp.mod.mds,all.env, na.rm=TRUE)
+envvec.nms
+plot(spp.mod.mds)
+plot(envvec.nms) #add vectors to previous ordination
+#store scores in new dataframe
+spscores1<-scores(spp.mod.mds,display="sites",choices=1)
+spscores2<-scores(spp.mod.mds,display="sites",choices=2)
+tplots<-moddat[,4]
+tplot_levels<-levels(tplots)
+spscoresall<-data.frame(tplots,spscores1,spscores2)
+#make nicer plot colored based on thermal, shapes on pre/post fire
+#help(ordiplot)
+#first, set colors and shapes
+cols1<- moddat %>% dplyr::select(quadrat) %>% mutate(color = "black", 
+                                                     color = ifelse(quadrat == "THM1", "purple", 
+                                                                    ifelse(quadrat=="THM2", "orange", 
+                                                                           ifelse(quadrat=="THM3", "blue",
+                                                                                  ifelse(quadrat=="THM4", "red", color)))))#colors based on quadrat
+Lcols <- rep(c("Purple", "Orange", "Blue", "Red")) #colors for the legend
+shapes <- moddat %>% dplyr::select(year) %>%
+  mutate(shape = 1, shape = ifelse(year == "2004", 8, 
+                                   ifelse(year>="2005" & year<"2014", 16,
+                                          ifelse(year>="2014", 15,shape)))) #shapes based on year 
+shapes<-shapes %>% mutate(time="Pre-Fire", 
+                          time= ifelse(year==2004, "Fire",
+                                       ifelse(year>=2005&year<2014, "Post-Fire",
+                                              ifelse(year>=2014, "2014 and after",time)))) 
+Lshapes <-rep(c(15,8,16,1))#shapes for legend
+#make the plot
+bio.mod.plot <- ordiplot(spp.mod.mds, choices=c(1,2), type = "none")   #Set up the plot
+points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols1$color,pch=shapes$shape) 
+plot(envvec.nms, col="green")
+text(spp.mod.mds, display = "species", cex=0.5, col="grey30") #label species
+legend("bottomright",legend=levels(as.factor(cols1$quadrat)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+legend("bottomleft",legend=levels(as.factor(shapes$time)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 
 
-#data[is.na(data)] <- 0 #replace NAs with 0 (species not counted in plots have NAs when wide dataset created)
+
 #levels(as.factor(dat$quadratNew))
 #levels(as.factor(dat$thermal))
 #levels(as.factor(dat$spname)) #any to remove?
@@ -532,10 +580,10 @@ spp.mds<-metaMDS(cover.Bio, trace = TRUE, autotransform = T, trymax=100, k=6)
 ######################
 
 #make bray-curtis dissimilarity matrix
-spp.bcd <- vegdist(cover.Bio)
+spp.bcd.mod <- vegdist(cover.Bio.mod)
 
 #quick run to check out NMS ordination
-spp.mds0 <-isoMDS(spp.bcd) #runs nms only once
+spp.mds0 <-isoMDS(spp.bcd.mod) #runs nms only once
 spp.mds0  #by default 2 dimensions returned, stress is 6.4, converged
 ordiplot(spp.mds0) #ugly
 
@@ -597,11 +645,14 @@ text(spp.mds, display = "species", cex=0.5, col="grey30") #label species
 legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 legend("topright",legend=levels(as.factor(shapes$time)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 
-=======
 #####################
 #indicator species analysis
 ######################
 #indicator species by treatment
 #trt_isa = multipatt(cover.relrow2, May_all_XC$treatment, control=how(nperm=999))
 #summary(trt_isa)
->>>>>>> cbb834d096adce9c5bae451d522b1ee6437cc31f
+
+library(indicspecies)
+trt_mod_isa = multipatt(cover.Bio.mod, moddat$quadrat, control=how(nperm=999))
+summary(trt_mod_isa)
+
