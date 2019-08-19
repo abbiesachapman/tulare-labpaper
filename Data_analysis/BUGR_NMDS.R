@@ -98,23 +98,157 @@ tplots<-data[,4]
 tplot_levels<-levels(tplots)
 spscoresall<-data.frame(tplots,spscores1,spscores2)
 
+#make an ordination plot, colored by thermal, with shapes based on time
+cols1<- data %>% dplyr::select(thermal) %>% mutate(color = "black", 
+                                                   color = ifelse(thermal == "cool", "purple", 
+                                                                  ifelse(thermal=="moderate", "orange", 
+                                                                         ifelse(thermal=="very cool", "blue",
+                                                                                ifelse(thermal=="very warm", "red", color))))) #colors based on thermal group
+Lcols <- rep(c("Black", "Purple", "Orange", "Blue", "Red")) #colors for the legend
+
+shapes <- data %>% dplyr::select(year) %>% mutate(shape = 1, shape = ifelse(year == "2004", 8, 
+                                                                            ifelse(year>="2005" & year<"2014", 16,
+                                                                                   ifelse(year>="2014", 15,shape)))) #shapes based on year 
+shapes<-shapes %>% mutate(time="Pre-Fire", time= ifelse(year==2004, "Fire",
+                                                        ifelse(year>=2005&year<2014, "Post-Fire",
+                                                               ifelse(year>=2014, "2014 and after",time)))) 
+Lshapes <-rep(c(15,8,16,1))#shapes for legend
+
+#make the plot
+bio.plot <- ordiplot(spp.mds, choices=c(1,2), type = "none")   #Set up the plot
+points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols1$color,pch=shapes$shape) 
+plot(envvec.nms, col="green")
+text(spp.mds, display = "species", cex=0.5, col="grey30") #label species
+legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+legend("topright",legend=levels(as.factor(shapes$time)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+
+
+#######################
+###make a series of plots to show change over the years
+#######################
+#store custom transparent color 
+mycol1<- rgb(0, 0, 255, max = 255, alpha = 0, names = "blue50")
+
+#start coloring in points for pre-fire, we'll keep adding years
+cols03<- data %>% dplyr::select(thermal, year) %>% mutate(color = mycol1, 
+                                                         color = ifelse(thermal == "cool" & year <="2003", "purple", 
+                                                                        ifelse(thermal=="moderate" & year <="2003", "orange", 
+                                                                               ifelse(thermal=="very cool" & year <="2003", "blue",
+                                                                                      ifelse(thermal=="very warm" & year <="2003", "red", color))))) #colors based on thermal group
+Lcols <- rep(c("Black", "Purple", "Orange", "Blue", "Red")) #colors for the legend
+shapes <- data %>% dplyr::select(year) %>%
+  mutate(shape = 1, shape = ifelse(year == "2004", 8, 
+                                   ifelse(year>="2005" & year<"2014", 16,
+                                          ifelse(year>="2014", 15,shape)))) #shapes based on year 
+shapes<-shapes %>% mutate(time="Pre-Fire", 
+                          time= ifelse(year==2004, "Fire",
+                                       ifelse(year>=2005&year<2014, "Post-Fire",
+                                              ifelse(year>=2014, "2014 and after",time)))) 
+Lshapes <-rep(c(15,8,16,1))#shapes for legend
+#make the plot
+bio.plot03 <- ordiplot(spp.mds, choices=c(1,2), type = "none")   #Set up the plot
+points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols03$color,pch=shapes$shape) 
+plot(envvec.nms, col="green")
+#text(spp.mds, display = "species", cex=0.5, col="grey30") #label species
+legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+legend("topright",legend=levels(as.factor(shapes$time)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+
+#now fire year
+cols04<- data %>% dplyr::select(thermal, year) %>% mutate(color = mycol1, 
+       color = ifelse(thermal == "cool" & year <="2004", "purple", 
+                      ifelse(thermal=="moderate" & year <="2004", "orange", 
+                             ifelse(thermal=="very cool" & year <="2004", "blue",
+                                    ifelse(thermal=="very warm" & year <="2004", "red", color))))) #colors based on thermal group
+bio.plot <- ordiplot(spp.mds, choices=c(1,2), type = "none")   #Set up the plot
+points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols04$color,pch=shapes$shape) 
+plot(envvec.nms, col="green")
+#text(spp.mds, display = "species", cex=0.5, col="grey30") #label species
+legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+legend("topright",legend=levels(as.factor(shapes$time)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+
+#now up post-fire
+cols06<- data %>% dplyr::select(thermal, year) %>% mutate(color = mycol1, 
+                                                         color = ifelse(thermal == "cool" & year <="2006", "purple", 
+                                                                        ifelse(thermal=="moderate" & year <="2006", "orange", 
+                                                                               ifelse(thermal=="very cool" & year <="2006", "blue",
+                                                                                      ifelse(thermal=="very warm" & year <="2006", "red", color))))) #colors based on thermal group
+bio.plot06 <- ordiplot(spp.mds, choices=c(1,2), type = "none")    #Set up the plot
+points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols06$color,pch=shapes$shape)
+plot(envvec.nms, col="green")
+#text(spp.mds, display = "species", cex=0.5, col="grey30") #label species
+#legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+#legend("topright",legend=levels(as.factor(shapes$time)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+
+#now up to 2004
+cols04<- data %>% dplyr::select(thermal, year) %>% mutate(color = mycol1, 
+                                                         color = ifelse(thermal == "cool" & year <="2004", "purple", 
+                                                                        ifelse(thermal=="moderate" & year <="2004", "orange", 
+                                                                               ifelse(thermal=="very cool" & year <="2004", "blue",
+                                                                                      ifelse(thermal=="very warm" & year <="2004", "red", color))))) #colors based on thermal group
+bio.plot04 <- ordiplot(spp.mds, choices=c(1,2), type = "none")   #Set up the plot
+points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols04$color,pch=shapes$shape) 
+plot(envvec.nms, col="green")
+
+#now up to 2008
+cols08<- data %>% dplyr::select(thermal, year) %>% mutate(color = mycol1, 
+                                                         color = ifelse(thermal == "cool" & year <="2008", "purple", 
+                                                                        ifelse(thermal=="moderate" & year <="2008", "orange", 
+                                                                               ifelse(thermal=="very cool" & year <="2008", "blue",
+                                                                                      ifelse(thermal=="very warm" & year <="2008", "red", color))))) #colors based on thermal group
+bio.plot08 <- ordiplot(spp.mds, choices=c(1,2), type = "none")   #Set up the plot
+points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols08$color,pch=shapes$shape) 
+plot(envvec.nms, col="green")
+
+#now up to 2012
+cols12<- data %>% dplyr::select(thermal, year) %>% mutate(color = mycol1, 
+                                                         color = ifelse(thermal == "cool" & year <="2012", "purple", 
+                                                                        ifelse(thermal=="moderate" & year <="2012", "orange", 
+                                                                               ifelse(thermal=="very cool" & year <="2012", "blue",
+                                                                                      ifelse(thermal=="very warm" & year <="2012", "red", color))))) #colors based on thermal group
+
+bio.plot12 <- ordiplot(spp.mds, choices=c(1,2), type = "none")   #Set up the plot
+points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols12$color,pch=shapes$shape) 
+plot(envvec.nms, col="green")
+
+#now up to 2016
+cols16<- data %>% dplyr::select(thermal, year) %>% mutate(color = mycol1, 
+                                                          color = ifelse(thermal == "cool" & year <="2016", "purple", 
+                                                                         ifelse(thermal=="moderate" & year <="2016", "orange", 
+                                                                                ifelse(thermal=="very cool" & year <="2016", "blue",
+                                                                                       ifelse(thermal=="very warm" & year <="2016", "red", color))))) #colors based on thermal group
+
+bio.plot16 <- ordiplot(spp.mds, choices=c(1,2), type = "none")   #Set up the plot
+points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols16$color,pch=shapes$shape) 
+plot(envvec.nms, col="green")
+
+#now all years
+cols18<- data %>% dplyr::select(thermal, year) %>% mutate(color = mycol1, 
+                                                          color = ifelse(thermal == "cool" & year <="2018", "purple", 
+                                                                         ifelse(thermal=="moderate" & year <="2018", "orange", 
+                                                                                ifelse(thermal=="very cool" & year <="2018", "blue",
+                                                                                       ifelse(thermal=="very warm" & year <="2018", "red", color))))) #colors based on thermal group
+
+bio.plot18 <- ordiplot(spp.mds, choices=c(1,2), type = "none")   #Set up the plot
+points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols18$color,pch=shapes$shape) 
+plot(envvec.nms, col="green")
+
 #make nicer plot colored based on thermal, shapes on pre/post fire
 #help(ordiplot)
 #first, set colors and shapes
 cols1<- data %>% dplyr::select(thermal) %>% mutate(color = "black", 
-       color = ifelse(thermal == "cool", "purple", 
-                      ifelse(thermal=="moderate", "orange", 
-                             ifelse(thermal=="very cool", "blue",
-                                    ifelse(thermal=="very warm", "red", color))))) #colors based on thermal group
+                                                   color = ifelse(thermal == "cool", "purple", 
+                                                                  ifelse(thermal=="moderate", "orange", 
+                                                                         ifelse(thermal=="very cool", "blue",
+                                                                                ifelse(thermal=="very warm", "red", color))))) #colors based on thermal group
 Lcols <- rep(c("Black", "Purple", "Orange", "Blue", "Red")) #colors for the legend
 shapes <- data %>% dplyr::select(year) %>%
   mutate(shape = 1, shape = ifelse(year == "2004", 8, 
-      ifelse(year>="2005" & year<"2014", 16,
-             ifelse(year>="2014", 15,shape)))) #shapes based on year 
+                                   ifelse(year>="2005" & year<"2014", 16,
+                                          ifelse(year>="2014", 15,shape)))) #shapes based on year 
 shapes<-shapes %>% mutate(time="Pre-Fire", 
-                        time= ifelse(year==2004, "Fire",
-                          ifelse(year>=2005&year<2014, "Post-Fire",
-                                 ifelse(year>=2014, "2014 and after",time)))) 
+                          time= ifelse(year==2004, "Fire",
+                                       ifelse(year>=2005&year<2014, "Post-Fire",
+                                              ifelse(year>=2014, "2014 and after",time)))) 
 Lshapes <-rep(c(15,8,16,1))#shapes for legend
 #make the plot
 bio.plot <- ordiplot(spp.mds, choices=c(1,2), type = "none")   #Set up the plot
@@ -123,6 +257,7 @@ plot(envvec.nms, col="green")
 text(spp.mds, display = "species", cex=0.5, col="grey30") #label species
 legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 legend("topright",legend=levels(as.factor(shapes$time)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+
 
 #separate NMDS plots by thermal designation
 #subset data by thermal
