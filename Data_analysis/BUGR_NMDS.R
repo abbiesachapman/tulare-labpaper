@@ -609,5 +609,5 @@ legend("topright",legend=levels(as.factor(shapes$time)), col="black", pch=Lshape
 
 
 
->>>>>>> 52dd2af3b53376838a16ed3da09fa72baccee8db
+
 
