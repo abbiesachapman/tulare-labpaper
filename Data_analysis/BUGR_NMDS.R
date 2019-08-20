@@ -502,7 +502,7 @@ tplots<-moddat[,4]
 tplot_levels<-levels(tplots)
 spscoresall<-data.frame(tplots,spscores1,spscores2)
 
-#make nicer plot colored based on thermal, shapes on pre/post fire
+#make nicer plot colored based on quadrat, shapes on pre/post fire
 #help(ordiplot)
 #first, set colors and shapes
 cols1<- moddat %>% dplyr::select(quadrat) %>% mutate(color = "black", 
@@ -580,15 +580,13 @@ tplots<-dat_yr[,1]
 tplot_levels<-levels(tplots)
 spscoresall.vec<-data.frame(tplots,spscores1.vec,spscores2.vec)
 
-#make nicer plot colored based on thermal, shapes on pre/post fire
-#help(ordiplot)
+#make plot to show successional vectors
 #first, set colors and shapes
-cols.yr<- dat_yr %>% dplyr::select(thermal) %>% mutate(color = "black", 
-                                                   color = ifelse(thermal == "cool", "purple", 
+cols.yr<- dat_yr %>% dplyr::select(thermal) %>% mutate(color = ifelse(thermal == "cool", "purple", 
                                                                   ifelse(thermal=="moderate", "orange", 
                                                                          ifelse(thermal=="very cool", "blue",
                                                                                 ifelse(thermal=="very warm", "red", color))))) #colors based on thermal group
-Lcols <- rep(c("Black", "Purple", "Orange", "Blue", "Red")) #colors for the legend
+Lcols.yr <- rep(c("Purple", "Orange", "Blue", "Red")) #colors for the legend
 shapes.yr <- dat_yr%>% dplyr::select(year) %>%
   mutate(shape = 1, shape = ifelse(year == "2004", 8, 
                                    ifelse(year>="2005" & year<"2014", 16,
@@ -604,9 +602,15 @@ points(spscoresall.vec$NMDS1,spscoresall.vec$NMDS2,col=cols.yr$color,pch=shapes.
 plot(envvec.vec, col="green")
 ordiarrows(vec.mds, groups=dat_yr$thermal, order.by=dat_yr$year, label=F, col="black")
 text(spp.mds, display = "species", cex=0.5, col="grey30") #label species
-legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+legend("topleft",legend=levels(as.factor(cols.yr$thermal)), col=Lcols.yr, pch=15, cex=0.9,inset=0.07,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 legend("topright",legend=levels(as.factor(shapes$time)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 
+#indicator species for thermal
+vec_isa = multipatt(cover.yr, dat_yr$thermal, control=how(nperm=999))
+summary(vec_isa)
+
+vec_yr_isa = multipatt(cover.yr, dat_yr$year, control=how(nperm=999))
+summary(vec_yr_isa)
 
 
 
