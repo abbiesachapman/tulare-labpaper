@@ -639,9 +639,9 @@ summary(vec_isa)
 vec_yr_isa = multipatt(cover.yr, dat_yr$year, control=how(nperm=999))
 summary(vec_yr_isa)
 
-####
+#######
 #test vector length from 2001 to 2014
-###
+######
 spscoresall.vec2<-cbind(spscoresall.vec, year=dat_yr$year)
 spscoresall.vec2<-spscoresall.vec2 %>% filter(year == "2001" | year == "2014") %>% gather(key = "NMDS", value = "point", NMDS1, NMDS2) %>% spread(year, point) #so endpoints only in dataset
 colnames(spscoresall.vec2)[colnames(spscoresall.vec2)=="2001"] <- "yr01"
@@ -655,5 +655,13 @@ ggplot(shift, aes(x=thermal, y=veclength, fill=thermal))+
   theme_classic()+
   scale_fill_manual(values=c("purple", "orange","blue","red"))
 
+##quick plots of NH4 and NO3 over time
+ggplot(env, aes(x=year, y=NH4))+
+  geom_point()+
+  geom_smooth(se=F, method="lm")
+
+ggplot(env, aes(x=year, y=NO3))+
+  geom_point()+
+  geom_smooth(se=F, method="lm")
 
 
