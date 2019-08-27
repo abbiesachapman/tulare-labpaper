@@ -95,12 +95,18 @@ grztog3<-grztog2%>%
   mutate(rep=paste(transect.quad, year))%>%
   select(-transect, -transect.quad,-year, -quadrat, -graze, -prepost, -thermal, -spname, -status, -func)
 
-indic_treatments<-select(grztog3, 3, 4)
+indic_treatments<-select(grztog3, 3, 4)%>%
+  unique()
 indic_species<-select(grztog3, 1, 2, 4)%>%
   spread(spcode, cover, fill=0)%>%
   remove_rownames()%>%
   column_to_rownames("rep")
-indic<-decostand(indic, "total")
+indic_species<-decostand(indic_species, "total")
+
+indic_treatments2<-indic_species%>%
+  rownames_to_column("rep")%>%
+  select(1)
+indic_treatments3<-left_join(indic_treatments2, indic_treatments)
 
 indicators<-multipatt(indic_species, indic_treatments$trtgroup, func="r.g", control=how(nperm=999))
 
