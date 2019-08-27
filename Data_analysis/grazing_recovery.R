@@ -10,6 +10,7 @@ alldat<-read_csv(paste(datpath_clean, "/alldatsp.csv", sep="")) %>%
   filter(cover!=0)%>%
   separate(quadrat, into=c("transect", "quadrat"), sep="-")
 
+
 #treatments is a dataframe of burning, grazing, thermal treatment for each quadrat, and which years have data
 treatments<-read_csv(paste(datpath_clean, "/quadrat_trt.csv", sep=""))%>%
   gather(key="year", value="data", -quadratID, -burn, -graze, -thermal)
@@ -27,7 +28,8 @@ grztog<-left_join(treatments_612, alldat)%>%
   mutate(transect.quad=paste(transect, quadrat, sep="_"))%>%
   select(transect.quad, transect, quadrat, year, graze, thermal, spname, cover)%>%
   filter(year==2006|year==2007|year==2008|year==2009|year==2010|year==2011|year==2012)
-grztog2<-left_join(grztog, SC)
+grztog2<-left_join(grztog, SC)%>%
+  filter(thermal=="moderate")
 
 #plot timeseries of richness 
 grzrich <- grztog2 %>%
