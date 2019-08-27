@@ -97,46 +97,13 @@ grztog3<-grztog2%>%
 
 indic_treatments<-select(grztog3, 3, 4)
 indic_species<-select(grztog3, 1, 2, 4)%>%
-remove_rownames()%>%
-  column_to_rownames("rep")
-
-ugpre<-grztog3%>%
-  filter(trtgroup=="ungrazed_pre")%>%
-  select(-trtgroup)%>%
   spread(spcode, cover, fill=0)%>%
   remove_rownames()%>%
   column_to_rownames("rep")
-ugpre<-decostand(ugpre, "total")
+indic<-decostand(indic, "total")
 
-ugpost<-grztog3%>%
-  filter(trtgroup=="ungrazed_post")%>%
-  select(-trtgroup)%>%
-  spread(spcode, cover, fill=0)%>%
-  remove_rownames()%>%
-  column_to_rownames("rep")
-ugpost<-decostand(ugpost, "total")
+indicators<-multipatt(plotspecrel2017, interaction(plotkey2017$grazetrt, plotkey2017$precinct), func="r.g", control=how(nperm=999))
 
-gpre<-grztog3%>%
-  filter(trtgroup=="grazed_pre")%>%
-  select(-trtgroup)%>%
-  spread(spcode, cover, fill=0)%>%
-  remove_rownames()%>%
-  column_to_rownames("rep")
-gpre<-decostand(gpre, "total")
-
-gpost<-grztog3%>%
-  filter(trtgroup=="ungrazed_post")%>%
-  select(-trtgroup)%>%
-  spread(spcode, cover, fill=0)%>%
-  remove_rownames()%>%
-  column_to_rownames("rep")
-gpost<-decostand(gpost, "total")
-
-
-ind_ugpre<-multipatt(plotspecrel2017, interaction(plotkey2017$grazetrt, plotkey2017$precinct), func="r.g", control=how(nperm=999))
-ind_ugpost<-
-ind_gpre<-
-ind_gpost<-
 summary(indicators)
 summary(indicators, alpha=1)
 
