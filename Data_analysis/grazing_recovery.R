@@ -102,7 +102,7 @@ indic_species<-select(grztog3, 1, 2, 4)%>%
   column_to_rownames("rep")
 indic<-decostand(indic, "total")
 
-indicators<-multipatt(plotspecrel2017, interaction(plotkey2017$grazetrt, plotkey2017$precinct), func="r.g", control=how(nperm=999))
+indicators<-multipatt(indic_species, indic_treatments$trtgroup, func="r.g", control=how(nperm=999))
 
 summary(indicators)
 summary(indicators, alpha=1)
