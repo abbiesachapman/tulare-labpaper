@@ -115,3 +115,5 @@ indsum<-indicators$sign%>%
   filter(p.value<.05)
 indsum1<-left_join(indsum, SC, by=c("species"="spcode"))%>%
   select(-index, -stat, -p.value)
+
+write.csv(indsum1, file = "Grazing_indicator_sp.csv")
