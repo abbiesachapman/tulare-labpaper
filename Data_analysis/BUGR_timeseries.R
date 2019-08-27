@@ -18,6 +18,7 @@ clim <- read_csv(paste(datpath_clean, "/san_jose_clim.csv", sep =""), skip = 9) 
   mutate(stand_ppt = scale(PRCP, center = T, scale = T)) %>% #standardize to z-scores
   mutate(stand_temp = scale(TAVG, center = T, scale = T)) #standardize to z-scores
 prism <- read_csv(paste(datpath_clean, "/Tulare_prism_data.csv", sep = ""))
+prism$Month <- as.integer(prism$Month)
 dat1<-dat%>%
   select(-1)%>%
   group_by(year, spname, quadratNew, thermal)%>%
@@ -166,6 +167,49 @@ ggplot(clim_lag, aes(PRCP, meancov)) +
   geom_smooth(aes(color = thermal), method = "lm", se = F)
 
 ggplot(clim_lag, aes(TAVG, meancov)) +
+  facet_grid(status~func) +
+  geom_point(aes(color = thermal)) +
+  geom_smooth(aes(color = thermal), method = "lm", se = F)
+
+#timeseries of prism (growing season from September to April)
+prism_grow <- prism %>%
+  filter(Month != 5:8) %>%
+  mutate(year = ifelse(Month >8, Year+1, Year)) %>%
+  group_by(year) %>%
+  summarize(prcp = sum(prcp), tavg = mean(tavg), tmin = mean(tmin), tmax = mean(tmax))
+prism_grow1 <- left_join(thermal_trend, prism_grow)
+
+ggplot(prism_grow1, aes(prcp, meancov)) +
+  facet_grid(status~func) +
+  geom_point(aes(color = thermal)) +
+  geom_smooth(aes(color = thermal), method = "lm", se = F)
+
+ggplot(thermal_trend, aes((year), meancov)) + facet_grid(status~func) +
+  geom_bar(data = prism_grow1, aes(x = year, y = prcp/30), stat = "identity", fill = "lightgrey") +
+  geom_line(aes(color= thermal))+ geom_point(aes(color = thermal))  +
+  scale_y_continuous(sec.axis = sec_axis(~.*10, name = "Annual Precipitation Sept-April"))
+
+ggplot(prism_grow1, aes(tavg, meancov)) +
+  facet_grid(status~func) +
+  geom_point(aes(color = thermal)) +
+  geom_smooth(aes(color = thermal), method = "lm", se = F)
+
+#lag effect of prism?
+prism_lag <- prism_grow %>%
+  mutate(year = year + 1)
+prism_lag <- left_join(thermal_trend, prism_lag) 
+
+ggplot(prism_lag, aes(prcp, meancov)) +
+  facet_grid(status~func) +
+  geom_point(aes(color = thermal)) +
+  geom_smooth(aes(color = thermal), method = "lm", se = F)
+
+ggplot(thermal_trend, aes((year), meancov)) + facet_grid(status~func) +
+  geom_bar(data = prism_lag, aes(x = year, y = prcp/30), stat = "identity", fill = "lightgrey") +
+  geom_line(aes(color= thermal))+ geom_point(aes(color = thermal))  +
+  scale_y_continuous(sec.axis = sec_axis(~.*10, name = "Previous Year's Annual Precipitation Sept-April"))
+
+ggplot(prism_lag, aes(tavg, meancov)) +
   facet_grid(status~func) +
   geom_point(aes(color = thermal)) +
   geom_smooth(aes(color = thermal), method = "lm", se = F)
