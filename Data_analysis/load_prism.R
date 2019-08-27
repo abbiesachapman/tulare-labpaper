@@ -8,9 +8,10 @@ library(magrittr)
 options(prism.path = 'C:\\Users\\Lina\\Dropbox\\Academics\\PRISM\\PRISM_data.path')
 
 #select the type of data and data range
-get_prism_monthlys(type = "ppt", years = 2001:2018, mo = 1:12, keepZip = F)
-get_prism_monthlys(type = "tmax", years = 2001:2018, mo = 1:12, keepZip = F)
-get_prism_monthlys(type = "tmin", years = 2001:2018, mo = 1:12, keepZip = F)
+get_prism_monthlys(type = "ppt", years = 2000:2018, mo = 1:12, keepZip = F)
+get_prism_monthlys(type = "tmean", years = 2000:2018, mo = 1:12, keepZip = F)
+get_prism_monthlys(type = "tmax", years = 2000:2018, mo = 1:12, keepZip = F)
+get_prism_monthlys(type = "tmin", years = 2000:2018, mo = 1:12, keepZip = F)
 
 #grab the prism data and compile the files
 climate_data <- ls_prism_data() %>%  
@@ -36,7 +37,8 @@ climate_extract <- climate_extract %>%  gather(date, value, 4:ncol(climate_extra
 climate_extract$date <- gsub("PRISM_", "", climate_extract$date) %>% 
                         gsub("_stable_4kmM3_", "", .) %>% 
                         gsub("_stable_4kmM2_", "", .) %>%
-                        gsub("ppt", "pric", .) %>%
+                        gsub("ppt", "prcp", .) %>%
+                        gsub("tmean", "tavg", .) %>%
                         gsub("_bil", "", .)
 climate_extract <- separate(climate_extract, "date", c("type", "Year", "Month"), sep = c(4, 8, 10))
 climate_extract <- climate_extract[, -7]
