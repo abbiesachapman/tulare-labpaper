@@ -32,4 +32,4 @@ key2005 <- dat2005 %>%
   select(quadrat, site, year) %>%
   unique()
 
-rm(dat, dat2, datnames)
+rm(dat, datnames)
