@@ -68,4 +68,17 @@ ggplot(grz.even, aes(year, meanShan)) +
   geom_errorbar(aes(ymin=meanShan-seShan, ymax=meanShan+seShan, color=as.factor(graze)), width=.2)+
   geom_vline(xintercept=2009)+ylab("Shannon Diversity")
 
-
+#plot timeseries of cover
+grzfunc<-grztog2%>%
+  group_by(transect.quad, year, graze, status, func, spcode)%>%
+  summarize(sumcov=sum(cover))%>%
+  filter(!is.na(status), !is.na(func))
+grzfuncagg<-grzfunc%>%
+  group_by(year, graze, status, func)%>%
+  summarize(meancov=mean(sumcov), se_cov=calcSE(sumcov))
+ 
+ggplot(grzfuncagg, aes((year), meancov))+
+  geom_line(aes(color=graze))+
+  geom_point(aes(color=graze))+
+  geom_errorbar(aes(ymin=meancov-se_cov, ymax=meancov+se_cov, color=graze), width=.2)+
+  facet_grid(status~func) +geom_vline(xintercept=2009)
