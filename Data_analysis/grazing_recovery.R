@@ -108,7 +108,7 @@ indic_treatments2<-indic_species%>%
   select(1)
 indic_treatments3<-left_join(indic_treatments2, indic_treatments)
 
-indicators<-multipatt(indic_species, indic_treatments$trtgroup, func="r.g", control=how(nperm=999))
+indicators<-multipatt(indic_species, indic_treatments$trtgroup, func="IndVal.g", control=how(nperm=999))
 
 summary(indicators)
 summary(indicators, alpha=1)
