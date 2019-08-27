@@ -113,4 +113,5 @@ indicators<-multipatt(indic_species, indic_treatments$trtgroup, func="IndVal.g",
 indsum<-indicators$sign%>%
   rownames_to_column("species")%>%
   filter(p.value<.05)
-
+indsum1<-left_join(indsum, SC, by=c("species"="spcode"))%>%
+  select(-index, -stat, -p.value)
