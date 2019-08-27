@@ -17,6 +17,7 @@ SC <- read_csv(paste(datpath_clean, "/SpeciesCodes.csv", sep=""))
 clim <- read_csv(paste(datpath_clean, "/san_jose_clim.csv", sep =""), skip = 9) %>%
   mutate(stand_ppt = scale(PRCP, center = T, scale = T)) %>% #standardize to z-scores
   mutate(stand_temp = scale(TAVG, center = T, scale = T)) #standardize to z-scores
+prism <- read_csv(paste(datpath_clean, "/Tulare_prism_data.csv", sep = ""))
 dat1<-dat%>%
   select(-1)%>%
   group_by(year, spname, quadratNew, thermal)%>%
