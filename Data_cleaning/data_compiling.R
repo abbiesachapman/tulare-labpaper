@@ -78,12 +78,14 @@ alldat <- rbind(dat2001, dat2002, dat2003, dat2004, dat_2005, dat_2006,
                 dat_2012, dat_2013, dat_2014, dat_2015, dat_2016, 
                 dat_2017, dat_2018)
 names(alldat)[3]=c("spcode")
+alldat[is.na(alldat)] <- 0 
 
 # species code check
 uniquesp <- data.frame(unique(alldat$spcode))
 names(uniquesp)[1]=c("spcode")
 
-spkey <- read_excel("SpeciesCodes.xlsx") %>%
+spkey <- read_excel(file.choose()) %>%
+#choose file called "SpeciesCodes.xlsx" in our OneDrive folder, Tulare-LabPaper
   select(-X__1)
 names(spkey)[1:2]=c("spcode","spname")
 
@@ -96,9 +98,9 @@ delcheck <- alldat %>%
 # link species key to alldat
 alldatsp <- inner_join(alldat, spkey, by = "spcode")
 
-
 # join datasets to include thermal treatment 
 quadkey <- read_excel("MasterQuadratKey.xlsx")
+#choose file called "MasterQuadratKey.xlsx" in our OneDrive folder: Tulare-LabPaper
 names(quadkey)[3:4]=c("quadratNew", "quadrat")
 
 # join alldatsp and quadkey for only burned and grazed data
