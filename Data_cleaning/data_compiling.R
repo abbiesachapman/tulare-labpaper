@@ -84,9 +84,8 @@ alldat[is.na(alldat)] <- 0
 uniquesp <- data.frame(unique(alldat$spcode))
 names(uniquesp)[1]=c("spcode")
 
-spkey <- read_excel(file.choose()) %>%
+spkey <- read_excel(file.choose()) 
 #choose file called "SpeciesCodes.xlsx" in our OneDrive folder, Tulare-LabPaper
-  select(-X__1)
 names(spkey)[1:2]=c("spcode","spname")
 
 diffsp <- full_join(spkey, uniquesp, by = "spcode")
@@ -99,9 +98,24 @@ delcheck <- alldat %>%
 alldatsp <- inner_join(alldat, spkey, by = "spcode")
 
 # join datasets to include thermal treatment 
-quadkey <- read_excel("MasterQuadratKey.xlsx")
+quadkey <- read_excel(file.choose())
 #choose file called "MasterQuadratKey.xlsx" in our OneDrive folder: Tulare-LabPaper
 names(quadkey)[3:4]=c("quadratNew", "quadrat")
+
+# join alldatsp and quadkey for all data
+alldatsptrt <- inner_join(alldatsp, quadkey, by = "quadrat") %>%
+  select(quadratNew, treatment, spcode, spname, cover, year, thermal)
+
+#check existence of all data across years
+alldatcheck <- alldatsptrt %>%
+  select(-cover, -spcode,-spname) %>%
+  unique() %>%
+  mutate(exist = 1) %>%
+  spread(year, exist, fill="")
+
+# print data frames
+write.csv(alldatcheck, "alldatcheck.csv")
+write.csv(alldatsptrt, "alldatsptrt.csv")
 
 # join alldatsp and quadkey for only burned and grazed data
 bugr <- inner_join(alldatsp, quadkey, by = "quadrat") %>%
