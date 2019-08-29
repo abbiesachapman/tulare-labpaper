@@ -104,7 +104,9 @@ names(quadkey)[3:4]=c("quadratNew", "quadrat")
 
 # join alldatsp and quadkey for all data
 alldatsptrt <- inner_join(alldatsp, quadkey, by = "quadrat") %>%
-  select(quadratNew, treatment, spcode, spname, cover, year, thermal)
+  select(quadratNew, treatment, spcode, spname, cover, year, thermal) %>%
+  separate(treatment, sep = " ", c("burn", "graze")) %>%
+  filter(graze != "NA", thermal != "?")
 
 #check existence of all data across years
 alldatcheck <- alldatsptrt %>%
