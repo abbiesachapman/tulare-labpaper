@@ -1,0 +1,135 @@
+## Set your datpath!! (file in Data_cleaning)
+
+library(tidyverse)
+library(readr)
+library(vegan)
+library(MASS)
+library(dplyr)
+library(RVAideMemoire) #for posthoc tests on permanova
+
+# Import csv file, transform to wide data, call it data
+all.dat <- read_csv(paste(datpath_clean, "/alldatsptrt.csv", sep=""))
+all.dat<-as.data.frame(all.dat)
+#dat2<-dat %>% mutate(cover=cover+0.00001) #a work around for data with lots of zeros
+#create wide data, first filter so year is 2005 to 2012
+all.data<- all.dat %>% dplyr::select(-X1, -spcode) %>% filter(year>2004 & year < 2013) %>% spread(spname, cover)
+all.data[is.na(all.data)] <- 0 #replace NAs with 0 (species not counted in plots have NAs when wide dataset created)
+levels(as.factor(all.dat$quadratNew))
+levels(as.factor(all.dat$thermal))
+levels(as.factor(all.dat$spname)) #any to remove?
+levels(as.factor(all.dat$burn))
+levels(as.factor(all.dat$graze))
+
+#Import environmental data - NADP pinnacles deposition data and NOAA San Jose temperature data
+env <- read_csv(paste(datpath_clean, "/NTN-CA66-deposition.csv", sep=""))
+env<-env %>% rename(year=yr) %>% filter(year>2004 & year < 2013)
+temp <- read_csv(paste(datpath_clean, "/san_jose_clim.csv", sep=""),skip=9)
+temp <- temp %>% rename(year=DATE, temp=TAVG) %>% filter(year>2004 & year <2013) %>% dplyr::select(year, temp)
+env<-merge(env,temp)
+
+#merge env to match full data
+all.env<-merge(env,all.data) %>% dplyr::select(NH4, NO3, totalN, ppt, temp)
+
+#check count of thermal factor
+all.data %>% 
+  group_by(thermal) %>%
+  summarise(no_rows = length(thermal)) 
+
+#check count of graze factor
+all.data %>% 
+  group_by(graze) %>%
+  summarise(no_rows = length(graze))
+
+#check count of burn factor
+all.data %>% 
+  group_by(burn) %>%
+  summarise(no_rows = length(burn))
+
+str(all.data)
+
+all.data$ID <- seq.int(nrow(all.data))
+plotnames<-all.data[,1]
+cover.gb<- all.data %>% dplyr::select(-c(1:5)) #wide data with ID columns removed, only species/cover for NMDS
+rownames(cover.gb)<-plotnames
+
+#check for empty rows
+cover.Biodrop.gb<-cover.gb[rowSums(cover.gb[, (1:157)]) ==0, ] #if no empty rows, next step not needed
+#cover.Biodrop.gb<-cover.gb[rowSums(cover.gb[, (1:157)])  >0 ]#remove empty rows
+
+#if needed, relativize by row or column or calculate presence/absence
+#cover.rowsums <- rowSums(cover.Bio [1:157])
+#cover.relrow <- data.frame(cover.Bio /cover.rowsums)
+#cover.colmax<-sapply(cover.Bio ,max)
+#cover.relcolmax <- data.frame(sweep(cover.Bio ,2,cover.colmax,'/'))
+#cover.pa <- cover.Bio %>% mutate_each(funs(ifelse(.>0,1,0)), 1:57)
+
+
+######################
+#NMDS
+######################
+#make bray-curtis dissimilarity matrix
+gb.bcd <- vegdist(cover.gb)
+
+#quick run to check out NMS ordination
+gb.mds0 <-isoMDS(gb.bcd) #runs nms only once
+gb.mds0  #by default 2 dimensions returned, stress is 6.4, converged
+ordiplot(gb.mds0) #ugly
+
+#prefer to run multiple NMS ordinations
+#with different starting configurations, and choose the best
+#this function does that, and in addition does several other steps too including: 
+#standardizing the data (though fuction call below turns this off with autotransform=F)
+#calculating distance matrix (default bray-curtis)
+#running NMDS with random starts
+#rotation of axes to maximize variance of site scores on axis 1
+#calculate species scores based on weighted averaging
+#help(metaMDS)
+gb.mds<-metaMDS(cover.gb, trace = TRUE, autotransform=T, trymax=100, k=6) #runs several with different starting configurations
+#trace= TRUE will give output for step by step what its doing
+#default is 2 dimensions, can put k=4 for 4 dimensions
+spp.mds #solution did not converge after 100 tries
+summary(spp.mds)
+
+#quick plot of results
+stressplot(spp.mds, spp.bcd) #stressplot to show fit
+ordiplot(spp.mds)
+
+#overlay environmental variables on full data
+envvec.nms<-envfit(spp.mds,all.env, na.rm=TRUE)
+envvec.nms
+plot(spp.mds)
+plot(envvec.nms) #add vectors to previous ordination
+
+#store scores in new dataframe
+spscores1<-scores(spp.mds,display="sites",choices=1)
+spscores2<-scores(spp.mds,display="sites",choices=2)
+tplots<-data[,4]
+tplot_levels<-levels(tplots)
+spscoresall<-data.frame(tplots,spscores1,spscores2)
+
+#make nicer plot colored based on thermal, shapes on pre/post fire
+#help(ordiplot)
+#first, set colors and shapes
+cols1<- data %>% dplyr::select(thermal) %>% mutate(color = "black", 
+                                                   color = ifelse(thermal == "cool", "purple", 
+                                                                  ifelse(thermal=="moderate", "orange", 
+                                                                         ifelse(thermal=="very cool", "blue",
+                                                                                ifelse(thermal=="very warm", "red", color))))) #colors based on thermal group
+Lcols <- rep(c("Black", "Purple", "Orange", "Blue", "Red")) #colors for the legend
+shapes <- data %>% dplyr::select(year) %>%
+  mutate(shape = 1, shape = ifelse(year == "2004", 8, 
+                                   ifelse(year>="2005" & year<"2014", 16,
+                                          ifelse(year>="2014", 15,shape)))) #shapes based on year 
+shapes<-shapes %>% mutate(time="Pre-Fire", 
+                          time= ifelse(year==2004, "Fire",
+                                       ifelse(year>=2005&year<2014, "Post-Fire",
+                                              ifelse(year>=2014, "2014 and after",time)))) 
+Lshapes <-rep(c(15,8,16,1))#shapes for legend
+#make the plot
+bio.plot <- ordiplot(spp.mds, choices=c(1,2), type = "none")   #Set up the plot
+points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols1$color,pch=shapes$shape) 
+plot(envvec.nms, col="green")
+text(spp.mds, display = "species", cex=0.5, col="grey30") #label species
+legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+legend("topright",legend=levels(as.factor(shapes$time)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+
