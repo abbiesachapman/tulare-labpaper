@@ -290,8 +290,77 @@ cover.Biodrop.gb.late<-cover.gb.late[rowSums(cover.gb.late[, (1:157)]) ==0, ] #i
 #cover.relcolmax <- data.frame(sweep(cover.Bio ,2,cover.colmax,'/'))
 #cover.pa <- cover.Bio %>% mutate_each(funs(ifelse(.>0,1,0)), 1:57)
 
-<<<<<<< HEAD
-=======
+######################
+#NMDS
+######################
+#make bray-curtis dissimilarity matrix
+gb.bcd.late <- vegdist(cover.gb.late)
+
+gb.mds.late<-metaMDS(gb.bcd.late , trace = TRUE, autotransform=T, trymax=100, k=3) #runs several with different starting configurations
+#trace= TRUE will give output for step by step what its doing
+#default is 2 dimensions, can put k=4 for 4 dimensions
+gb.mds.late #solution did not converge after 100 tries
+summary(gb.mds.late)
+
+#quick plot of results
+stressplot(gb.mds.late, gb.bcd.late) #stressplot to show fit
+ordiplot(gb.mds.late)
+
+#overlay environmental variables on full data
+envvec.nms.gb.late<-envfit(gb.mds.late,all.env.late, na.rm=TRUE)
+envvec.nms.gb.late
+plot(gb.mds.late)
+plot(envvec.nms.gb.late) #add vectors to previous ordination
+
+#store scores in new dataframe
+spscores1.gb.l<-scores(gb.mds.late,display="sites",choices=1)
+spscores2.gb.l<-scores(gb.mds.late,display="sites",choices=2)
+tplots.gb.l<-all.data.late[,2]
+tplot_levels_gb_l<-levels(tplots.gb.l)
+spscoresall.gb.l<-data.frame(tplots.gb.l,spscores1.gb.l,spscores2.gb.l)
+
+#make nicer plot colored based on thermal, shapes on pre/post fire
+#help(ordiplot)
+#first, set colors and shapes
+cols1.l<-all.data.late %>% dplyr::select(burn, graze) %>% mutate(color = "forestgreen", 
+                                                                 color = ifelse(burn == "burned" & graze=="grazed", "red",
+                                                                                ifelse(burn=="burned" & graze =="ungrazed", "orange",
+                                                                                       ifelse(burn=="unburned" & graze=="graze", "purple", color)))) #colors based on burn trt
+Lcols.l <- rep(c("orange", "Red", "forestgreen","yellow4")) #colors for the legend
+shapes.l <- all.data.late %>% dplyr::select(year) %>%
+  mutate(shape = 0, shape = ifelse(year=="2009", 1, ifelse(year=="2010",2, 
+                                                           ifelse(year=="2011", 5, shape)))) #shapes based on grazing 
+Lshapes.l <-rep(c(1,2,5))#shapes for legend
+#make the plot
+gb.plot.l <- ordiplot(gb.mds.late, choices=c(1,2), type = "none")   #Set up the plot
+points(spscoresall.gb.l$NMDS1,spscoresall.gb.l$NMDS2,col=cols1.l$color,pch=shapes.l$shape) 
+#plot(envvec.nms.gb, col="green")
+#text(gb.mds, display = "species", cex=0.5, col="grey30") #label species
+legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+legend("topright",legend=levels(as.factor(shapes.l$year)), col="black", pch=Lshapes.l, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+
+#make nicer plot colored based on thermal, shapes on pre/post fire
+#help(ordiplot)
+#first, set colors and shapes
+cols2.l<- all.data.late %>% dplyr::select(thermal) %>% mutate(color = "black", 
+                                                              color = ifelse(thermal == "cool", "purple", 
+                                                                             ifelse(thermal=="moderate", "orange", 
+                                                                                    ifelse(thermal=="very cool", "blue",
+                                                                                           ifelse(thermal=="very warm", "red", color))))) #colors based on thermal group
+Lcols.l2 <- rep(c("purple", "orange", "blue","red","black")) #colors for the legend
+shapes.l <- all.data.late %>% dplyr::select(year) %>%
+  mutate(shape = 0, shape = ifelse(year=="2009", 1, ifelse(year=="2010",2, 
+                                                           ifelse(year=="2011", 5, shape)))) #shapes based on grazing 
+Lshapes.l <-rep(c(1,2,5))#shapes for legend
+#make the plot
+gb.plot.l <- ordiplot(gb.mds.late, choices=c(1,2), type = "none")   #Set up the plot
+points(spscoresall.gb.l$NMDS1,spscoresall.gb.l$NMDS2,col=cols2.l$color,pch=shapes.l$shape) 
+#plot(envvec.nms.gb, col="green")
+#text(gb.mds, display = "species", cex=0.5, col="grey30") #label species
+legend("bottomright",legend=levels(as.factor(cols2.l$thermal)), col=Lcols.l2, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+legend("topright",legend=levels(as.factor(shapes.l$year)), col="black", pch=Lshapes.l, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+
+
 ########################
 #####NMDS for 2006######
 ########################
@@ -542,79 +611,6 @@ cover.Biodrop.gb.05<-cover.gb.05[rowSums(cover.gb.05[, (1:156)]) ==0, ] #if no e
 #cover.relcolmax <- data.frame(sweep(cover.Bio ,2,cover.colmax,'/'))
 #cover.pa <- cover.Bio %>% mutate_each(funs(ifelse(.>0,1,0)), 1:57)
 
->>>>>>> 1fcb75eb2c6a1647b5fdd27f009c20404df11d8c
-
-######################
-#NMDS
-######################
-#make bray-curtis dissimilarity matrix
-<<<<<<< HEAD
-gb.bcd.late <- vegdist(cover.gb.late)
-
-gb.mds.late<-metaMDS(gb.bcd.late , trace = TRUE, autotransform=T, trymax=100, k=3) #runs several with different starting configurations
-#trace= TRUE will give output for step by step what its doing
-#default is 2 dimensions, can put k=4 for 4 dimensions
-gb.mds.late #solution did not converge after 100 tries
-summary(gb.mds.late)
-
-#quick plot of results
-stressplot(gb.mds.late, gb.bcd.late) #stressplot to show fit
-ordiplot(gb.mds.late)
-
-#overlay environmental variables on full data
-envvec.nms.gb.late<-envfit(gb.mds.late,all.env.late, na.rm=TRUE)
-envvec.nms.gb.late
-plot(gb.mds.late)
-plot(envvec.nms.gb.late) #add vectors to previous ordination
-
-#store scores in new dataframe
-spscores1.gb.l<-scores(gb.mds.late,display="sites",choices=1)
-spscores2.gb.l<-scores(gb.mds.late,display="sites",choices=2)
-tplots.gb.l<-all.data.late[,2]
-tplot_levels_gb_l<-levels(tplots.gb.l)
-spscoresall.gb.l<-data.frame(tplots.gb.l,spscores1.gb.l,spscores2.gb.l)
-
-#make nicer plot colored based on thermal, shapes on pre/post fire
-#help(ordiplot)
-#first, set colors and shapes
-cols1.l<-all.data.late %>% dplyr::select(burn, graze) %>% mutate(color = "forestgreen", 
-                                                                  color = ifelse(burn == "burned" & graze=="grazed", "red",
-                                                                                 ifelse(burn=="burned" & graze =="ungrazed", "orange",
-                                                                                        ifelse(burn=="unburned" & graze=="graze", "purple", color)))) #colors based on burn trt
-Lcols.l <- rep(c("orange", "Red", "forestgreen","yellow4")) #colors for the legend
-shapes.l <- all.data.late %>% dplyr::select(year) %>%
-  mutate(shape = 0, shape = ifelse(year=="2009", 1, ifelse(year=="2010",2, 
-                                                           ifelse(year=="2011", 5, shape)))) #shapes based on grazing 
-Lshapes.l <-rep(c(1,2,5))#shapes for legend
-#make the plot
-gb.plot.l <- ordiplot(gb.mds.late, choices=c(1,2), type = "none")   #Set up the plot
-points(spscoresall.gb.l$NMDS1,spscoresall.gb.l$NMDS2,col=cols1.l$color,pch=shapes.l$shape) 
-#plot(envvec.nms.gb, col="green")
-#text(gb.mds, display = "species", cex=0.5, col="grey30") #label species
-legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
-legend("topright",legend=levels(as.factor(shapes.l$year)), col="black", pch=Lshapes.l, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
-
-#make nicer plot colored based on thermal, shapes on pre/post fire
-#help(ordiplot)
-#first, set colors and shapes
-cols2.l<- all.data.late %>% dplyr::select(thermal) %>% mutate(color = "black", 
-                                                   color = ifelse(thermal == "cool", "purple", 
-                                                                  ifelse(thermal=="moderate", "orange", 
-                                                                         ifelse(thermal=="very cool", "blue",
-                                                                                ifelse(thermal=="very warm", "red", color))))) #colors based on thermal group
-Lcols.l2 <- rep(c("purple", "orange", "blue","red","black")) #colors for the legend
-shapes.l <- all.data.late %>% dplyr::select(year) %>%
-  mutate(shape = 0, shape = ifelse(year=="2009", 1, ifelse(year=="2010",2, 
-                                                           ifelse(year=="2011", 5, shape)))) #shapes based on grazing 
-Lshapes.l <-rep(c(1,2,5))#shapes for legend
-#make the plot
-gb.plot.l <- ordiplot(gb.mds.late, choices=c(1,2), type = "none")   #Set up the plot
-points(spscoresall.gb.l$NMDS1,spscoresall.gb.l$NMDS2,col=cols2.l$color,pch=shapes.l$shape) 
-#plot(envvec.nms.gb, col="green")
-#text(gb.mds, display = "species", cex=0.5, col="grey30") #label species
-legend("bottomright",legend=levels(as.factor(cols2.l$thermal)), col=Lcols.l2, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
-legend("topright",legend=levels(as.factor(shapes.l$year)), col="black", pch=Lshapes.l, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
-=======
 gb.bcd.05 <- vegdist(cover.gb.05)
 
 #quick run to check out NMS ordination
@@ -719,4 +715,4 @@ legend("bottomleft",legend=levels(as.factor(shapes$graze)), col="black", pch=Lsh
 library(indicspecies)
 trt_isa_05 = multipatt(cover.gb.05, dat.05$graze*dat.06$burn, control=how(nperm=999))
 summary(trt_isa_05)
->>>>>>> 1fcb75eb2c6a1647b5fdd27f009c20404df11d8c
+
