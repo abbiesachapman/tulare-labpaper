@@ -246,6 +246,29 @@ points(spscoresall.gb.e$NMDS1,spscoresall.gb.e$NMDS2,col=cols1.e$color,pch=shape
 legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 legend("topright",legend=levels(as.factor(shapes.e$year)), col="black", pch=Lshapes.e, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 
+#make nicer plot colored based on thermal, shapes on pre/post fire
+#help(ordiplot)
+#first, set colors and shapes
+cols2.e<- all.data.early %>% dplyr::select(thermal) %>% mutate(color = "black", 
+                                                              color = ifelse(thermal == "cool", "purple", 
+                                                                             ifelse(thermal=="moderate", "orange", 
+                                                                                    ifelse(thermal=="very cool", "blue",
+                                                                                           ifelse(thermal=="very warm", "red", color))))) #colors based on thermal group
+Lcols.e2 <- rep(c("purple", "orange", "blue","red","black")) #colors for the legend
+shapes.e <- all.data.early %>% dplyr::select(year) %>%
+  mutate(shape = 0, shape = ifelse(year == "2005", 16, ifelse(year=="2006", 17, ifelse(year=="2007", 18,
+                                                                                       ifelse(year=="2008", 15, shape))))) #shapes based on grazing 
+Lshapes.e <-rep(c(16,17,18,15))#shapes for legend
+#make the plot
+gb.plot.e <- ordiplot(gb.mds.early, choices=c(1,2), type = "none")   #Set up the plot
+points(spscoresall.gb.e$NMDS1,spscoresall.gb.e$NMDS2,col=cols2.e$color,pch=shapes.e$shape) 
+#plot(envvec.nms.gb, col="green")
+#text(gb.mds, display = "species", cex=0.5, col="grey30") #label species
+legend("bottomright",legend=levels(as.factor(cols2.e$thermal)), col=Lcols.e2, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+legend("topright",legend=levels(as.factor(shapes.e$year)), col="black", pch=Lshapes.e, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+
+
+
 ###late years####
 #create wide data, first filter so year is 2005 to 2008
 all.data.late<- all.dat %>% dplyr::select(-X1, -spcode) %>% filter(year>2008 & year < 2012) %>% spread(spname, cover)
