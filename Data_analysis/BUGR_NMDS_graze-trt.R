@@ -560,9 +560,9 @@ Lshapes <-rep(c(8,17))#shapes for legend
 
 
 #make the plot
-bio.plot <- ordiplot(gb.mds.06, choices=c(1,2), type = "none")   #Set up the plot
+bio.plot <- ordiplot(gb.mds.mod06, choices=c(1,2), type = "none", xlim = c(-3,3), ylim = c(-1,1))   #Set up the plot
 points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols1$color,pch=shapes$shape) 
-plot(envvec.nms, col="green")
+#plot(envvec.nms, col="green")
 #text(gb.mds.06, display = "species", cex=0.5, col="grey30") #label species
 legend("topleft",legend=levels(as.factor(cols1$burn)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 legend("bottomleft",legend=levels(as.factor(shapes$graze)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
@@ -774,7 +774,7 @@ shapes <- mod.dat.05 %>%
                                     ifelse(graze == "ungrazed", 17,shape))) #shapes based on year 
 Lshapes <-rep(c(8,17))#shapes for legend
 #make the plot
-bio.plot <- ordiplot(gb.mds.mod05, choices=c(1,2), type = "none")   #Set up the plot
+bio.plot <- ordiplot(gb.mds.mod05, choices=c(1,2), type = "none", xlim = c(-3.0,2.0), ylim = c(-1.0,1.5))   #Set up the plot
 points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols1$color,pch=shapes$shape) 
 #text(gb.mds.06, display = "species", cex=0.5, col="grey30") #label species
 legend("topleft",legend=levels(as.factor(cols1$burn)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
