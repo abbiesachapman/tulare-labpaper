@@ -43,14 +43,13 @@ all.data %>%
 
 str(all.data)
 
-all.data$ID <- seq.int(nrow(all.data))
 plotnames<-all.data[,1]
 cover.gb<- all.data %>% dplyr::select(-c(1:5)) #wide data with ID columns removed, only species/cover for NMDS
 rownames(cover.gb)<-plotnames
 
 #check for empty rows
-cover.Biodrop.gb<-cover.gb[rowSums(cover.gb[, (1:157)]) ==0, ] #if no empty rows, next step not needed
-#cover.Biodrop.gb<-cover.gb[rowSums(cover.gb[, (1:157)])  >0 ]#remove empty rows
+cover.Biodrop.gb<-cover.gb[rowSums(cover.gb[, (1:156)]) ==0, ] #if no empty rows, next step not needed
+#cover.Biodrop.gb<-cover.gb[rowSums(cover.gb[, (1:156)])  >0 ]#remove empty rows
 
 #if needed, relativize by row or column or calculate presence/absence
 #cover.rowsums <- rowSums(cover.Bio [1:157])
@@ -146,16 +145,92 @@ points(spscoresall.gb$NMDS1,spscoresall.gb$NMDS2,col=cols1$color,pch=shapes$shap
 legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 legend("topright",legend=levels(as.factor(shapes$year)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 
+########MODERATE FOR ALL YEARS##############
+#create wide data, first filter so year is 2005 to 2012
+mod.data<- all.dat %>% dplyr::select(-X1, -spcode) %>% filter(year>2004 & year < 2013) %>% filter(thermal=="moderate")%>% spread(spname, cover)
+mod.data[is.na(mod.data)] <- 0 #replace NAs with 0 (species not counted in plots have NAs when wide dataset created)
+levels(as.factor(mod.data$quadratNew))
+levels(as.factor(mod.data$thermal))
+levels(as.factor(mod.data$burn))
+levels(as.factor(mod.data$graze))
+
+#Import environmental data - NADP pinnacles deposition data and NOAA San Jose temperature data
+env <- read_csv(paste(datpath_clean, "/NTN-CA66-deposition.csv", sep=""))
+env<-env %>% rename(year=yr) %>% filter(year>2004 & year < 2013)
+temp <- read_csv(paste(datpath_clean, "/san_jose_clim.csv", sep=""),skip=9)
+temp <- temp %>% rename(year=DATE, temp=TAVG) %>% filter(year>2004 & year <2013) %>% dplyr::select(year, temp)
+env<-merge(env,temp)
+
+#merge env to match full data
+mod.env<-merge(env,mod.data) %>% dplyr::select(NH4, NO3, totalN, ppt, temp)
+
+#check count of graze and burn factor
+mod.data %>% 
+  group_by(graze, burn) %>%
+  summarise(no_rows = length(graze))
+
+plotnames<-mod.data[,1]
+cover.mod<- mod.data %>% dplyr::select(-c(1:5)) #wide data with ID columns removed, only species/cover for NMDS
+rownames(cover.mod)<-plotnames
+
+#check for empty rows
+cover.Biodrop.mod<-cover.gb[rowSums(cover.mod[, (1:156)]) ==0, ] 
+
+######################
+#NMDS
+######################
+#make bray-curtis dissimilarity matrix
+mod.bcd <- vegdist(cover.mod)
+#run mds
+mod.mds<-metaMDS(cover.mod, trace = TRUE, autotransform=T, trymax=100, k=2) #runs several with different starting configurations
+#trace= TRUE will give output for step by step what its doing
+#default is 2 dimensions, can put k=4 for 4 dimensions
+mod.mds #solution did not converge after 100 tries
+summary(mod.mds)
+
+#quick plot of results
+stressplot(mod.mds, mod.bcd) #stressplot to show fit
+ordiplot(mod.mds)
+
+#overlay environmental variables on full data
+envvec.nms.mod<-envfit(mod.mds,mod.env, na.rm=TRUE)
+envvec.nms.mod
+plot(mod.mds)
+plot(envvec.nms.mod) #add vectors to previous ordination
+
+#store scores in new dataframe
+spscores1.mod<-scores(mod.mds,display="sites",choices=1)
+spscores2.mod<-scores(mod.mds,display="sites",choices=2)
+tplots.mod<-mod.data[,2]
+tplot_levels_mod<-levels(tplots.mod)
+spscoresall.mod<-data.frame(tplots.mod,spscores1.mod,spscores2.mod)
+
+#make nicer plot colored based on burning and grazing, shapes on year
+#help(ordiplot)
+#first, set colors and shapes
+cols1<-mod.data %>% dplyr::select(burn, graze) %>% mutate(color = "forestgreen", 
+                                                          color = ifelse(burn == "burned" & graze=="grazed", "red",
+                                                                         ifelse(burn=="burned" & graze =="ungrazed", "orange",
+                                                                                ifelse(burn=="unburned" & graze=="graze", "purple", color)))) #colors based on burn trt
+Lcols <- rep(c("orange", "Red", "forestgreen","yellow4")) #colors for the legend
+shapes <- mod.data %>% dplyr::select(year) %>%
+  mutate(shape = 0, shape = ifelse(year == "2005", 16, ifelse(year=="2006", 17, ifelse(year=="2007", 18,
+                                                                                       ifelse(year=="2008", 15, ifelse(year=="2009", 1, ifelse(year=="2010",2, 
+                                                                                                                                               ifelse(year=="2011", 5, shape)))))))) #shapes based on grazing 
+Lshapes <-rep(c(16,17,18,15,1,2,5,0))#shapes for legend
+#make the plot
+mod.plot <- ordiplot(mod.mds, choices=c(1,2), xlim=c(-0.05,0.1), ylim=c(-0.05,0.05),type = "none")   #Set up the plot
+points(spscoresall.mod$NMDS1,spscoresall.mod$NMDS2,col=cols1$color,pch=shapes$shape) 
+#plot(envvec.nms.gb, col="green")
+#text(mod.mds, display = "species", cex=0.5, col="grey30") #label species
+#legend("bottomright",legend=levels(as.factor(cols1$burn)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+legend("topright",legend=levels(as.factor(shapes$year)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+
 
 ###early years####
 #create wide data, first filter so year is 2005 to 2008
 all.data.early<- all.dat %>% dplyr::select(-X1, -spcode) %>% filter(year>2004 & year < 2009) %>% spread(spname, cover)
 all.data.early[is.na(all.data.early)] <- 0 #replace NAs with 0 (species not counted in plots have NAs when wide dataset created)
-levels(as.factor(all.dat$quadratNew))
-levels(as.factor(all.dat$thermal))
-levels(as.factor(all.dat$spname)) #any to remove?
-levels(as.factor(all.dat$burn))
-levels(as.factor(all.dat$graze))
 
 #Import environmental data - NADP pinnacles deposition data and NOAA San Jose temperature data
 env <- read_csv(paste(datpath_clean, "/NTN-CA66-deposition.csv", sep=""))
@@ -169,7 +244,7 @@ all.env.early<-merge(env,all.data.early) %>% dplyr::select(NH4, NO3, totalN, ppt
 
 #check count of thermal factor
 all.data.early %>% 
-  group_by(thermal) %>%
+  group_by(thermal, graze, burn) %>%
   summarise(no_rows = length(thermal)) 
 
 #check count of graze and burn factor
@@ -177,10 +252,6 @@ all.data.early %>%
   group_by(graze, burn) %>%
   summarise(no_rows = length(graze))
 
-
-str(all.data)
-
-all.data.early$ID <- seq.int(nrow(all.data))
 plotnames<-all.data.early[,1]
 cover.gb.early<- all.data.early %>% dplyr::select(-c(1:5)) #wide data with ID columns removed, only species/cover for NMDS
 rownames(cover.gb.early)<-plotnames
@@ -243,7 +314,7 @@ gb.plot.e <- ordiplot(gb.mds.early, choices=c(1,2), type = "none")   #Set up the
 points(spscoresall.gb.e$NMDS1,spscoresall.gb.e$NMDS2,col=cols1.e$color,pch=shapes.e$shape) 
 #plot(envvec.nms.gb, col="green")
 #text(gb.mds, display = "species", cex=0.5, col="grey30") #label species
-legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+#legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 legend("topright",legend=levels(as.factor(shapes.e$year)), col="black", pch=Lshapes.e, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 
 #make nicer plot colored based on thermal, shapes on pre/post fire
@@ -267,16 +338,219 @@ points(spscoresall.gb.e$NMDS1,spscoresall.gb.e$NMDS2,col=cols2.e$color,pch=shape
 legend("bottomright",legend=levels(as.factor(cols2.e$thermal)), col=Lcols.e2, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 legend("topright",legend=levels(as.factor(shapes.e$year)), col="black", pch=Lshapes.e, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 
+###MODERATE######
+###early years####
+#create wide data, first filter so year is 2005 to 2008
+mod.data.early<- all.dat %>% dplyr::select(-X1, -spcode) %>% filter(year>2004 & year < 2009) %>% filter(thermal=="moderate") %>% spread(spname, cover)
+mod.data.early[is.na(mod.data.early)] <- 0 #replace NAs with 0 (species not counted in plots have NAs when wide dataset created)
+
+#Import environmental data - NADP pinnacles deposition data and NOAA San Jose temperature data
+env <- read_csv(paste(datpath_clean, "/NTN-CA66-deposition.csv", sep=""))
+env<-env %>% rename(year=yr) %>% filter(year>2004 & year < 2009)
+temp <- read_csv(paste(datpath_clean, "/san_jose_clim.csv", sep=""),skip=9)
+temp <- temp %>% rename(year=DATE, temp=TAVG) %>% filter(year>2004 & year <2009) %>% dplyr::select(year, temp)
+env<-merge(env,temp)
+
+#merge env to match full data
+mod.env.early<-merge(env,mod.data.early) %>% dplyr::select(NH4, NO3, totalN, ppt, temp)
+
+#check count of thermal factor
+mod.data.early %>% 
+  group_by(thermal, graze, burn) %>%
+  summarise(no_rows = length(thermal)) 
+
+#check count of graze and burn factor
+mod.data.early %>% 
+  group_by(graze, burn) %>%
+  summarise(no_rows = length(graze))
+
+plotnames<-mod.data.early[,1]
+cover.mod.early<- mod.data.early %>% dplyr::select(-c(1:5)) #wide data with ID columns removed, only species/cover for NMDS
+rownames(cover.mod.early)<-plotnames
+
+#check for empty rows
+cover.Biodrop.mod.early<-cover.mod.early[rowSums(cover.mod.early[, (1:156)]) ==0, ] #if no empty rows, next step not needed
+#cover.Biodrop.gb<-cover.gb[rowSums(cover.gb[, (1:157)])  >0 ]#remove empty rows
+
+#if needed, relativize by row or column or calculate presence/absence
+#cover.rowsums <- rowSums(cover.Bio [1:157])
+#cover.relrow <- data.frame(cover.Bio /cover.rowsums)
+#cover.colmax<-sapply(cover.Bio ,max)
+#cover.relcolmax <- data.frame(sweep(cover.Bio ,2,cover.colmax,'/'))
+#cover.pa <- cover.Bio %>% mutate_each(funs(ifelse(.>0,1,0)), 1:57)
+
+
+######################
+#NMDS
+######################
+#make bray-curtis dissimilarity matrix
+mod.bcd.early <- vegdist(cover.mod.early)
+
+mod.mds.early<-metaMDS(mod.bcd.early , trace = TRUE, autotransform=T, trymax=100, k=2) #runs several with different starting configurations
+mod.mds.early #solution did not converge after 100 tries
+summary(mod.mds.early)
+
+#quick plot of results
+stressplot(mod.mds.early, mod.bcd.early) #stressplot to show fit
+ordiplot(mod.mds.early)
+
+#store scores in new dataframe
+spscores1.mod.e<-scores(mod.mds.early,display="sites",choices=1)
+spscores2.mod.e<-scores(mod.mds.early,display="sites",choices=2)
+tplots.mod.e<-mod.data.early[,2]
+tplot_levels_mod_e<-levels(tplots.mod.e)
+spscoresall.mod.e<-data.frame(tplots.mod.e,spscores1.mod.e,spscores2.mod.e)
+
+############################
+#Indicator species for early MODERATE#
+############################
+mod.trt.early <- mod.data.early %>%
+  unite(treatment, c(burn, graze), remove=FALSE, sep = " ")
+library(indicspecies)
+mod_trt_isa_early = multipatt(cover.mod.early, mod.trt.early$treatment, control=how(nperm=999))
+summary(mod_trt_isa_early)
+
+#make nicer plot colored based on burn/graze, shapes on year
+#moderate
+species.e<-as.data.frame(mod.mds.early$species) 
+species.e$name<-row.names(species.e)
+#store custom transparent color 
+mycol1<- rgb(0, 0, 255, max = 255, alpha = 0, names = "blue50")
+spc.e<- species.e %>% mutate(color = mycol1, 
+                         color = ifelse(name == "Trifolium depauperatum", name=="Crassula connata", name=="Calandrinia ciliata", name=="Poa secunda ssp. secunda", name=="Festuca bromoides",name=="Koeleria macrantha", name=="Galium aparine", name == "Rigiopappus leptoclodus", "red", 
+                                        ifelse(name=="Festuca myuros", name=="Layia gaillardiodes", "orange",
+                                               ifelse(name=="Epilobium sp." | name=="Chlorogalum pomeridianum" |name=="Sanicula bipinnatifida"|name=="Trifolium willdenovii",name=="Triteleia laxa", name=="Allium serra", "forestgreen", 
+                                                      ifelse(name=="Plantago erecta"|name=="Lasthenia californica"|name=="Aphanes occidentalis"|name=="Erodium cicutarium"|name=="Gilia tricolor"|name=="Lepidium nitidum", name=="Astragalus gambellianus",name=="Hemizonia congesta", name=="Castilleja densiflora", name=="Microseris douglasii", "magenta", 
+                                                             ifelse(name=="Brodiaea spp."|name=="Hordeum murinum ssp. leporinum"|name=="Eschscholzia californica"|name=="Muilla maritima", "blue",
+                                                                    ifelse(name=="Festuca perennis", "green", color)))))))
+
+cols1.e<-mod.data.early %>% dplyr::select(burn, graze) %>% mutate(color = "forestgreen", 
+                                                                  color = ifelse(burn == "burned" & graze=="grazed", "red",
+                                                                                 ifelse(burn=="burned" & graze =="ungrazed", "orange",
+                                                                                        ifelse(burn=="unburned" & graze=="graze", "purple", color)))) #colors based on burn trt
+Lcols.e <- rep(c("orange", "Red", "forestgreen","yellow4")) #colors for the legend
+shapes.e <- mod.data.early %>% dplyr::select(year) %>%
+  mutate(shape = 0, shape = ifelse(year == "2005", 16, ifelse(year=="2006", 17, ifelse(year=="2007", 8,
+                                                                                       ifelse(year=="2008", 15, shape))))) #shapes based on grazing 
+Lshapes.e <-rep(c(16,17,8,15))#shapes for legend
+#make the plot
+mod.plot.e <- ordiplot(gb.mds.early, choices=c(1,2), ylim=c(-0.4, 0.4), type = "none")   #Set up the plot
+points(spscoresall.mod.e$NMDS1,spscoresall.mod.e$NMDS2,col=cols1.e$color,pch=shapes.e$shape) 
+#plot(envvec.nms.gb, col="green")
+text(species.e$MDS1,species.e$MDS2, cex=0.9, col=spc.e$color, label=species.e$name) #label species
+#legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+legend("topright",legend=levels(as.factor(shapes.e$year)), col="black", pch=Lshapes.e, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+
+#make nicer plot colored based on thermal, shapes on pre/post fire
+#help(ordiplot)
+#first, set colors and shapes
+cols2.e<- all.data.early %>% dplyr::select(thermal) %>% mutate(color = "black", 
+                                                               color = ifelse(thermal == "cool", "purple", 
+                                                                              ifelse(thermal=="moderate", "orange", 
+                                                                                     ifelse(thermal=="very cool", "blue",
+                                                                                            ifelse(thermal=="very warm", "red", color))))) #colors based on thermal group
+Lcols.e2 <- rep(c("purple", "orange", "blue","red","black")) #colors for the legend
+shapes.e <- all.data.early %>% dplyr::select(year) %>%
+  mutate(shape = 0, shape = ifelse(year == "2005", 16, ifelse(year=="2006", 17, ifelse(year=="2007", 18,
+                                                                                       ifelse(year=="2008", 15, shape))))) #shapes based on grazing 
+Lshapes.e <-rep(c(16,17,18,15))#shapes for legend
+#make the plot
+gb.plot.e <- ordiplot(gb.mds.early, choices=c(1,2), type = "none")   #Set up the plot
+points(spscoresall.gb.e$NMDS1,spscoresall.gb.e$NMDS2,col=cols2.e$color,pch=shapes.e$shape) 
+#plot(envvec.nms.gb, col="green")
+#text(gb.mds, display = "species", cex=0.5, col="grey30") #label species
+legend("bottomright",legend=levels(as.factor(cols2.e$thermal)), col=Lcols.e2, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+legend("topright",legend=levels(as.factor(shapes.e$year)), col="black", pch=Lshapes.e, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+
+
+###MODERATE#####
+###late years####
+#create wide data, first filter so year is 2005 to 2008
+mod.data.late<- all.dat %>% dplyr::select(-X1, -spcode) %>% filter(year>2008 & year < 2013) %>% filter(thermal=="moderate") %>% spread(spname, cover)
+mod.data.late[is.na(mod.data.late)] <- 0 #replace NAs with 0 (species not counted in plots have NAs when wide dataset created)
+
+#Import environmental data - NADP pinnacles deposition data and NOAA San Jose temperature data
+env <- read_csv(paste(datpath_clean, "/NTN-CA66-deposition.csv", sep=""))
+env<-env %>% rename(year=yr) %>% filter(year>2008 & year < 2013)
+temp <- read_csv(paste(datpath_clean, "/san_jose_clim.csv", sep=""),skip=9)
+temp <- temp %>% rename(year=DATE, temp=TAVG) %>% filter(year>2008 & year <2012) %>% dplyr::select(year, temp)
+env<-merge(env,temp)
+
+#merge env to match full data
+mod.env.late<-merge(env,mod.data.late) %>% dplyr::select(NH4, NO3, totalN, ppt, temp)
+
+#check count of graze and burn factor
+mod.data.late %>% 
+  group_by(graze, burn) %>%
+  summarise(no_rows = length(graze))
+
+plotnames<-mod.data.late[,1]
+cover.mod.late<- mod.data.late %>% dplyr::select(-c(1:5)) #wide data with ID columns removed, only species/cover for NMDS
+rownames(cover.mod.late)<-plotnames
+
+#check for empty rows
+cover.Biodrop.mod.late<-cover.mod.late[rowSums(cover.mod.late[, (1:156)]) ==0, ] #if no empty rows, next step not needed
+#cover.Biodrop.gb<-cover.gb[rowSums(cover.gb[, (1:157)])  >0 ]#remove empty rows
+
+######################
+#NMDS
+######################
+#make bray-curtis dissimilarity matrix
+mod.bcd.late <- vegdist(cover.mod.late)
+
+mod.mds.late<-metaMDS(mod.bcd.late , trace = TRUE, autotransform=T, trymax=100, k=2) #runs several with different starting configurations
+#trace= TRUE will give output for step by step what its doing
+#default is 2 dimensions, can put k=4 for 4 dimensions
+mod.mds.late #no solution reached
+summary(mod.mds.late)
+
+#quick plot of results
+stressplot(mod.mds.late, mod.bcd.late) #stressplot to show fit
+ordiplot(mod.mds.late)
+
+#store scores in new dataframe
+spscores1.mod.l<-scores(mod.mds.late,display="sites",choices=1)
+spscores2.mod.l<-scores(mod.mds.late,display="sites",choices=2)
+tplots.mod.l<-mod.data.late[,2]
+tplot_levels_mod_l<-levels(tplots.mod.l)
+spscoresall.mod.l<-data.frame(tplots.mod.l,spscores1.mod.l,spscores2.mod.l)
+
+############################
+#Indicator species for late MODERATE#
+############################
+mod.trt.late <- mod.data.late %>%
+  unite(treatment, c(burn, graze), remove=FALSE, sep = " ")
+library(indicspecies)
+mod_trt_isa_late = multipatt(cover.mod.late, mod.trt.late$treatment, control=how(nperm=999))
+summary(mod_trt_isa_late)
+
+#make  plot colored based on burn/graze, shapes on year
+cols1.l<-mod.data.late %>% dplyr::select(burn, graze) %>% mutate(color = "forestgreen", 
+                                                                 color = ifelse(burn == "burned" & graze=="grazed", "red",
+                                                                                ifelse(burn=="burned" & graze =="ungrazed", "orange",
+                                                                                       ifelse(burn=="unburned" & graze=="graze", "purple", color)))) #colors based on burn trt
+Lcols.l <- rep(c("orange", "Red", "forestgreen","yellow4")) #colors for the legend
+shapes.l <- mod.data.late %>% dplyr::select(year) %>%
+  mutate(shape = 0, shape = ifelse(year=="2009", 19, ifelse(year=="2010",2, 
+                                                           ifelse(year=="2011", 5, shape)))) #shapes based on grazing 
+Lshapes.l <-rep(c(19,2,5, 0))#shapes for legend
+#make the plot
+mod.plot.l <- ordiplot(mod.mds.late, choices=c(1,2), xlim=c(-0.015, 0.015), type = "none")   #Set up the plot
+points(spscoresall.mod.l$NMDS1,spscoresall.mod.l$NMDS2,col=cols1.l$color,pch=shapes.l$shape) 
+#plot(envvec.nms.gb, col="green")
+#text(gb.mds, display = "species", cex=0.5, col="grey30") #label species
+#legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+legend("topleft",legend=levels(as.factor(shapes.l$year)), col="black", pch=Lshapes.l, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 
 
 ###late years####
 #create wide data, first filter so year is 2005 to 2008
-all.data.late<- all.dat %>% dplyr::select(-X1, -spcode) %>% filter(year>2008 & year < 2012) %>% spread(spname, cover)
+all.data.late<- all.dat %>% dplyr::select(-X1, -spcode) %>% filter(year>2008 & year < 2013) %>% spread(spname, cover)
 all.data.late[is.na(all.data.late)] <- 0 #replace NAs with 0 (species not counted in plots have NAs when wide dataset created)
 
 #Import environmental data - NADP pinnacles deposition data and NOAA San Jose temperature data
 env <- read_csv(paste(datpath_clean, "/NTN-CA66-deposition.csv", sep=""))
-env<-env %>% rename(year=yr) %>% filter(year>2008 & year < 2012)
+env<-env %>% rename(year=yr) %>% filter(year>2008 & year < 2013)
 temp <- read_csv(paste(datpath_clean, "/san_jose_clim.csv", sep=""),skip=9)
 temp <- temp %>% rename(year=DATE, temp=TAVG) %>% filter(year>2008 & year <2012) %>% dplyr::select(year, temp)
 env<-merge(env,temp)
@@ -286,7 +560,7 @@ all.env.late<-merge(env,all.data.late) %>% dplyr::select(NH4, NO3, totalN, ppt, 
 
 #check count of thermal factor
 all.data.late %>% 
-  group_by(thermal) %>%
+  group_by(thermal, burn, graze) %>%
   summarise(no_rows = length(thermal)) 
 
 #check count of graze and burn factor
@@ -294,16 +568,12 @@ all.data.late %>%
   group_by(graze, burn) %>%
   summarise(no_rows = length(graze))
 
-
-str(all.data.late)
-
-all.data.late$ID <- seq.int(nrow(all.data.late))
 plotnames<-all.data.late[,1]
 cover.gb.late<- all.data.late %>% dplyr::select(-c(1:5)) #wide data with ID columns removed, only species/cover for NMDS
 rownames(cover.gb.late)<-plotnames
 
 #check for empty rows
-cover.Biodrop.gb.late<-cover.gb.late[rowSums(cover.gb.late[, (1:157)]) ==0, ] #if no empty rows, next step not needed
+cover.Biodrop.gb.late<-cover.gb.late[rowSums(cover.gb.late[, (1:156)]) ==0, ] #if no empty rows, next step not needed
 #cover.Biodrop.gb<-cover.gb[rowSums(cover.gb[, (1:157)])  >0 ]#remove empty rows
 
 #if needed, relativize by row or column or calculate presence/absence
@@ -322,7 +592,7 @@ gb.bcd.late <- vegdist(cover.gb.late)
 gb.mds.late<-metaMDS(gb.bcd.late , trace = TRUE, autotransform=T, trymax=100, k=3) #runs several with different starting configurations
 #trace= TRUE will give output for step by step what its doing
 #default is 2 dimensions, can put k=4 for 4 dimensions
-gb.mds.late #solution did not converge after 100 tries
+gb.mds.late #no solution reached
 summary(gb.mds.late)
 
 #quick plot of results
@@ -342,7 +612,7 @@ tplots.gb.l<-all.data.late[,2]
 tplot_levels_gb_l<-levels(tplots.gb.l)
 spscoresall.gb.l<-data.frame(tplots.gb.l,spscores1.gb.l,spscores2.gb.l)
 
-#make nicer plot colored based on thermal, shapes on pre/post fire
+#make nicer plot colored based on burn/graZE, shapes on YEAR
 #help(ordiplot)
 #first, set colors and shapes
 cols1.l<-all.data.late %>% dplyr::select(burn, graze) %>% mutate(color = "forestgreen", 
@@ -351,20 +621,18 @@ cols1.l<-all.data.late %>% dplyr::select(burn, graze) %>% mutate(color = "forest
                                                                                        ifelse(burn=="unburned" & graze=="graze", "purple", color)))) #colors based on burn trt
 Lcols.l <- rep(c("orange", "Red", "forestgreen","yellow4")) #colors for the legend
 shapes.l <- all.data.late %>% dplyr::select(year) %>%
-  mutate(shape = 0, shape = ifelse(year=="2009", 1, ifelse(year=="2010",2, 
+  mutate(shape = 0, shape = ifelse(year=="2009", 19, ifelse(year=="2010",2, 
                                                            ifelse(year=="2011", 5, shape)))) #shapes based on grazing 
-Lshapes.l <-rep(c(1,2,5))#shapes for legend
+Lshapes.l <-rep(c(19,2,5, 0))#shapes for legend
 #make the plot
-gb.plot.l <- ordiplot(gb.mds.late, choices=c(1,2), type = "none")   #Set up the plot
+gb.plot.l <- ordiplot(gb.mds.late, choices=c(1,2), xlim=c(-0.2, 0.2), type = "none")   #Set up the plot
 points(spscoresall.gb.l$NMDS1,spscoresall.gb.l$NMDS2,col=cols1.l$color,pch=shapes.l$shape) 
 #plot(envvec.nms.gb, col="green")
 #text(gb.mds, display = "species", cex=0.5, col="grey30") #label species
-legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+#legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 legend("topright",legend=levels(as.factor(shapes.l$year)), col="black", pch=Lshapes.l, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 
-#make nicer plot colored based on thermal, shapes on pre/post fire
-#help(ordiplot)
-#first, set colors and shapes
+#make plot colored based on thermal, shapes on year
 cols2.l<- all.data.late %>% dplyr::select(thermal) %>% mutate(color = "black", 
                                                               color = ifelse(thermal == "cool", "purple", 
                                                                              ifelse(thermal=="moderate", "orange", 
@@ -372,16 +640,18 @@ cols2.l<- all.data.late %>% dplyr::select(thermal) %>% mutate(color = "black",
                                                                                            ifelse(thermal=="very warm", "red", color))))) #colors based on thermal group
 Lcols.l2 <- rep(c("purple", "orange", "blue","red","black")) #colors for the legend
 shapes.l <- all.data.late %>% dplyr::select(year) %>%
-  mutate(shape = 0, shape = ifelse(year=="2009", 1, ifelse(year=="2010",2, 
+  mutate(shape = 0, shape = ifelse(year=="2009", 19, ifelse(year=="2010",2, 
                                                            ifelse(year=="2011", 5, shape)))) #shapes based on grazing 
-Lshapes.l <-rep(c(1,2,5))#shapes for legend
+Lshapes.l <-rep(c(19,2,5,0))#shapes for legend
 #make the plot
-gb.plot.l <- ordiplot(gb.mds.late, choices=c(1,2), type = "none")   #Set up the plot
+gb.plot.l <- ordiplot(gb.mds.late, choices=c(1,2),xlim=c(-0.2, 0.2), type = "none")   #Set up the plot
 points(spscoresall.gb.l$NMDS1,spscoresall.gb.l$NMDS2,col=cols2.l$color,pch=shapes.l$shape) 
 #plot(envvec.nms.gb, col="green")
 #text(gb.mds, display = "species", cex=0.5, col="grey30") #label species
-legend("bottomright",legend=levels(as.factor(cols2.l$thermal)), col=Lcols.l2, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
-legend("topright",legend=levels(as.factor(shapes.l$year)), col="black", pch=Lshapes.l, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+legend("bottomright",legend=levels(as.factor(cols2.l$thermal)), col=Lcols.l2, pch=15, cex=0.9,inset=0.08,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+legend("topright",legend=levels(as.factor(shapes.l$year)), col="black", pch=Lshapes.l, cex=0.9,inset=0.08,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+
+
 
 
 ########################
@@ -600,9 +870,20 @@ legend("topleft",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex
 legend("bottomleft",legend=levels(as.factor(shapes$graze)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 
 #moderate
+species<-as.data.frame(gb.mds.mod06$species) 
+species$name<-row.names(species)
+#store custom transparent color 
+mycol1<- rgb(0, 0, 255, max = 255, alpha = 0, names = "blue50")
+spc<- species %>% mutate(color = mycol1, 
+         color = ifelse(name == "Rigiopappus leptoclodus", "red", 
+                ifelse(name=="Festuca myuros", "orange",
+                ifelse(name=="Festuca perennis" | name=="Sanicula bipinnatifida" |name=="Trifolium willdenovii"|name=="Triteleia laxa", "black", 
+                ifelse(name=="Plantago erecta"|name=="Lasthenia californica"|name=="Aphanes occidentalis"|name=="Erodium cicutarium"|name=="Gilia tricolor"|name=="Lepidium nitidum", "magenta", 
+                ifelse(name=="Brodiaea spp."|name=="Hordeum murinum ssp. leporinum"|name=="Eschscholzia californica"|name=="Muilla maritima", "blue",color))))))
+
 bio.plot <- ordiplot(gb.mds.mod06, choices=c(1,2), type = "none")   #Set up the plot
 points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols1$color,pch=shapes$shape) 
-#text(gb.mds.06, display = "species", cex=0.5, col="grey30") #label species
+text(species$MDS1,species$MDS2, cex=0.9, col=spc$color, label=species$name) #label species
 legend("topleft",legend=levels(as.factor(cols1$burn)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 legend("bottomleft",legend=levels(as.factor(shapes$graze)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 
@@ -614,6 +895,15 @@ trt.dat.06 <- dat.06 %>%
 library(indicspecies)
 trt_isa_06 = multipatt(cover.gb.06, trt.dat.06$treatment, control=how(nperm=999))
 summary(trt_isa_06)
+
+############################
+#Indicator species for 2006 MODERATE#
+############################
+mod.trt.dat.06 <- mod.dat.06 %>%
+  unite(treatment, c(burn, graze), remove=FALSE, sep = " ")
+library(indicspecies)
+mod_trt_isa_06 = multipatt(cover.gb.mod06, mod.trt.dat.06$treatment, control=how(nperm=999))
+summary(mod_trt_isa_06)
 
 ########################
 #####NMDS for 2005######
@@ -815,7 +1105,86 @@ legend("bottomleft",legend=levels(as.factor(shapes$graze)), col="black", pch=Lsh
 ############################
 #Indicator species for 2005#
 ############################
+trt.dat.05 <- dat.05 %>%
+  unite(treatment, c(burn, graze), remove=FALSE, sep = " ")
 library(indicspecies)
-trt_isa_05 = multipatt(cover.gb.05, dat.05$graze*dat.06$burn, control=how(nperm=999))
+trt_isa_05 = multipatt(cover.gb.05, trt.dat.05$treatment, control=how(nperm=999))
 summary(trt_isa_05)
+
+
+#####################
+#successional vectors on summarized MODERATE data
+####################
+mod_yr<-all.dat %>% group_by(thermal, burn, graze, year, spname) %>% filter(thermal == "moderate", year>2005 & year<2013) %>% 
+  summarize(mean=mean(cover))%>% arrange(burn)%>%  arrange(graze)%>% arrange(year)%>%
+  spread(spname, mean) 
+mod_yr[is.na(mod_yr)] <- 0 
+
+cover.yr <- mod_yr %>% ungroup %>% dplyr::select(-thermal,-burn,-graze, -year)
+
+#merge env to match full data
+yr.env<-merge(env,mod_yr) %>% dplyr::select(NH4, NO3, totalN, ppt, temp)
+
+#make bray-curtis dissimilarity matrix
+vec.bcd <- vegdist(cover.yr)
+
+#NMDS 
+vec.mds<-metaMDS(cover.yr, trace = TRUE, autotransform = T, trymax=100, k=2) #runs several with different starting configurations
+#trace= TRUE will give output for step by step what its doing
+#default is 2 dimensions, can put k=4 for 4 dimensions
+vec.mds #solution converged after 20 tries
+summary(vec.mds)
+
+#quick plot of results
+stressplot(vec.mds, vec.bcd) #stressplot to show fit
+ordiplot(vec.mds)
+
+#overlay environmental variables, only showing significant drivers
+envvec.vec<-envfit(vec.mds,yr.env, na.rm=TRUE)
+envvec.vec
+plot(vec.mds)
+plot(envvec.vec, p.max=0.05) #add vectors to previous ordination
+
+#store scores in new dataframe
+spscores1.vec<-scores(vec.mds,display="sites",choices=1)
+spscores2.vec<-scores(vec.mds,display="sites",choices=2)
+tplots<-mod_yr[,2]
+tplot_levels<-levels(tplots$burn)
+spscoresall.vec<-data.frame(tplots,spscores1.vec,spscores2.vec)
+
+#make plot to show successional vectors
+#first, set colors and shapes
+mod_yr <- mod_yr %>%
+  unite(treatment, c(burn, graze), remove=FALSE, sep = " ")
+cols.yr<- mod_yr %>% dplyr::select(burn, graze) %>% mutate(color = "forestgreen", 
+                                                           color = ifelse(burn == "burned" & graze=="grazed", "red",
+                                                                          ifelse(burn=="burned" & graze =="ungrazed", "orange",
+                                                                                 ifelse(burn=="unburned" & graze=="graze", "purple", color)))) #colors based on burn trt
+Lcols.yr <- rep(c("forestgreen", "red", "orange", "purple")) #colors for the legend
+#shapes.yr <- dat_yr%>% dplyr::select(year) %>%
+  mutate(shape = 1, shape = ifelse(year == "2004", 8, 
+                                   ifelse(year>="2005" & year<"2014", 16,
+                                          ifelse(year>="2014", 15,shape)))) #shapes based on year 
+#shapes.yr<-shapes.yr %>% mutate(time="Pre-Fire", 
+                                #time= ifelse(year==2004, "Fire",
+                                             #ifelse(year>=2005&year<2014, "Post-Fire",
+                                                    #ifelse(year>=2014, "2014 and after",time)))) 
+#Lshapes <-rep(c(15,8,16,1))#shapes for legend
+#make the plot
+vec.plot <- ordiplot(vec.mds, choices=c(1,2), type = "none")   #Set up the plot
+points(spscoresall.vec$NMDS1,spscoresall.vec$NMDS2, col=cols.yr$color,pch=19) 
+plot(envvec.vec, p.max=0.05, col="green")
+ordiarrows(vec.mds, groups=mod_yr$treatment, order.by=mod_yr$year, label=F, col="black")
+#text(spp.mds, display = "species", cex=0.5, col="grey30") #label species
+legend("topleft",legend=levels(as.factor(cols.yr$thermal)), col=Lcols.yr, pch=15, cex=0.9,inset=0.07,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+legend("topright",legend=levels(as.factor(shapes$time)), col="black", pch=Lshapes, cex=0.9,inset=0.07,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+
+#indicator species for thermal
+vec_isa = multipatt(cover.yr, dat_yr$thermal, control=how(nperm=999))
+summary(vec_isa)
+
+vec_yr_isa = multipatt(cover.yr, dat_yr$year, control=how(nperm=999))
+summary(vec_yr_isa)
+
+
 
