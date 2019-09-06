@@ -401,9 +401,29 @@ tplots.mod.e<-mod.data.early[,2]
 tplot_levels_mod_e<-levels(tplots.mod.e)
 spscoresall.mod.e<-data.frame(tplots.mod.e,spscores1.mod.e,spscores2.mod.e)
 
-#make nicer plot colored based on thermal, shapes on pre/post fire
-#help(ordiplot)
-#first, set colors and shapes
+############################
+#Indicator species for early MODERATE#
+############################
+mod.trt.early <- mod.data.early %>%
+  unite(treatment, c(burn, graze), remove=FALSE, sep = " ")
+library(indicspecies)
+mod_trt_isa_early = multipatt(cover.mod.early, mod.trt.early$treatment, control=how(nperm=999))
+summary(mod_trt_isa_early)
+
+#make nicer plot colored based on burn/graze, shapes on year
+#moderate
+species.e<-as.data.frame(mod.mds.early$species) 
+species.e$name<-row.names(species.e)
+#store custom transparent color 
+mycol1<- rgb(0, 0, 255, max = 255, alpha = 0, names = "blue50")
+spc.e<- species.e %>% mutate(color = mycol1, 
+                         color = ifelse(name == "Trifolium depauperatum", name=="Crassula connata", name=="Calandrinia ciliata", name=="Poa secunda ssp. secunda", name=="Festuca bromoides",name=="Koeleria macrantha", name=="Galium aparine", name == "Rigiopappus leptoclodus", "red", 
+                                        ifelse(name=="Festuca myuros", name=="Layia gaillardiodes", "orange",
+                                               ifelse(name=="Epilobium sp." | name=="Chlorogalum pomeridianum" |name=="Sanicula bipinnatifida"|name=="Trifolium willdenovii",name=="Triteleia laxa", name=="Allium serra", "forestgreen", 
+                                                      ifelse(name=="Plantago erecta"|name=="Lasthenia californica"|name=="Aphanes occidentalis"|name=="Erodium cicutarium"|name=="Gilia tricolor"|name=="Lepidium nitidum", name=="Astragalus gambellianus",name=="Hemizonia congesta", name=="Castilleja densiflora", name=="Microseris douglasii", "magenta", 
+                                                             ifelse(name=="Brodiaea spp."|name=="Hordeum murinum ssp. leporinum"|name=="Eschscholzia californica"|name=="Muilla maritima", "blue",
+                                                                    ifelse(name=="Festuca perennis", "green", color)))))))
+
 cols1.e<-mod.data.early %>% dplyr::select(burn, graze) %>% mutate(color = "forestgreen", 
                                                                   color = ifelse(burn == "burned" & graze=="grazed", "red",
                                                                                  ifelse(burn=="burned" & graze =="ungrazed", "orange",
@@ -417,7 +437,7 @@ Lshapes.e <-rep(c(16,17,8,15))#shapes for legend
 mod.plot.e <- ordiplot(gb.mds.early, choices=c(1,2), ylim=c(-0.4, 0.4), type = "none")   #Set up the plot
 points(spscoresall.mod.e$NMDS1,spscoresall.mod.e$NMDS2,col=cols1.e$color,pch=shapes.e$shape) 
 #plot(envvec.nms.gb, col="green")
-#text(gb.mds, display = "species", cex=0.5, col="grey30") #label species
+text(species.e$MDS1,species.e$MDS2, cex=0.9, col=spc.e$color, label=species.e$name) #label species
 #legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 legend("topright",legend=levels(as.factor(shapes.e$year)), col="black", pch=Lshapes.e, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 
@@ -495,9 +515,16 @@ tplots.mod.l<-mod.data.late[,2]
 tplot_levels_mod_l<-levels(tplots.mod.l)
 spscoresall.mod.l<-data.frame(tplots.mod.l,spscores1.mod.l,spscores2.mod.l)
 
-#make nicer plot colored based on thermal, shapes on pre/post fire
-#help(ordiplot)
-#first, set colors and shapes
+############################
+#Indicator species for late MODERATE#
+############################
+mod.trt.late <- mod.data.late %>%
+  unite(treatment, c(burn, graze), remove=FALSE, sep = " ")
+library(indicspecies)
+mod_trt_isa_late = multipatt(cover.mod.late, mod.trt.late$treatment, control=how(nperm=999))
+summary(mod_trt_isa_late)
+
+#make  plot colored based on burn/graze, shapes on year
 cols1.l<-mod.data.late %>% dplyr::select(burn, graze) %>% mutate(color = "forestgreen", 
                                                                  color = ifelse(burn == "burned" & graze=="grazed", "red",
                                                                                 ifelse(burn=="burned" & graze =="ungrazed", "orange",
@@ -843,9 +870,20 @@ legend("topleft",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex
 legend("bottomleft",legend=levels(as.factor(shapes$graze)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 
 #moderate
+species<-as.data.frame(gb.mds.mod06$species) 
+species$name<-row.names(species)
+#store custom transparent color 
+mycol1<- rgb(0, 0, 255, max = 255, alpha = 0, names = "blue50")
+spc<- species %>% mutate(color = mycol1, 
+         color = ifelse(name == "Rigiopappus leptoclodus", "red", 
+                ifelse(name=="Festuca myuros", "orange",
+                ifelse(name=="Festuca perennis" | name=="Sanicula bipinnatifida" |name=="Trifolium willdenovii"|name=="Triteleia laxa", "black", 
+                ifelse(name=="Plantago erecta"|name=="Lasthenia californica"|name=="Aphanes occidentalis"|name=="Erodium cicutarium"|name=="Gilia tricolor"|name=="Lepidium nitidum", "magenta", 
+                ifelse(name=="Brodiaea spp."|name=="Hordeum murinum ssp. leporinum"|name=="Eschscholzia californica"|name=="Muilla maritima", "blue",color))))))
+
 bio.plot <- ordiplot(gb.mds.mod06, choices=c(1,2), type = "none")   #Set up the plot
 points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols1$color,pch=shapes$shape) 
-#text(gb.mds.06, display = "species", cex=0.5, col="grey30") #label species
+text(species$MDS1,species$MDS2, cex=0.9, col=spc$color, label=species$name) #label species
 legend("topleft",legend=levels(as.factor(cols1$burn)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 legend("bottomleft",legend=levels(as.factor(shapes$graze)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 
@@ -857,6 +895,15 @@ trt.dat.06 <- dat.06 %>%
 library(indicspecies)
 trt_isa_06 = multipatt(cover.gb.06, trt.dat.06$treatment, control=how(nperm=999))
 summary(trt_isa_06)
+
+############################
+#Indicator species for 2006 MODERATE#
+############################
+mod.trt.dat.06 <- mod.dat.06 %>%
+  unite(treatment, c(burn, graze), remove=FALSE, sep = " ")
+library(indicspecies)
+mod_trt_isa_06 = multipatt(cover.gb.mod06, mod.trt.dat.06$treatment, control=how(nperm=999))
+summary(mod_trt_isa_06)
 
 ########################
 #####NMDS for 2005######
