@@ -1005,9 +1005,9 @@ Lshapes <-rep(c(8,17))#shapes for legend
 
 
 #make the plot
-bio.plot <- ordiplot(gb.mds.06, choices=c(1,2), type = "none")   #Set up the plot
+bio.plot <- ordiplot(gb.mds.mod06, choices=c(1,2), type = "none", xlim = c(-3,3), ylim = c(-1,1))   #Set up the plot
 points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols1$color,pch=shapes$shape) 
-plot(envvec.nms, col="green")
+#plot(envvec.nms, col="green")
 #text(gb.mds.06, display = "species", cex=0.5, col="grey30") #label species
 legend("topleft",legend=levels(as.factor(cols1$burn)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 legend("bottomleft",legend=levels(as.factor(shapes$graze)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
@@ -1202,9 +1202,9 @@ plot(gb.mds.05)
 plot(envvec.nms) #add vectors to previous ordination
 
 #store scores in new dataframe
-spscores1<-scores(gb.mds.mod05,display="sites",choices=1)
-spscores2<-scores(gb.mds.mod05,display="sites",choices=2)
-tplots<-mod.dat.05[,4]
+spscores1<-scores(gb.mds.05,display="sites",choices=1)
+spscores2<-scores(gb.mds.05,display="sites",choices=2)
+tplots<-dat.05[,4]
 tplot_levels<-levels(tplots)
 spscoresall<-data.frame(tplots,spscores1,spscores2)
 
@@ -1239,7 +1239,7 @@ shapes <- mod.dat.05 %>%
                                     ifelse(graze == "ungrazed", 17,shape))) #shapes based on year 
 Lshapes <-rep(c(8,17))#shapes for legend
 #make the plot
-bio.plot <- ordiplot(gb.mds.mod05, choices=c(1,2), type = "none")   #Set up the plot
+bio.plot <- ordiplot(gb.mds.05, choices=c(1,2), type = "none", xlim = c(-3.0,2.0), ylim = c(-1.0,1.5))   #Set up the plot
 points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols1$color,pch=shapes$shape) 
 #text(gb.mds.06, display = "species", cex=0.5, col="grey30") #label species
 legend("topleft",legend=levels(as.factor(cols1$burn)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
@@ -1256,7 +1256,15 @@ cols1<- dat.05 %>%
                                ifelse(thermal=="moderate", "orange", 
                                       ifelse(thermal=="warm", "yellow",     
                                              ifelse(thermal=="very warm", "red", color))))))
+#moderate
+mycol1<- rgb(0, 0, 255, max = 255, alpha = 0, names = "blue50")
+cols1<- dat.05 %>% 
+  dplyr::select(thermal) %>% 
+  mutate(color = mycol1, 
+         color = ifelse(thermal=="moderate", "orange", color))
+                                    
 Lcols <- rep(c("Purple", "Orange", "Blue", "Red", "Yellow"))
+Lcols <- rep(c("Orange"))
 
 shapes <- dat.05 %>% 
   dplyr::select(graze) %>%
@@ -1272,9 +1280,9 @@ Lshapes <-rep(c(8,17))#shapes for legend
 #make the plot
 bio.plot <- ordiplot(gb.mds.05, choices=c(1,2), type = "none")   #Set up the plot
 points(spscoresall$NMDS1,spscoresall$NMDS2,col=cols1$color,pch=shapes$shape) 
-plot(envvec.nms, col="green")
+#plot(envvec.nms, col="green")
 #text(gb.mds.06, display = "species", cex=0.5, col="grey30") #label species
-legend("topleft",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+#legend("topleft",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 legend("bottomleft",legend=levels(as.factor(shapes$graze)), col="black", pch=Lshapes, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 
 ############################

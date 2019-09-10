@@ -15,7 +15,8 @@ names(dat)[1:2] = c("quadrat", "site")
 
 
 dat2001env <- dat %>%
-  select(quadrat, site, GOPHER, BARE, ROCK, LITTER, COWPIE)
+  select(quadrat, site, GOPHER, BARE, ROCK, LITTER, COWPIE) %>%
+  mutate(year = 2001)
 
 dat2001 <- dat %>%
   select(-c(GOPHER, BARE, ROCK, LITTER, COWPIE)) %>%
