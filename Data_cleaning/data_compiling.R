@@ -72,7 +72,7 @@ dat_2017 <- dat2017 %>%
 dat_2018 <- dat2018 %>%
   select(-transect)
 
-# append all the data 
+# append all the data for species
 alldat <- rbind(dat2001, dat2002, dat2003, dat2004, dat_2005, dat_2006, 
                 dat_2007, dat_2008, dat_2009, dat_2010, dat_2011, 
                 dat_2012, dat_2013, dat_2014, dat_2015, dat_2016, 
@@ -134,6 +134,65 @@ bugrcheck <- bugr %>%
 # print data frames
 write.csv(bugrcheck, "BUGRdatacheck.csv")
 write.csv(bugr, "bugrdat.csv")
+
+# remove column "transect" from 2005-2018 to use rbind
+dat_2005env <- dat2005env %>%
+  select(-transect)
+
+dat_2006env <- dat2006env %>%
+  select(-transect)
+
+dat_2007env <- dat2007env %>%
+  select(-transect)
+
+dat_2008env <- dat2008env %>%
+  select(-transect)
+
+dat_2009env <- dat2009env %>%
+  select(-transect)
+
+dat_2010env <- dat2010env %>%
+  select(-transect)
+
+dat_2011env <- dat2011env %>%
+  select(-transect)
+
+dat_2012env <- dat2012env %>%
+  select(-transect)
+
+dat_2013env <- dat2013env %>%
+  select(-transect)
+
+dat_2014env <- dat2014env %>%
+  select(-transect)
+
+dat_2015env <- dat2015env %>%
+  select(-transect)
+
+dat_2016env <- dat2016env %>%
+  select(-transect)
+
+dat_2017env <- dat2017env %>%
+  select(-transect)
+
+dat_2018env <- dat2018env %>%
+  select(-transect)
+
+#append all environmental data
+alldatenv <- rbind(dat2001env, dat2002env, dat2003env, dat2004env, dat_2005env, dat_2006env, 
+                dat_2007env, dat_2008env, dat_2009env, dat_2010env, dat_2011env, 
+                dat_2012env, dat_2013env, dat_2014env, dat_2015env, dat_2016env, 
+                dat_2017env, dat_2018env)
+alldatenv[is.na(alldatenv)] <- 0 
+alldatenvTH <- alldatenv %>%
+  filter(site == "TH"| site == "TH-BG"| site == "TH-BUG"| site == "TH-UBUG"| site == "PGE"|
+       site == "TH-MEC")
+
+# join alldatenvTH and quadkey for all data
+alldatenv <- inner_join(alldatenvTH, quadkey, by = "quadrat") %>%
+  select(quadratNew, site, GOPHER, BARE, ROCK, LITTER, COWPIE, year)
+
+write.csv(alldatenv, "envdat.csv")
 
 
 
