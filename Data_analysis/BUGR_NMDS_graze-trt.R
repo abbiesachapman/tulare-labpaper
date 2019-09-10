@@ -1,11 +1,12 @@
 ## Set your datpath!! (file in Data_cleaning)
-
 library(tidyverse)
 library(readr)
 library(vegan)
 library(MASS)
 library(dplyr)
 library(RVAideMemoire) #for posthoc tests on permanova
+library(indicspecies)
+library(gridExtra)
 
 # Import csv file, transform to wide data, call it data
 all.dat <- read_csv(paste(datpath_clean, "/alldatsptrt.csv", sep=""))
@@ -261,8 +262,8 @@ cover.Biodrop.gb.early<-cover.gb.early[rowSums(cover.gb.early[, (1:156)]) ==0, ]
 #cover.Biodrop.gb<-cover.gb[rowSums(cover.gb[, (1:157)])  >0 ]#remove empty rows
 
 #if needed, relativize by row or column or calculate presence/absence
-#cover.rowsums <- rowSums(cover.Bio [1:157])
-#cover.relrow <- data.frame(cover.Bio /cover.rowsums)
+cover.rowsums <- rowSums(cover.gb.early [1:156])
+cover.relrow <- data.frame(cover.gb.early /cover.rowsums)
 #cover.colmax<-sapply(cover.Bio ,max)
 #cover.relcolmax <- data.frame(sweep(cover.Bio ,2,cover.colmax,'/'))
 #cover.pa <- cover.Bio %>% mutate_each(funs(ifelse(.>0,1,0)), 1:57)
@@ -273,8 +274,8 @@ cover.Biodrop.gb.early<-cover.gb.early[rowSums(cover.gb.early[, (1:156)]) ==0, ]
 ######################
 #make bray-curtis dissimilarity matrix
 gb.bcd.early <- vegdist(cover.gb.early)
-
-gb.mds.early<-metaMDS(gb.bcd.early , trace = TRUE, autotransform=T, trymax=100, k=3) #runs several with different starting configurations
+gb.mds.early<-metaMDS(cover.gb.early, dist="bray", trace = TRUE, autotransform=T, trymax=100, k=4)
+#gb.mds.early<-metaMDS(gb.bcd.early , trace = TRUE, autotransform=T, trymax=100, k=3) #runs several with different starting configurations
 #trace= TRUE will give output for step by step what its doing
 #default is 2 dimensions, can put k=4 for 4 dimensions
 gb.mds.early #solution did not converge after 100 tries
@@ -386,7 +387,7 @@ cover.Biodrop.mod.early<-cover.mod.early[rowSums(cover.mod.early[, (1:156)]) ==0
 #make bray-curtis dissimilarity matrix
 mod.bcd.early <- vegdist(cover.mod.early)
 
-mod.mds.early<-metaMDS(mod.bcd.early , trace = TRUE, autotransform=T, trymax=100, k=2) #runs several with different starting configurations
+mod.mds.early<-metaMDS(mod.bcd.early , trace = TRUE, autotransform=T, trymax=100, k=3) #runs several with different starting configurations
 mod.mds.early #solution did not converge after 100 tries
 summary(mod.mds.early)
 
@@ -397,9 +398,11 @@ ordiplot(mod.mds.early)
 #store scores in new dataframe
 spscores1.mod.e<-scores(mod.mds.early,display="sites",choices=1)
 spscores2.mod.e<-scores(mod.mds.early,display="sites",choices=2)
-tplots.mod.e<-mod.data.early[,2]
+year<-mod.data.early[,5]
+treatment<-mod.data.early$treatment
 tplot_levels_mod_e<-levels(tplots.mod.e)
-spscoresall.mod.e<-data.frame(tplots.mod.e,spscores1.mod.e,spscores2.mod.e)
+spscoresall.mod.e<-data.frame(year,treatment,spscores1.mod.e,spscores2.mod.e)
+
 
 ############################
 #Indicator species for early MODERATE#
@@ -440,6 +443,178 @@ points(spscoresall.mod.e$NMDS1,spscoresall.mod.e$NMDS2,col=cols1.e$color,pch=sha
 text(species.e$MDS1,species.e$MDS2, cex=0.9, col=spc.e$color, label=species.e$name) #label species
 #legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 legend("topright",legend=levels(as.factor(shapes.e$year)), col="black", pch=Lshapes.e, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+
+mod.data.early <- mod.data.early %>%
+  unite(treatment, c(burn, graze), remove=FALSE, sep = " ")
+#create plot in ggplot 
+fig1b<-ggplot(subset(spscoresall.mod.e, year==2005), aes(x=NMDS1, y=NMDS2, col=treatment, shape=as.factor(year)))+
+  geom_point(cex=2)+
+  ggtitle("b) 2005")+
+  xlim(-0.4,0.4)+
+  ylim(-0.4,0.4)+
+  scale_shape_manual(values=c(16),guide = guide_legend(title = "Year"))+
+  scale_color_manual(values=c("red", "orange"), guide = guide_legend(title = "Treatment"), #change legend title
+                     labels=c("Burned & Grazed", "Burned & Ungrazed"))+ #change labels in the legend)+
+  theme_bw()+
+  theme(plot.title = element_text(color="black", size=14, face="bold.italic"))+
+  theme(legend.position="none")
+fig1b
+
+fig1c<-ggplot(subset(spscoresall.mod.e, year==2006), aes(x=NMDS1, y=NMDS2, col=treatment, shape=as.factor(year)))+
+  geom_point(cex=2)+
+  ggtitle("c) 2006")+
+  xlim(-0.4,0.4)+
+  ylim(-0.4,0.4)+
+  scale_shape_manual(values=c(17),guide = guide_legend(title = "Year"))+
+  scale_color_manual(values=c("red", "orange", "forestgreen"), guide = guide_legend(title = "Treatment"), #change legend title
+                     labels=c("Burned & Grazed", "Burned & Ungrazed", "Unburned & Ungrazed"))+ #change labels in the legend)+
+  theme_bw()+
+  theme(plot.title = element_text(color="black", size=14, face="bold.italic"))+
+  theme(legend.position="none")
+fig1c
+
+fig1d<-ggplot(subset(spscoresall.mod.e, year==2007), aes(x=NMDS1, y=NMDS2, col=treatment, shape=as.factor(year)))+
+  geom_point(cex=2)+
+  ggtitle("d)2007")+
+  xlim(-0.4,0.4)+
+  ylim(-0.4,0.4)+
+  scale_shape_manual(values=c(8),guide = guide_legend(title = "Year"))+
+  scale_color_manual(values=c("red", "orange", "forestgreen"), guide = guide_legend(title = "Treatment"), #change legend title
+                     labels=c("Burned & Grazed", "Burned & Ungrazed", "Unburned & Ungrazed"))+ #change labels in the legend)+
+  theme_bw()+
+  theme(legend.position="none")+
+  theme(plot.title = element_text(color="black", size=14, face="bold.italic"))
+fig1d
+
+fig1e<-ggplot(subset(spscoresall.mod.e, year==2008), aes(x=NMDS1, y=NMDS2, col=treatment, shape=as.factor(year)))+
+  geom_point(cex=2)+
+  ggtitle("e) 2008")+
+  xlim(-0.4,0.4)+
+  ylim(-0.4,0.4)+
+  scale_shape_manual(values=c(15),guide = guide_legend(title = "Year"))+
+  scale_color_manual(values=c("red", "orange","forestgreen"), guide = guide_legend(title = "Treatment"), #change legend title
+                     labels=c("Burned & Grazed", "Burned & Ungrazed", "Unburned & Ungrazed"))+ #change labels in the legend)+
+  theme_bw()+
+  theme(legend.position="none")+
+  theme(plot.title = element_text(color="black", size=14, face="bold.italic"))
+#theme(legend.position="bottom", legend.title=element_text(size=11), legend.text=element_text(size=10), axis.text=element_text(size=8), axis.title=element_text(size=11))+
+#theme(legend.background = element_rect(colour = 'black', fill = 'white', linetype='solid'))
+fig1e
+
+
+fig1f<-ggplot(spscoresall.mod.e, aes(x=NMDS1, y=NMDS2, col=mod.data.early$treatment, shape=as.factor(mod.data.early$year)))+
+  geom_point(cex=2)+
+  ggtitle("f)")+
+  xlim(-0.4,0.4)+
+  ylim(-0.4,0.4)+
+  scale_shape_manual(values=c(16,17,8,15),guide = guide_legend(title = "Year"))+
+  scale_color_manual(values=c("red", "orange","forestgreen"), guide = guide_legend(title = "Treatment"), #change legend title
+                     labels=c("Burned & Grazed", "Burned & Ungrazed", "Unburned & Ungrazed"))+ #change labels in the legend)+
+  theme_bw()+
+  theme(legend.position="none")+
+  theme(plot.title = element_text(color="black", size=14, face="bold.italic"))
+  #theme(legend.position="bottom", legend.title=element_text(size=11), legend.text=element_text(size=10), axis.text=element_text(size=8), axis.title=element_text(size=11))+
+  #theme(legend.background = element_rect(colour = 'black', fill = 'white', linetype='solid'))
+fig1f
+
+g_legend<-function(a.gplot){
+  tmp <- ggplot_gtable(ggplot_build(a.gplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)}
+
+mylegend<-g_legend(fig1f)
+
+#####################
+#successional vectors on summarized MODERATE data for burn (2005-2008)
+####################
+mod_yr_burn<-all.dat %>% group_by(thermal, burn, graze, year, spname) %>% filter(thermal == "moderate", year>2004 & year<2010) %>% 
+  summarize(mean=mean(cover))%>% arrange(burn)%>%  arrange(graze)%>% arrange(year)%>%
+  spread(spname, mean) 
+mod_yr_burn[is.na(mod_yr_burn)] <- 0 
+
+cover.yr <- mod_yr_burn %>% ungroup %>% dplyr::select(-thermal,-burn,-graze, -year)
+
+#merge env to match full data
+#yr.env<-merge(env,mod_yr) %>% dplyr::select(NH4, NO3, totalN, ppt, temp)
+
+#make bray-curtis dissimilarity matrix
+vec.bcd <- vegdist(cover.yr)
+
+#NMDS 
+vec.mds<-metaMDS(cover.yr, trace = TRUE, autotransform = T, trymax=100, k=2) #runs several with different starting configurations
+#trace= TRUE will give output for step by step what its doing
+#default is 2 dimensions, can put k=4 for 4 dimensions
+vec.mds #solution converged after 20 tries
+summary(vec.mds)
+
+#quick plot of results
+stressplot(vec.mds, vec.bcd) #stressplot to show fit
+ordiplot(vec.mds)
+
+#overlay environmental variables, only showing significant drivers
+#envvec.vec<-envfit(vec.mds,yr.env, na.rm=TRUE)
+#envvec.vec
+#plot(vec.mds)
+#plot(envvec.vec, p.max=0.05) #add vectors to previous ordination
+
+#store scores in new dataframe
+spscores1.vec<-scores(vec.mds,display="sites",choices=1)
+spscores2.vec<-scores(vec.mds,display="sites",choices=2)
+tplots<-mod_yr_burn[,2]
+tplot_levels<-levels(tplots$burn)
+spscoresall.vec<-data.frame(tplots,spscores1.vec,spscores2.vec)
+
+#make plot to show successional vectors
+#first, set colors and shapes
+mod_yr_burn <- mod_yr_burn %>%
+  unite(treatment, c(burn, graze), remove=FALSE, sep = " ")
+cols.yr<- mod_yr_burn %>% dplyr::select(burn, graze) %>% mutate(color = "forestgreen", 
+                                                                color = ifelse(burn == "burned" & graze=="grazed", "red",
+                                                                               ifelse(burn=="burned" & graze =="ungrazed", "orange",
+                                                                                      ifelse(burn=="unburned" & graze=="graze", "purple", color)))) #colors based on burn trt
+Lcols.yr <- rep(c( "red", "orange","forestgreen")) #colors for the legend
+#shapes.yr <- dat_yr%>% dplyr::select(year) %>%
+mutate(shape = 1, shape = ifelse(year == "2004", 8, 
+                                 ifelse(year>="2005" & year<"2014", 16,
+                                        ifelse(year>="2014", 15,shape)))) #shapes based on year 
+#shapes.yr<-shapes.yr %>% mutate(time="Pre-Fire", 
+#time= ifelse(year==2004, "Fire",
+#ifelse(year>=2005&year<2014, "Post-Fire",
+#ifelse(year>=2014, "2014 and after",time)))) 
+#Lshapes <-rep(c(15,8,16,1))#shapes for legend
+#make the plot
+vec.plot <- ordiplot(vec.mds, choices=c(1,2), type = "none")   #Set up the plot
+points(spscoresall.vec$NMDS1,spscoresall.vec$NMDS2, col=cols.yr$color,pch=19) 
+#plot(envvec.vec, p.max=0.05, col="green")
+ordiarrows(vec.mds, groups=mod_yr_burn$treatment, order.by=mod_yr_burn$year, label=F, col=Lcols.yr)
+#text(spp.mds, display = "species", cex=0.5, col="grey30") #label species
+legend("topleft",legend=levels(as.factor(mod_yr_burn$treatment)), col=Lcols.yr, pch=15, cex=0.9,inset=0.07,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+legend("topright",legend=levels(as.factor(shapes$time)), col="black", pch=Lshapes, cex=0.9,inset=0.07,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+
+vec1<-ggplot(spscoresall.vec, aes(x=NMDS1, y=NMDS2, col=mod_yr_burn$treatment))+
+  geom_point(shape=19, cex=3)+
+  ggtitle("a)")+
+  scale_color_manual(values=c("red", "orange","forestgreen"), guide = guide_legend(title = "Treatment"), #change legend title
+                     labels=c("Burned & Grazed", "Burned & Ungrazed", "Unburned & Ungrazed"))+ #change labels in the legend)+
+  geom_path(arrow=arrow())+
+  theme_bw()+
+  theme(legend.position="none")+
+  theme(plot.title = element_text(color="black", size=14, face="bold.italic"))
+#theme(legend.position=c(0.8,0.8), legend.title=element_text(size=14), legend.text=element_text(size=12), axis.text=element_text(size=16), axis.title=element_text(size=16))+
+#theme(legend.background = element_rect(colour = 'black', fill = 'white', linetype='solid'))
+vec1
+
+lay <- rbind(c(1,1,1,1),
+             c(1,1,1,1),
+             c(1,1,1,1),
+             c(2,2,3,3),
+             c(2,2,3,3),
+             c(4,4,5,5),
+             c(4,4,5,5),
+             c(6,6,6,6))
+grid.arrange(vec1, fig1b, fig1c, fig1d, fig1e, mylegend, layout_matrix = lay)
+
 
 #make nicer plot colored based on thermal, shapes on pre/post fire
 #help(ordiplot)
@@ -1110,81 +1285,6 @@ trt.dat.05 <- dat.05 %>%
 library(indicspecies)
 trt_isa_05 = multipatt(cover.gb.05, trt.dat.05$treatment, control=how(nperm=999))
 summary(trt_isa_05)
-
-
-#####################
-#successional vectors on summarized MODERATE data
-####################
-mod_yr<-all.dat %>% group_by(thermal, burn, graze, year, spname) %>% filter(thermal == "moderate", year>2005 & year<2013) %>% 
-  summarize(mean=mean(cover))%>% arrange(burn)%>%  arrange(graze)%>% arrange(year)%>%
-  spread(spname, mean) 
-mod_yr[is.na(mod_yr)] <- 0 
-
-cover.yr <- mod_yr %>% ungroup %>% dplyr::select(-thermal,-burn,-graze, -year)
-
-#merge env to match full data
-yr.env<-merge(env,mod_yr) %>% dplyr::select(NH4, NO3, totalN, ppt, temp)
-
-#make bray-curtis dissimilarity matrix
-vec.bcd <- vegdist(cover.yr)
-
-#NMDS 
-vec.mds<-metaMDS(cover.yr, trace = TRUE, autotransform = T, trymax=100, k=2) #runs several with different starting configurations
-#trace= TRUE will give output for step by step what its doing
-#default is 2 dimensions, can put k=4 for 4 dimensions
-vec.mds #solution converged after 20 tries
-summary(vec.mds)
-
-#quick plot of results
-stressplot(vec.mds, vec.bcd) #stressplot to show fit
-ordiplot(vec.mds)
-
-#overlay environmental variables, only showing significant drivers
-envvec.vec<-envfit(vec.mds,yr.env, na.rm=TRUE)
-envvec.vec
-plot(vec.mds)
-plot(envvec.vec, p.max=0.05) #add vectors to previous ordination
-
-#store scores in new dataframe
-spscores1.vec<-scores(vec.mds,display="sites",choices=1)
-spscores2.vec<-scores(vec.mds,display="sites",choices=2)
-tplots<-mod_yr[,2]
-tplot_levels<-levels(tplots$burn)
-spscoresall.vec<-data.frame(tplots,spscores1.vec,spscores2.vec)
-
-#make plot to show successional vectors
-#first, set colors and shapes
-mod_yr <- mod_yr %>%
-  unite(treatment, c(burn, graze), remove=FALSE, sep = " ")
-cols.yr<- mod_yr %>% dplyr::select(burn, graze) %>% mutate(color = "forestgreen", 
-                                                           color = ifelse(burn == "burned" & graze=="grazed", "red",
-                                                                          ifelse(burn=="burned" & graze =="ungrazed", "orange",
-                                                                                 ifelse(burn=="unburned" & graze=="graze", "purple", color)))) #colors based on burn trt
-Lcols.yr <- rep(c("forestgreen", "red", "orange", "purple")) #colors for the legend
-#shapes.yr <- dat_yr%>% dplyr::select(year) %>%
-  mutate(shape = 1, shape = ifelse(year == "2004", 8, 
-                                   ifelse(year>="2005" & year<"2014", 16,
-                                          ifelse(year>="2014", 15,shape)))) #shapes based on year 
-#shapes.yr<-shapes.yr %>% mutate(time="Pre-Fire", 
-                                #time= ifelse(year==2004, "Fire",
-                                             #ifelse(year>=2005&year<2014, "Post-Fire",
-                                                    #ifelse(year>=2014, "2014 and after",time)))) 
-#Lshapes <-rep(c(15,8,16,1))#shapes for legend
-#make the plot
-vec.plot <- ordiplot(vec.mds, choices=c(1,2), type = "none")   #Set up the plot
-points(spscoresall.vec$NMDS1,spscoresall.vec$NMDS2, col=cols.yr$color,pch=19) 
-plot(envvec.vec, p.max=0.05, col="green")
-ordiarrows(vec.mds, groups=mod_yr$treatment, order.by=mod_yr$year, label=F, col="black")
-#text(spp.mds, display = "species", cex=0.5, col="grey30") #label species
-legend("topleft",legend=levels(as.factor(cols.yr$thermal)), col=Lcols.yr, pch=15, cex=0.9,inset=0.07,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
-legend("topright",legend=levels(as.factor(shapes$time)), col="black", pch=Lshapes, cex=0.9,inset=0.07,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
-
-#indicator species for thermal
-vec_isa = multipatt(cover.yr, dat_yr$thermal, control=how(nperm=999))
-summary(vec_isa)
-
-vec_yr_isa = multipatt(cover.yr, dat_yr$year, control=how(nperm=999))
-summary(vec_yr_isa)
 
 
 
