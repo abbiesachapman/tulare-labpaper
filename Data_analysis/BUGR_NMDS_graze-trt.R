@@ -475,7 +475,7 @@ fig1c
 
 fig1d<-ggplot(subset(spscoresall.mod.e, year==2007), aes(x=NMDS1, y=NMDS2, col=treatment, shape=as.factor(year)))+
   geom_point(cex=2)+
-  ggtitle("d)2007")+
+  ggtitle("d) 2007")+
   xlim(-0.4,0.4)+
   ylim(-0.4,0.4)+
   scale_shape_manual(values=c(8),guide = guide_legend(title = "Year"))+
@@ -641,7 +641,7 @@ legend("topright",legend=levels(as.factor(shapes.e$year)), col="black", pch=Lsha
 ###MODERATE#####
 ###late years####
 #create wide data, first filter so year is 2005 to 2008
-mod.data.late<- all.dat %>% dplyr::select(-X1, -spcode) %>% filter(year>2008 & year < 2013) %>% filter(thermal=="moderate") %>% spread(spname, cover)
+mod.data.late<- all.dat %>% dplyr::select(-X1, -spcode) %>% filter(year>2007 & year < 2013) %>% filter(thermal=="moderate") %>% spread(spname, cover)
 mod.data.late[is.na(mod.data.late)] <- 0 #replace NAs with 0 (species not counted in plots have NAs when wide dataset created)
 
 #Import environmental data - NADP pinnacles deposition data and NOAA San Jose temperature data
@@ -673,7 +673,7 @@ cover.Biodrop.mod.late<-cover.mod.late[rowSums(cover.mod.late[, (1:156)]) ==0, ]
 #make bray-curtis dissimilarity matrix
 mod.bcd.late <- vegdist(cover.mod.late)
 
-mod.mds.late<-metaMDS(mod.bcd.late , trace = TRUE, autotransform=T, trymax=100, k=2) #runs several with different starting configurations
+mod.mds.late<-metaMDS(mod.bcd.late , trace = TRUE, autotransform=T, trymax=100, k=3) #runs several with different starting configurations
 #trace= TRUE will give output for step by step what its doing
 #default is 2 dimensions, can put k=4 for 4 dimensions
 mod.mds.late #no solution reached
