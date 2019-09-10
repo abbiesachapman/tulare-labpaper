@@ -104,9 +104,14 @@ names(quadkey)[3:4]=c("quadratNew", "quadrat")
 
 # join alldatsp and quadkey for all data
 alldatsptrt <- inner_join(alldatsp, quadkey, by = "quadrat") %>%
-  select(quadratNew, treatment, spcode, spname, cover, year, thermal) %>%
+  select(quadratNew, treatment, spcode, spname, cover, year, Status, Type) %>%
   separate(treatment, sep = " ", c("burn", "graze")) %>%
-  filter(graze != "NA", thermal != "?")
+  mutate(quadrat2 = quadratNew) %>%
+  separate(quadrat2, sep = "-", c("transect", "replicate")) %>%
+  select(-replicate) %>%
+  filter(transect != "THB1", transect != "THUB1", transect != "THB2", transect != "THUB2")
+names(alldatsptrt)[8:9]=c("status", "type")
+
 
 #check existence of all data across years
 alldatcheck <- alldatsptrt %>%
@@ -190,7 +195,8 @@ alldatenvTH <- alldatenv %>%
 
 # join alldatenvTH and quadkey for all data
 alldatenv <- inner_join(alldatenvTH, quadkey, by = "quadrat") %>%
-  select(quadratNew, site, GOPHER, BARE, ROCK, LITTER, COWPIE, year)
+  select(quadratNew, GOPHER, BARE, ROCK, LITTER, COWPIE, year)
+names(alldatenv)[2:6] = c("gopher", "bare", "rock", "litter", "cowpie")
 
 write.csv(alldatenv, "envdat.csv")
 
