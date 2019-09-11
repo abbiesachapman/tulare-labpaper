@@ -52,19 +52,23 @@ ggplot(shan1, aes(year, meanShan)) +
   geom_vline(xintercept=2009)+geom_vline(xintercept=2005, color="red")+ylab("Shannon Diversity")
 
 #plot timeseries of cover
-grzfunc<-grztog2%>%
-  group_by(transect.quad, year, graze, status, func, spcode)%>%
+cov<-alldat%>%
+  filter(type!="NA", status!="NA")%>%
+  mutate(func=paste(type, status))%>%
+  mutate(trt=paste(graze, burn))%>%
+  filter(cover != 0, spname !="Unknown", spname!="Moss") %>%
+  group_by(year, quadratNew, trt, func, spcode, spname)%>%
   summarize(sumcov=sum(cover))%>%
-  filter(!is.na(status), !is.na(func))
-grzfuncagg<-grzfunc%>%
-  group_by(year, graze, status, func)%>%
+  filter(!is.na(trt), !is.na(func))
+cov1<-cov%>%
+  group_by(year, trt, func)%>%
   summarize(meancov=mean(sumcov), se_cov=calcSE(sumcov))
  
-ggplot(grzfuncagg, aes((year), meancov))+
-  geom_line(aes(color=graze))+
-  geom_point(aes(color=graze))+
-  geom_errorbar(aes(ymin=meancov-se_cov, ymax=meancov+se_cov, color=graze), width=.2)+
-  facet_grid(status~func) +geom_vline(xintercept=2009)
+ggplot(cov1, aes((year), meancov))+
+  geom_line(aes(color=trt))+
+  geom_point(aes(color=trt))+
+  geom_errorbar(aes(ymin=meancov-se_cov, ymax=meancov+se_cov, color=trt), width=.2)+
+  facet_grid(~func) +geom_vline(xintercept=2009)+geom_vline(xintercept=2005, color="red")
 
 ##########
 # Indicator Species
