@@ -479,6 +479,7 @@ fig1c<-ggplot(subset(spscoresall.mod.e, year==2006), aes(x=NMDS1, y=NMDS2, col=t
   theme(plot.title = element_text(color="black", size=14, face="bold.italic"))+
   theme(legend.position="none")
 fig1c
+fig1c+geom_text(subset(spscoresall.mod.e, year==2006), mapping=aes(x=NMDS1, y=NMDS2, label=mod.2006$transect), cex=4)
 
 fig1d<-ggplot(subset(spscoresall.mod.e, year==2007), aes(x=NMDS1, y=NMDS2, col=treatment, shape=as.factor(year)))+
   geom_point(cex=2)+
