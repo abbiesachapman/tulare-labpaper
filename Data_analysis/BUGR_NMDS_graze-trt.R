@@ -359,7 +359,7 @@ mod.env.early<-merge(env,mod.data.early) %>% dplyr::select(NH4, NO3, totalN, ppt
 
 #check count of thermal factor
 mod.data.early %>% 
-  group_by(thermal, graze, burn) %>%
+  group_by(graze, burn, transect) %>%
   summarise(no_rows = length(thermal)) 
 
 #check count of graze and burn factor
@@ -386,7 +386,7 @@ cover.relrow.me <- data.frame(cover.mod.early /cover.rowsums.me)
 #cover.colmax<-sapply(cover.mod.early ,max)
 #cover.relcolmax <- data.frame(sweep(cover.Bio ,2,cover.colmax,'/'))
 #cover.pa <- cover.Bio %>% mutate_each(funs(ifelse(.>0,1,0)), 1:57)
-
+covercheck<-as.data.frame(cover.rowsums.me)
 
 ######################
 #NMDS
@@ -537,29 +537,38 @@ mod.2005<-subset(mod.data.early, year==2005)
 cover.2005<-mod.2005 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
 cover.rowsums.05 <- rowSums(cover.2005 [1:156])
 cover.relrow.05 <- data.frame(cover.2005/cover.rowsums.05)
-permanova1<-adonis(cover.relrow.05~mod.2005$treatment, perm=100, method="bray")
+mod.bcd.05 <- vegdist(cover.relrow.05)
+permanova1<-adonis(cover.relrow.05~mod.2005$treatment,perm=100, method="bray")
 permanova1
+pairwise.perm.manova(mod.bcd.05,mod.2005$treatment, nperm=100) #all three treatments differ in 2005
 
 mod.2006<-subset(mod.data.early, year==2006)
 cover.2006<-mod.2006 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
 cover.rowsums.06 <- rowSums(cover.2006 [1:156])
 cover.relrow.06 <- data.frame(cover.2006/cover.rowsums.06)
+mod.bcd.06 <- vegdist(cover.relrow.06)
 permanova2<-adonis(cover.relrow.06~mod.2006$treatment, perm=100, method="bray")
 permanova2
+pairwise.perm.manova(mod.bcd.06,mod.2006$treatment, nperm=100) #all three treatments differ in 2006
 
 mod.2007<-subset(mod.data.early, year==2007)
 cover.2007<-mod.2007 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
 cover.rowsums.07 <- rowSums(cover.2007 [1:156])
 cover.relrow.07 <- data.frame(cover.2007/cover.rowsums.07)
+mod.bcd.07 <- vegdist(cover.relrow.07)
 permanova3<-adonis(cover.relrow.07~mod.2007$treatment, perm=100, method="bray")
 permanova3
+pairwise.perm.manova(mod.bcd.07,mod.2007$treatment, nperm=100) #ungrazed communities are same, both differ from grazed
 
 mod.2008<-subset(mod.data.early, year==2008)
 cover.2008<-mod.2008 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
 cover.rowsums.08 <- rowSums(cover.2008 [1:156])
 cover.relrow.08 <- data.frame(cover.2008/cover.rowsums.08)
+mod.bcd.08 <- vegdist(cover.relrow.08)
 permanova3<-adonis(cover.2008~mod.2008$treatment, perm=100, method="bray")
 permanova3
+pairwise.perm.manova(mod.bcd.08,mod.2008$treatment, nperm=100) #ungrazed communities are same, both differ from grazed
+
 
 #####################
 #successional vectors on summarized MODERATE data for burn (2005-2008)
@@ -639,9 +648,11 @@ summary(mod_vec_isa_early)
 ############################
 ###Make vector plot again in ggplot
 ###########################
+
+#to plot indicator species (from above) on plot
 species.e<-as.data.frame(vec.mds$species)
 species.e$name<-row.names(species.e)
-spc.e<- species.e %>% filter(name == "Trifolium depauperatum"| name=="Crassula connata"| name=="Calandrinia ciliata"| name=="Poa secunda ssp. secunda"| name=="Festuca bromoides"|name=="Koeleria macrantha"| name=="Galium aparine"| name == "Rigiopappus leptoclodus" |name=="Festuca myuros"| name=="Layia gaillardiodes"| name=="Epilobium sp."| name=="Chlorogalum pomeridianum"|name=="Sanicula bipinnatifida"|name=="Trifolium willdenovii"|name=="Triteleia laxa"| name=="Allium serra"|name=="Plantago erecta"|name=="Lasthenia californica"|name=="Aphanes occidentalis"|name=="Erodium cicutarium"|name=="Gilia tricolor"|name=="Lepidium nitidum"| name=="Astragalus gambellianus"|name=="Hemizonia congesta"| name=="Castilleja densiflora"| name=="Microseris douglasii"|name=="Brodiaea spp."|name=="Hordeum murinum ssp. leporinum"|name=="Eschscholzia californica"|name=="Muilla maritima"|name=="Festuca perennis")
+spc.e<- species.e %>% filter(name == "Trifolium depauperatum"| name=="Crassula connata"| name=="Calandrinia ciliata"| name == "Rigiopappus leptoclodus" |name=="Poa secunda ssp. secunda"| name=="Festuca bromoides"|name=="Koeleria macrantha"| name=="Galium aparine"| name == "Rigiopappus leptoclodus" |name=="Festuca myuros"| name=="Layia gaillardiodes"| name=="Silene gallica"|name=="Athysanus pusilus"|name=="Sisyrinchium bellum"|name=="Epilobium sp."| name=="Chlorogalum pomeridianum"|name=="Sanicula bipinnatifida"|name=="Lessingia micradenia glabratai"|name=="Triteleia laxa"| name=="Allium serra"|name=="Plantago erecta"|name=="Lasthenia californica"|name=="Aphanes occidentalis"|name=="Erodium cicutarium"|name=="Gilia tricolor"|name=="Lepidium nitidum"| name=="Hemizonia congesta"| name=="Castilleja densiflora"| name=="Microseris douglasii"|name=="Agoseris heterophylla"|name=="Brodiaea spp."|name=="Hordeum murinum ssp. leporinum"|name=="Muilla maritima"|name=="Festuca perennis")
 
 vec1<-ggplot(spscoresall.vec, aes(x=NMDS1, y=NMDS2))+
   geom_point(cex=3, aes(shape=as.factor(mod_yr_burn$year), col=mod_yr_burn$treatment))+
@@ -658,6 +669,7 @@ vec1<-ggplot(spscoresall.vec, aes(x=NMDS1, y=NMDS2))+
 vec1
 
 vec1<-vec1+geom_text(data=spc.e, mapping=aes(x=MDS1, y=MDS2, label=name), cex=1.5)
+vec1
 
 #create layout for panel
 lay <- rbind(c(1,1,1,1),
