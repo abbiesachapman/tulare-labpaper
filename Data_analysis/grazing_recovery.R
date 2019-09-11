@@ -27,29 +27,29 @@ rich1<-rich%>%
 ggplot(rich1, aes(year, mean_rich)) +
   geom_line(aes(color=as.factor(trt)))+facet_wrap(~func) +
   geom_errorbar(aes(ymin=mean_rich-se_rich, ymax=mean_rich+se_rich, color=as.factor(trt)), width=.2)+
-  geom_vline(xintercept=2009)
+  geom_vline(xintercept=2009)+geom_vline(xintercept=2005, color="red")
 
 library(codyn)
 #plot time series of shannon diversity
-grzshan<-grztog2%>%
-  filter(func!="NA", status!="NA")%>%
-  mutate(func=paste(func, status))%>%
-  filter(cover != 0, spname != c("Unknown", "Moss"))%>%
-  mutate(alltrt=paste(transect.quad, graze, func, sep="_"))
-simp.g<-community_diversity(grzshan, time.var = "year", abundance.var="cover", replicate.var="alltrt", metric = c("InverseSimpson"))
-shandiv.g<- community_diversity(grzshan, time.var = "year", abundance.var="cover", replicate.var="alltrt", metric = c("Shannon")) 
+shan<-alldat%>%
+  filter(type!="NA", status!="NA")%>%
+  mutate(func=paste(type, status))%>%
+  mutate(trt=paste(graze, burn))%>%
+  filter(cover != 0, spname !="Unknown", spname!="Moss") %>%
+  mutate(alltrt=paste(quadratNew, trt, func, sep="_"))
+simp.g<-community_diversity(shan, time.var = "year", abundance.var="cover", replicate.var="alltrt", metric = c("InverseSimpson"))
+shandiv.g<- community_diversity(shan, time.var = "year", abundance.var="cover", replicate.var="alltrt", metric = c("Shannon")) 
 
-grz.even<-left_join(simp.g, shandiv.g)%>%
-  separate(alltrt, into=c("transect", "quad", "graze", "func"), sep="_")%>%
-  mutate(transect.quad=paste(transect, quad, sep="_"))%>%
-  group_by(year, graze, func)%>%
+shan1<-left_join(simp.g, shandiv.g)%>%
+  separate(alltrt, into=c("transectNew", "trt", "func"), sep="_")%>%
+  group_by(year, trt, func)%>%
   summarize(meanShan=mean(Shannon), seShan=calcSE(Shannon), meanSimp=mean(InverseSimpson))%>%
-  filter(!is.na(graze), !is.na(func), func!=("NA"), graze!="NA")
+  filter(!is.na(trt), !is.na(func), func!=("NA"), trt!="NA")
 
-ggplot(grz.even, aes(year, meanShan)) +
-  geom_line(aes(color=as.factor(graze)))+facet_wrap(~func) +
-  geom_errorbar(aes(ymin=meanShan-seShan, ymax=meanShan+seShan, color=as.factor(graze)), width=.2)+
-  geom_vline(xintercept=2009)+ylab("Shannon Diversity")
+ggplot(shan1, aes(year, meanShan)) +
+  geom_line(aes(color=as.factor(trt)))+facet_wrap(~func) +
+  geom_errorbar(aes(ymin=meanShan-seShan, ymax=meanShan+seShan, color=as.factor(trt)), width=.2)+
+  geom_vline(xintercept=2009)+geom_vline(xintercept=2005, color="red")+ylab("Shannon Diversity")
 
 #plot timeseries of cover
 grzfunc<-grztog2%>%
