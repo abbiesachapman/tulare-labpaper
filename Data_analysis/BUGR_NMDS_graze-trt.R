@@ -538,8 +538,8 @@ cover.2005<-mod.2005 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-gr
 cover.rowsums.05 <- rowSums(cover.2005 [1:156])
 cover.relrow.05 <- data.frame(cover.2005/cover.rowsums.05)
 mod.bcd.05 <- vegdist(cover.relrow.05)
-permanova1<-adonis(cover.relrow.05~mod.2005$treatment,perm=100, method="bray")
-permanova1
+permanova05<-adonis(cover.relrow.05~mod.2005$treatment,perm=100, method="bray")
+permanova05
 pairwise.perm.manova(mod.bcd.05,mod.2005$treatment, nperm=100) #all three treatments differ in 2005
 
 mod.2006<-subset(mod.data.early, year==2006)
@@ -547,8 +547,8 @@ cover.2006<-mod.2006 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-gr
 cover.rowsums.06 <- rowSums(cover.2006 [1:156])
 cover.relrow.06 <- data.frame(cover.2006/cover.rowsums.06)
 mod.bcd.06 <- vegdist(cover.relrow.06)
-permanova2<-adonis(cover.relrow.06~mod.2006$treatment, perm=100, method="bray")
-permanova2
+permanova06<-adonis(cover.relrow.06~mod.2006$treatment, perm=100, method="bray")
+permanova06
 pairwise.perm.manova(mod.bcd.06,mod.2006$treatment, nperm=100) #all three treatments differ in 2006
 
 mod.2007<-subset(mod.data.early, year==2007)
@@ -556,8 +556,8 @@ cover.2007<-mod.2007 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-gr
 cover.rowsums.07 <- rowSums(cover.2007 [1:156])
 cover.relrow.07 <- data.frame(cover.2007/cover.rowsums.07)
 mod.bcd.07 <- vegdist(cover.relrow.07)
-permanova3<-adonis(cover.relrow.07~mod.2007$treatment, perm=100, method="bray")
-permanova3
+permanova07<-adonis(cover.relrow.07~mod.2007$treatment, perm=100, method="bray")
+permanova07
 pairwise.perm.manova(mod.bcd.07,mod.2007$treatment, nperm=100) #ungrazed communities are same, both differ from grazed
 
 mod.2008<-subset(mod.data.early, year==2008)
@@ -565,8 +565,8 @@ cover.2008<-mod.2008 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-gr
 cover.rowsums.08 <- rowSums(cover.2008 [1:156])
 cover.relrow.08 <- data.frame(cover.2008/cover.rowsums.08)
 mod.bcd.08 <- vegdist(cover.relrow.08)
-permanova3<-adonis(cover.2008~mod.2008$treatment, perm=100, method="bray")
-permanova3
+permanova08<-adonis(cover.2008~mod.2008$treatment, perm=100, method="bray")
+permanova08
 pairwise.perm.manova(mod.bcd.08,mod.2008$treatment, nperm=100) #ungrazed communities are same, both differ from grazed
 
 
