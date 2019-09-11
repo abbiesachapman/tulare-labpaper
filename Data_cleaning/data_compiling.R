@@ -104,7 +104,7 @@ names(quadkey)[3:4]=c("quadratNew", "quadrat")
 
 # join alldatsp and quadkey for all data
 alldatsptrt <- inner_join(alldatsp, quadkey, by = "quadrat") %>%
-  select(quadratNew, treatment, spcode, spname, cover, year, Status, Type) %>%
+  select(quadratNew, treatment, spcode, spname, cover, year, Status, Type, thermal) %>%
   separate(treatment, sep = " ", c("burn", "graze")) %>%
   mutate(quadrat2 = quadratNew) %>%
   separate(quadrat2, sep = "-", c("transect", "replicate")) %>%
