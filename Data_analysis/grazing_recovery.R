@@ -2,6 +2,7 @@
 # Objective: compare grazed and ungrazed plots as grazing was reintroduced
 # 2006-2008 = ungrazed plots are ungrazed, 2009-2012 = ungrazed plots have cattle reintroduced
 # all years = grazed plots are grazed
+library(ggplot2); theme_set(theme_classic())
 
 alldat<-read_csv(paste(datpath_clean, "/alldatsptrt.csv", sep="")) %>%
   select(-1)%>%
@@ -89,9 +90,8 @@ calcSE<-function(x){
 #take avg litter and se
 litter <- joindat %>%
   filter(type != "NA", status != "NA") %>% #remove NAs
-  mutate(func=paste(type, status))%>% 
   mutate(trt=paste(graze, burn)) %>%
-  group_by(trt, year, status, type) %>%
+  group_by(trt, year) %>%
   summarise(mean_litter = mean(litter),
             se_litter = calcSE(litter))
 
@@ -99,7 +99,6 @@ litter <- joindat %>%
 ggplot(litter, aes(year, mean_litter)) +
   geom_line(aes(color=as.factor(trt))) +
   geom_point(aes(color=as.factor(trt))) +
-  facet_grid(status~type) +
   geom_errorbar(aes(ymin=mean_litter-se_litter, ymax=mean_litter+se_litter, color=as.factor(trt)), width=.2)
 
 
