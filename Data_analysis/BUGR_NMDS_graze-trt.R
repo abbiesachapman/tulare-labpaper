@@ -12,9 +12,7 @@ library(goeveg)#for scree plot of NMDS to test number of dimensions
 # Import csv file, transform to wide data, call it data
 all.dat <- read_csv(paste(datpath_clean, "/alldatsptrt.csv", sep=""))
 all.dat<-as.data.frame(all.dat)
-all.dat.check<-read_csv(paste(datpath_clean, "/alldatcheck.csv", sep=""))
-thermal<-all.dat.check %>% dplyr::select(thermal,quadratNew)
-all.dat<-merge(all.dat, thermal) %>% dplyr::select(-status, -type)
+all.dat<-all.dat %>% dplyr::select(-status, -type)
 
 #dat2<-dat %>% mutate(cover=cover+0.00001) #a work around for data with lots of zeros
 #create wide data, first filter so year is 2005 to 2012
@@ -45,7 +43,6 @@ all.data %>%
 all.data %>% 
   group_by(graze, burn) %>%
   summarise(no_rows = length(graze))
-
 
 str(all.data)
 
