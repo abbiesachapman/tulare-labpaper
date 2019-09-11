@@ -13,19 +13,20 @@ alldat<-read_csv(paste(datpath_clean, "/alldatsptrt.csv", sep="")) %>%
 
 #plot timeseries of richness 
 rich <- alldat %>%
-  filter(func!="NA", status!="NA")%>%
-  mutate(func=paste(func, status))%>%
-  filter(cover != 0, spname != c("Unknown", "Moss")) %>%
-  group_by(year, quadratNew, graze, func, thermal)%>%
+  filter(type!="NA", status!="NA")%>%
+  mutate(func=paste(type, status))%>%
+  mutate(trt=paste(graze, burn))%>%
+  filter(cover != 0, spname !="Unknown", spname!="Moss") %>%
+  group_by(year, quadratNew, trt, func)%>%
   summarize(richness = length(unique(spname)))
 
-grzrich1<-grzrich%>%
-  group_by(year, graze, func) %>%
+rich1<-rich%>%
+  group_by(year, trt, func) %>%
   summarize(mean_rich = mean(richness), se_rich=calcSE(richness))
 
-ggplot(grzrich1, aes(year, mean_rich)) +
-  geom_line(aes(color=as.factor(graze)))+facet_wrap(~func) +
-  geom_errorbar(aes(ymin=mean_rich-se_rich, ymax=mean_rich+se_rich, color=as.factor(graze)), width=.2)+
+ggplot(rich1, aes(year, mean_rich)) +
+  geom_line(aes(color=as.factor(trt)))+facet_wrap(~func) +
+  geom_errorbar(aes(ymin=mean_rich-se_rich, ymax=mean_rich+se_rich, color=as.factor(trt)), width=.2)+
   geom_vline(xintercept=2009)
 
 library(codyn)
