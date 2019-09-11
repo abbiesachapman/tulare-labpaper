@@ -20,10 +20,11 @@ rich <- alldat %>%
   mutate(trt=paste(graze, burn))%>%
   filter(cover != 0, spname !="Unknown", spname!="Moss") %>%
   group_by(year, quadratNew, trt, func)%>%
-  summarize(richness = length(unique(spname)))
+  summarize(richness = length(unique(spname)))%>%
+  mutate(prepost=ifelse(year<2009, "pre", "post"))
 
 rich1<-rich%>%
-  group_by(year, trt, func) %>%
+  group_by(year, trt, func, prepost) %>%
   summarize(mean_rich = mean(richness), se_rich=calcSE(richness))
 
 ggplot(rich1, aes(year, mean_rich)) +
@@ -42,9 +43,12 @@ shan<-alldat%>%
 simp.g<-community_diversity(shan, time.var = "year", abundance.var="cover", replicate.var="alltrt", metric = c("InverseSimpson"))
 shandiv.g<- community_diversity(shan, time.var = "year", abundance.var="cover", replicate.var="alltrt", metric = c("Shannon")) 
 
-shan1<-left_join(simp.g, shandiv.g)%>%
+shan2<-left_join(simp.g, shandiv.g)%>%
   separate(alltrt, into=c("transectNew", "trt", "func"), sep="_")%>%
-  group_by(year, trt, func)%>%
+  mutate(prepost=ifelse(year<2009, "pre", "post"))
+  
+shan1<-shan2%>%
+  group_by(year, trt, func, prepost)%>%
   summarize(meanShan=mean(Shannon), seShan=calcSE(Shannon), meanSimp=mean(InverseSimpson))%>%
   filter(!is.na(trt), !is.na(func), func!=("NA"), trt!="NA")
 
@@ -61,9 +65,10 @@ cov<-alldat%>%
   filter(cover != 0, spname !="Unknown", spname!="Moss") %>%
   group_by(year, quadratNew, trt, func, spcode, spname)%>%
   summarize(sumcov=sum(cover))%>%
-  filter(!is.na(trt), !is.na(func))
+  filter(!is.na(trt), !is.na(func))%>%
+  mutate(prepost=ifelse(year<2009, "pre", "post"))
 cov1<-cov%>%
-  group_by(year, trt, func)%>%
+  group_by(year, trt, func, prepost)%>%
   summarize(meancov=mean(sumcov), se_cov=calcSE(sumcov))
  
 ggplot(cov1, aes((year), meancov))+
