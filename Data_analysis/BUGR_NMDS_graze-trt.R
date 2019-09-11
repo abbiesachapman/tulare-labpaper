@@ -702,6 +702,11 @@ mod.data.late %>%
 plotnames<-mod.data.late[,1]
 cover.mod.late<- mod.data.late %>% dplyr::select(-c(1:6)) #wide data with ID columns removed, only species/cover for NMDS
 rownames(cover.mod.late)<-plotnames
+##delete outlier row 122 (nearly empty row: has only 2 species with 1% cover... is this a data recording issue?)
+mod.data.late <- mod.data.late[-c(122),] 
+cover.mod.late<-cover.mod.late[-c(122),] 
+
+#now relativize by row
 cover.rowsums.ml <- rowSums(cover.mod.late [1:156])
 cover.relrow.ml <- data.frame(cover.mod.late /cover.rowsums.ml)
 
@@ -728,6 +733,7 @@ summary(mod.mds.late)
 #quick plot of results
 stressplot(mod.mds.late, mod.bcd.late) #stressplot to show fit
 ordiplot(mod.mds.late)
+orditorp(mod.mds.late,display="sites",cex=0.8,air=0.01)
 
 #store scores in new dataframe
 mod.trt.late <- mod.data.late %>%
@@ -741,7 +747,6 @@ spscoresall.mod.l<-data.frame(year,treatment,spscores1.mod.l,spscores2.mod.l)
 ############################
 #Indicator species for late MODERATE#
 ############################
-
 mod_trt_isa_late = multipatt(cover.relrow.ml, mod.trt.late$treatment, control=how(nperm=999))
 summary(mod_trt_isa_late)
 
@@ -762,7 +767,7 @@ points(spscoresall.mod.l$NMDS1,spscoresall.mod.l$NMDS2,col=cols1.l$color,pch=sha
 #plot(envvec.nms.gb, col="green")
 #text(gb.mds, display = "species", cex=0.5, col="grey30") #label species
 #legend("bottomright",legend=levels(as.factor(cols1$thermal)), col=Lcols, pch=15, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
-legend("bottomleft",legend=levels(as.factor(shapes.l$year)), col="black", pch=Lshapes.l, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
+legend("topright",legend=levels(as.factor(shapes.l$year)), col="black", pch=Lshapes.l, cex=0.9,inset=0.1,bty="n",y.intersp=0.5,x.intersp=0.8,pt.cex=1.1)
 
 
 ###late years, all thermal####
