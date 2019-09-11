@@ -71,6 +71,39 @@ ggplot(cov1, aes((year), meancov))+
   facet_grid(~func) +geom_vline(xintercept=2009)+geom_vline(xintercept=2005, color="red")
 
 ##########
+#Litter
+##########
+
+#load environmental data
+envdat <- read_csv(paste(datpath_clean, "/envdat.csv", sep = "")) %>%
+  select(-1) 
+
+#join env data with master
+joindat <- left_join(alldat, envdat)
+
+calcSE<-function(x){
+  x <- x[!is.na(x)]
+  sd(x)/sqrt(length(x))
+}
+
+#take avg litter and se
+litter <- joindat %>%
+  filter(type != "NA", status != "NA") %>% #remove NAs
+  mutate(func=paste(type, status))%>% 
+  mutate(trt=paste(graze, burn)) %>%
+  group_by(trt, year, status, type) %>%
+  summarise(mean_litter = mean(litter),
+            se_litter = calcSE(litter))
+
+#graph litter time series
+ggplot(litter, aes(year, mean_litter)) +
+  geom_line(aes(color=as.factor(trt))) +
+  geom_point(aes(color=as.factor(trt))) +
+  facet_grid(status~type) +
+  geom_errorbar(aes(ymin=mean_litter-se_litter, ymax=mean_litter+se_litter, color=as.factor(trt)), width=.2)
+
+
+##########
 # Indicator Species
 ###########
 library(indicspecies)
