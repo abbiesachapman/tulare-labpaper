@@ -5,12 +5,11 @@
 
 alldat<-read_csv(paste(datpath_clean, "/alldatsptrt.csv", sep="")) %>%
   select(-1)%>%
-  filter(transect%in%c("THBUGM1", "THBUGM2", "THM1", "THM2", "THM3", "THM4", "THUBUGM1", "THUBUGM2"))#
-  group_by(year, spname, quadrat)%>%
+  filter(transect%in%c("THBUGM1", "THBUGM2", "THM1", "THM2", "THM3", "THM4", "THUBUGM1", "THUBUGM2"))%>%
+  filter(thermal=="moderate")%>%
+  group_by(year, spname, spcode, quadratNew, status, type, transect)%>%
   summarize(cover=sum(cover))%>%
-  filter(cover!=0)%>%
-  separate(quadrat, into=c("transect", "quadrat"), sep="-")
-
+  filter(cover!=0)
 
 #treatments is a dataframe of burning, grazing, thermal treatment for each quadrat, and which years have data
 treatments<-read_csv(paste(datpath_clean, "/quadrat_trt.csv", sep=""))%>%
