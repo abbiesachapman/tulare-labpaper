@@ -3,7 +3,7 @@
 # 2006-2008 = ungrazed plots are ungrazed, 2009-2012 = ungrazed plots have cattle reintroduced
 # all years = grazed plots are grazed
 
-theme_set()
+theme_set(theme_classic())
 
 alldat<-read_csv(paste(datpath_clean, "/alldatsptrt.csv", sep="")) %>%
   select(-1)%>%
