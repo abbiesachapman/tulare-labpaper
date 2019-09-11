@@ -3,40 +3,26 @@
 # 2006-2008 = ungrazed plots are ungrazed, 2009-2012 = ungrazed plots have cattle reintroduced
 # all years = grazed plots are grazed
 
-alldat<-read_csv(paste(datpath_clean, "/alldatsp.csv", sep="")) %>%
+#load updated master data
+alldat<-read_csv(paste(datpath_clean, "/alldatsptrt.csv", sep="")) %>%
   select(-1)%>%
-  group_by(year, spname, quadrat)%>%
+  group_by(year, spname, quadratNew, burn, graze, thermal)%>%
   summarize(cover=sum(cover))%>%
   filter(cover!=0)%>%
-  separate(quadrat, into=c("transect", "quadrat"), sep="-")
+  separate(quadratNew, into=c("transect", "quadrat"), sep="-")
 
-
-#treatments is a dataframe of burning, grazing, thermal treatment for each quadrat, and which years have data
-treatments<-read_csv(paste(datpath_clean, "/quadrat_trt.csv", sep=""))%>%
-  gather(key="year", value="data", -quadratID, -burn, -graze, -thermal)
-#treatments612 is only quadrats with data in 2006-2012
-treatments_612<-treatments%>%
-  filter(year==2006|year==2007|year==2008|year==2009|year==2010|year==2011|year==2012)%>%
-  mutate(year=paste("y", year, sep=""))%>%
-  spread(year, data)%>%
-  filter(!is.na(y2006),!is.na(y2007),!is.na(y2008),!is.na(y2009),!is.na(y2010),!is.na(y2011),!is.na(y2012))%>%
-  select(1:4)%>%
-  mutate(transect=quadratID)%>%
-  select(-1)
-
-grztog<-left_join(treatments_612, alldat)%>%
-  mutate(transect.quad=paste(transect, quadrat, sep="_"))%>%
-  select(transect.quad, transect, quadrat, year, graze, thermal, spname, cover)%>%
-  filter(year==2006|year==2007|year==2008|year==2009|year==2010|year==2011|year==2012)
-grztog2<-left_join(grztog, SC)%>%
-  filter(thermal=="moderate")
+#we want data in 2006-2012 for moderate
+grztog1 <- alldat %>%
+  filter(year==2006|year==2007|year==2008|year==2009|year==2010|year==2011|year==2012) 
+grztog2 <- left_join(grztog1, SC) %>%
+  filter(thermal == "moderate")
 
 #plot timeseries of richness 
 grzrich <- grztog2 %>%
   filter(func!="NA", status!="NA")%>%
+  filter(cover != 0, spname != "Unknown", spname != "Moss") %>%
   mutate(func=paste(func, status))%>%
-  filter(cover != 0, spname != c("Unknown", "Moss")) %>%
-  group_by(year, transect.quad, graze, func, thermal)%>%
+  group_by(year, transect, quadrat, graze, func)%>%
   summarize(richness = length(unique(spname)))
 
 grzrich1<-grzrich%>%
@@ -53,8 +39,8 @@ library(codyn)
 grzshan<-grztog2%>%
   filter(func!="NA", status!="NA")%>%
   mutate(func=paste(func, status))%>%
-  filter(cover != 0, spname != c("Unknown", "Moss"))%>%
-  mutate(alltrt=paste(transect.quad, graze, func, sep="_"))
+  filter(cover != 0, spname != "Unknown", spname != "Moss")%>%
+  mutate(alltrt=paste(transect, quadrat, graze, func, sep="_"))
 simp.g<-community_diversity(grzshan, time.var = "year", abundance.var="cover", replicate.var="alltrt", metric = c("InverseSimpson"))
 shandiv.g<- community_diversity(grzshan, time.var = "year", abundance.var="cover", replicate.var="alltrt", metric = c("Shannon")) 
 
@@ -72,7 +58,7 @@ ggplot(grz.even, aes(year, meanShan)) +
 
 #plot timeseries of cover
 grzfunc<-grztog2%>%
-  group_by(transect.quad, year, graze, status, func, spcode)%>%
+  group_by(transect, quadrat, year, graze, status, func, spcode)%>%
   summarize(sumcov=sum(cover))%>%
   filter(!is.na(status), !is.na(func))
 grzfuncagg<-grzfunc%>%
@@ -92,8 +78,8 @@ library(indicspecies)
 grztog3<-grztog2%>%
   mutate(prepost=ifelse(year<2009, "pre", "post"))%>%
   mutate(trtgroup=paste(graze, prepost, sep="_"))%>%
-  mutate(rep=paste(transect.quad, year))%>%
-  select(-transect, -transect.quad,-year, -quadrat, -graze, -prepost, -thermal, -spname, -status, -func)
+  mutate(rep=paste(transect, quadrat, year))%>%
+  select(-transect, -transect, -quadrat,-year, -quadrat, -graze, -prepost, -thermal, -spname, -status, -func)
 
 indic_treatments<-select(grztog3, 3, 4)%>%
   unique()
