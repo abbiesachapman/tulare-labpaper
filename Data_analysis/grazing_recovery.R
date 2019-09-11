@@ -7,36 +7,16 @@ alldat<-read_csv(paste(datpath_clean, "/alldatsptrt.csv", sep="")) %>%
   select(-1)%>%
   filter(transect%in%c("THBUGM1", "THBUGM2", "THM1", "THM2", "THM3", "THM4", "THUBUGM1", "THUBUGM2"))%>%
   filter(thermal=="moderate")%>%
-  group_by(year, spname, spcode, quadratNew, status, type, transect)%>%
+  group_by(year, spname, spcode, quadratNew, status, type, transect, burn, graze)%>%
   summarize(cover=sum(cover))%>%
   filter(cover!=0)
 
-#treatments is a dataframe of burning, grazing, thermal treatment for each quadrat, and which years have data
-treatments<-read_csv(paste(datpath_clean, "/quadrat_trt.csv", sep=""))%>%
-  gather(key="year", value="data", -quadratID, -burn, -graze, -thermal)
-#treatments612 is only quadrats with data in 2006-2012
-treatments_612<-treatments%>%
- # filter(year==2006|year==2007|year==2008|year==2009|year==2010|year==2011|year==2012)%>%
-  mutate(year=paste("y", year, sep=""))%>%
-  spread(year, data)%>%
-  filter(!is.na(y2006),!is.na(y2007),!is.na(y2008),!is.na(y2009),!is.na(y2010),!is.na(y2011),!is.na(y2012))%>%
-  select(1:4)%>%
-  mutate(transect=quadratID)%>%
-  select(-1)
-
-grztog<-left_join(treatments_612, alldat)%>%
-  mutate(transect.quad=paste(transect, quadrat, sep="_"))%>%
-  select(transect.quad, transect, quadrat, year, graze, thermal, spname, cover)%>%
-  filter(year==2006|year==2007|year==2008|year==2009|year==2010|year==2011|year==2012)
-grztog2<-left_join(grztog, SC)%>%
-  filter(thermal=="moderate")
-
 #plot timeseries of richness 
-grzrich <- grztog2 %>%
+rich <- alldat %>%
   filter(func!="NA", status!="NA")%>%
   mutate(func=paste(func, status))%>%
   filter(cover != 0, spname != c("Unknown", "Moss")) %>%
-  group_by(year, transect.quad, graze, func, thermal)%>%
+  group_by(year, quadratNew, graze, func, thermal)%>%
   summarize(richness = length(unique(spname)))
 
 grzrich1<-grzrich%>%
