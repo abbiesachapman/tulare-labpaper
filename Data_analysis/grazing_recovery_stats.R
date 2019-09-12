@@ -98,7 +98,65 @@ cov<-alldat%>%
   filter(!is.na(trt), !is.na(func))%>%
   mutate(prepost=ifelse(year<2009, "pre", "post"))
 
+cov2005 <- cov %>%
+  filter(year == 2005) %>%
+  filter(trt != "ungrazed unburned")
+anova(lm(sumcov~graze, data = cov2005%>%filter(func == "forb native")))
+anova(lm(sumcov~graze, data = cov2005%>%filter(func == "grass non-native")))
+anova(lm(sumcov~graze, data = cov2005%>%filter(func == "forb non-native")))
+anova(lm(sumcov~graze, data = cov2005%>%filter(func == "grass native")))
 
+cov2006 <- cov %>%
+  filter(year == 2006) %>%
+  filter(trt != "ungrazed unburned")
+anova(lm(sumcov~graze, data = cov2006%>%filter(func == "forb native")))
+anova(lm(sumcov~graze, data = cov2006%>%filter(func == "grass non-native")))
+anova(lm(sumcov~graze, data = cov2006%>%filter(func == "forb non-native")))
+anova(lm(sumcov~graze, data = cov2006%>%filter(func == "grass native")))
+
+cov2007 <- cov %>%
+  filter(year == 2007) %>%
+  filter(trt != "ungrazed unburned")
+anova(lm(sumcov~graze, data = cov2007%>%filter(func == "forb native")))
+anova(lm(sumcov~graze, data = cov2007%>%filter(func == "grass non-native")))
+anova(lm(sumcov~graze, data = cov2007%>%filter(func == "forb non-native")))
+anova(lm(sumcov~graze, data = cov2007%>%filter(func == "grass native")))
+
+cov2008 <- cov %>%
+  filter(year == 2008) %>%
+  filter(trt != "ungrazed unburned")
+anova(lm(sumcov~graze, data = cov2008%>%filter(func == "forb native")))
+anova(lm(sumcov~graze, data = cov2008%>%filter(func == "grass non-native")))
+anova(lm(sumcov~graze, data = cov2008%>%filter(func == "forb non-native")))
+anova(lm(sumcov~graze, data = cov2008%>%filter(func == "grass native")))
+
+cov2009 <- cov %>%
+  filter(year == 2009)
+anova(lm(sumcov~trt, data = cov2009%>%filter(func == "forb native")))
+anova(lm(sumcov~trt, data = cov2009%>%filter(func == "grass non-native")))
+anova(lm(sumcov~trt, data = cov2009%>%filter(func == "forb non-native")))
+anova(lm(sumcov~trt, data = cov2009%>%filter(func == "grass native")))
+
+cov2010 <- cov %>%
+  filter(year == 2010)
+anova(lm(sumcov~trt, data = cov2010%>%filter(func == "forb native")))
+anova(lm(sumcov~trt, data = cov2010%>%filter(func == "grass non-native")))
+anova(lm(sumcov~trt, data = cov2010%>%filter(func == "forb non-native")))
+anova(lm(sumcov~trt, data = cov2010%>%filter(func == "grass native")))
+
+cov2011 <- cov %>%
+  filter(year == 2011)
+anova(lm(sumcov~trt, data = cov2011%>%filter(func == "forb native")))
+anova(lm(sumcov~trt, data = cov2011%>%filter(func == "grass non-native")))
+anova(lm(sumcov~trt, data = cov2011%>%filter(func == "forb non-native")))
+anova(lm(sumcov~trt, data = cov2011%>%filter(func == "grass native")))
+
+cov2012 <- cov %>%
+  filter(year == 2012)
+anova(lm(sumcov~trt, data = cov2012%>%filter(func == "forb native")))
+anova(lm(sumcov~trt, data = cov2012%>%filter(func == "grass non-native")))
+anova(lm(sumcov~trt, data = cov2012%>%filter(func == "forb non-native")))
+anova(lm(sumcov~trt, data = cov2012%>%filter(func == "grass native")))
 
 ########
 #one-way ANOVA analyze two blocks of years: 2005-2008 and 2008-2012 
