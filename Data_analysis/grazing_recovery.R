@@ -4,8 +4,6 @@
 # all years = grazed plots are grazed
 library(ggplot2); theme_set(theme_classic())
 
-theme_set(theme_classic())
-
 alldat<-read_csv(paste(datpath_clean, "/alldatsptrt.csv", sep="")) %>%
   select(-1)%>%
   filter(transect%in%c("THBUGM1", "THBUGM2", "THM1", "THM2", "THM3", "THM4", "THUBUGM1", "THUBUGM2"))%>%
