@@ -1,6 +1,7 @@
 library(tidyverse)
 library(readr)
-library(nlme)
+library(nlme) #linear mixed models
+library(sjstats) #effect size cohen's f
 
 #load updated master data
 alldat<-read_csv(paste(datpath_clean, "/alldatsptrt.csv", sep="")) %>%
@@ -229,15 +230,43 @@ anova(lm(Shannon~trt1, data = shan2012%>%filter(func == "grass native")))
 lit <- joindat %>%
   mutate(trt=paste(graze, burn)) %>%
   ungroup() %>%
-  select(quadratNew, year, trt, transect, burn, graze, status, type,  litter)
+  select(quadratNew, year, trt, transect, burn, graze, litter)
 
 lit2005 <- lit%>%
   filter(year == 2005) %>%
-  filter(trt1 != "ungrazed unburned")
-anova(lm(litter~grazed, data = lit2005%>%filter(func == "forb native")))
-anova(lm(litter~grazed, data = lit2005%>%filter(func == "grass non-native")))
-anova(lm(litter~grazed, data = lit2005%>%filter(func == "forb non-native")))
-anova(lm(litter~grazed, data = lit2005%>%filter(func == "grass native")))
+  filter(trt != "ungrazed unburned")
+anova(lm(litter~graze, data = lit2005))
+
+lit2006 <- lit%>%
+  filter(year == 2006) %>%
+  filter(trt != "ungrazed unburned")
+anova(lm(litter~graze, data = lit2006))
+
+lit2007 <- lit%>%
+  filter(year == 2007) %>%
+  filter(trt != "ungrazed unburned")
+anova(lm(litter~graze, data = lit2007))
+
+lit2008 <- lit%>%
+  filter(year == 2008) %>%
+  filter(trt != "ungrazed unburned")
+anova(lm(litter~graze, data = lit2008))
+
+lit2009 <- lit%>%
+  filter(year == 2009) 
+anova(lm(litter~trt, data = lit2009))
+
+lit2010 <- lit%>%
+  filter(year == 2010) 
+anova(lm(litter~trt, data = lit2010))
+
+lit2011 <- lit%>%
+  filter(year == 2011) 
+anova(lm(litter~trt, data = lit2011))
+
+lit2012 <- lit%>%
+  filter(year == 2012) 
+anova(lm(litter~trt, data = lit2012))
 
 ########
 #one-way ANOVA analyze two blocks of years: 2005-2008 and 2008-2012 
@@ -275,6 +304,29 @@ anova(lm(sumcov~trt, data = cov_post%>%filter(func == "grass non-native")))
 anova(lm(sumcov~trt, data = cov_post%>%filter(func == "forb non-native")))
 anova(lm(sumcov~trt, data = cov_post%>%filter(func == "grass native")))
 
+shan_pre <- shan3 %>%
+  filter(trt1 != "ungrazed unburned") %>%
+  filter(year%in%c(2005:2008))
+anova(lm(Shannon~grazed, data = shan_pre%>%filter(func == "forb native")))
+anova(lm(Shannon~grazed, data = shan_pre%>%filter(func == "grass non-native")))
+anova(lm(Shannon~grazed, data = shan_pre%>%filter(func == "forb non-native")))
+anova(lm(Shannon~grazed, data = shan_pre%>%filter(func == "grass native")))
+
+shan_post <- shan3 %>%
+  filter(year%in%c(2008:2012))
+anova(lm(Shannon~trt1, data = shan_post%>%filter(func == "forb native")))
+anova(lm(Shannon~trt1, data = shan_post%>%filter(func == "grass non-native")))
+anova(lm(Shannon~trt1, data = shan_post%>%filter(func == "forb non-native")))
+anova(lm(Shannon~trt1, data = shan_post%>%filter(func == "grass native")))
+
+lit_pre <- lit %>%
+  filter(trt != "ungrazed unburned") %>%
+  filter(year%in%c(2005:2008))
+anova(lm(litter~graze, data = lit_pre))
+
+lit_post <- lit %>%
+  filter(year%in%c(2008:2012))
+anova(lm(litter~trt, data = lit_post))
 
 ########
 #linear mixed models
