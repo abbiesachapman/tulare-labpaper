@@ -158,6 +158,87 @@ anova(lm(sumcov~trt, data = cov2012%>%filter(func == "grass non-native")))
 anova(lm(sumcov~trt, data = cov2012%>%filter(func == "forb non-native")))
 anova(lm(sumcov~trt, data = cov2012%>%filter(func == "grass native")))
 
+#evenness
+#pull in object "shan2" from grazing recovery
+shan3 <- shan2 %>%
+  mutate(trt1 = trt) %>%
+  separate(trt, into=c("grazed", "burn"), sep=" ")
+
+shan2005 <- shan3%>%
+  filter(year == 2005) %>%
+  filter(trt1 != "ungrazed unburned")
+anova(lm(Shannon~grazed, data = shan2005%>%filter(func == "forb native")))
+anova(lm(Shannon~grazed, data = shan2005%>%filter(func == "grass non-native")))
+anova(lm(Shannon~grazed, data = shan2005%>%filter(func == "forb non-native")))
+anova(lm(Shannon~grazed, data = shan2005%>%filter(func == "grass native")))
+
+shan2006 <- shan3%>%
+  filter(year == 2006) %>%
+  filter(trt1 != "ungrazed unburned")
+anova(lm(Shannon~grazed, data = shan2006%>%filter(func == "forb native")))
+anova(lm(Shannon~grazed, data = shan2006%>%filter(func == "grass non-native")))
+anova(lm(Shannon~grazed, data = shan2006%>%filter(func == "forb non-native")))
+anova(lm(Shannon~grazed, data = shan2006%>%filter(func == "grass native")))
+
+shan2007 <- shan3%>%
+  filter(year == 2007) %>%
+  filter(trt1 != "ungrazed unburned")
+anova(lm(Shannon~grazed, data = shan2007%>%filter(func == "forb native")))
+anova(lm(Shannon~grazed, data = shan2007%>%filter(func == "grass non-native")))
+anova(lm(Shannon~grazed, data = shan2007%>%filter(func == "forb non-native")))
+anova(lm(Shannon~grazed, data = shan2007%>%filter(func == "grass native")))
+
+shan2008 <- shan3%>%
+  filter(year == 2008) %>%
+  filter(trt1 != "ungrazed unburned")
+anova(lm(Shannon~grazed, data = shan2008%>%filter(func == "forb native")))
+anova(lm(Shannon~grazed, data = shan2008%>%filter(func == "grass non-native")))
+anova(lm(Shannon~grazed, data = shan2008%>%filter(func == "forb non-native")))
+anova(lm(Shannon~grazed, data = shan2008%>%filter(func == "grass native")))
+
+shan2009 <- shan3%>%
+  filter(year == 2009)
+anova(lm(Shannon~trt1, data = shan2009%>%filter(func == "forb native")))
+anova(lm(Shannon~trt1, data = shan2009%>%filter(func == "grass non-native")))
+anova(lm(Shannon~trt1, data = shan2009%>%filter(func == "forb non-native")))
+anova(lm(Shannon~trt1, data = shan2009%>%filter(func == "grass native")))
+
+shan2010 <- shan3%>%
+  filter(year == 2010)
+anova(lm(Shannon~trt1, data = shan2010%>%filter(func == "forb native")))
+anova(lm(Shannon~trt1, data = shan2010%>%filter(func == "grass non-native")))
+anova(lm(Shannon~trt1, data = shan2010%>%filter(func == "forb non-native")))
+anova(lm(Shannon~trt1, data = shan2010%>%filter(func == "grass native")))
+
+shan2011 <- shan3%>%
+  filter(year == 2011)
+anova(lm(Shannon~trt1, data = shan2011%>%filter(func == "forb native")))
+anova(lm(Shannon~trt1, data = shan2011%>%filter(func == "grass non-native")))
+anova(lm(Shannon~trt1, data = shan2011%>%filter(func == "forb non-native")))
+anova(lm(Shannon~trt1, data = shan2011%>%filter(func == "grass native")))
+
+shan2012 <- shan3%>%
+  filter(year == 2012)
+anova(lm(Shannon~trt1, data = shan2012%>%filter(func == "forb native")))
+anova(lm(Shannon~trt1, data = shan2012%>%filter(func == "grass non-native")))
+anova(lm(Shannon~trt1, data = shan2012%>%filter(func == "forb non-native")))
+anova(lm(Shannon~trt1, data = shan2012%>%filter(func == "grass native")))
+
+#litter
+#pull in object "joindat" from grazingrecovery
+lit <- joindat %>%
+  mutate(trt=paste(graze, burn)) %>%
+  ungroup() %>%
+  select(quadratNew, year, trt, transect, burn, graze, status, type,  litter)
+
+lit2005 <- lit%>%
+  filter(year == 2005) %>%
+  filter(trt1 != "ungrazed unburned")
+anova(lm(litter~grazed, data = lit2005%>%filter(func == "forb native")))
+anova(lm(litter~grazed, data = lit2005%>%filter(func == "grass non-native")))
+anova(lm(litter~grazed, data = lit2005%>%filter(func == "forb non-native")))
+anova(lm(litter~grazed, data = lit2005%>%filter(func == "grass native")))
+
 ########
 #one-way ANOVA analyze two blocks of years: 2005-2008 and 2008-2012 
 ########
@@ -178,11 +259,30 @@ anova(lm(richness~trt, data = rich4%>%filter(func == "grass non-native")))
 anova(lm(richness~trt, data = rich4%>%filter(func == "forb non-native")))
 anova(lm(richness~trt, data = rich4%>%filter(func == "grass native")))
 
+cov_pre <- cov %>%
+  filter(trt != "ungrazed unburned") %>%
+  filter(year%in%c(2005:2008))
+
+anova(lm(sumcov~graze, data = cov_pre%>%filter(func == "forb native")))
+anova(lm(sumcov~graze, data = cov_pre%>%filter(func == "grass non-native")))
+anova(lm(sumcov~graze, data = cov_pre%>%filter(func == "forb non-native")))
+anova(lm(sumcov~graze, data = cov_pre%>%filter(func == "grass native")))
+
+cov_post <- cov %>%
+  filter(year%in%c(2008:2012))
+anova(lm(sumcov~trt, data = cov_post%>%filter(func == "forb native")))
+anova(lm(sumcov~trt, data = cov_post%>%filter(func == "grass non-native")))
+anova(lm(sumcov~trt, data = cov_post%>%filter(func == "forb non-native")))
+anova(lm(sumcov~trt, data = cov_post%>%filter(func == "grass native")))
+
+
 ########
 #linear mixed models
 #grazed and burned as fixed effects, year as random
 #nest quadrats within transects
 ########
+
+#richness
 
 fit2005fn<- lme(richness~graze, random = ~1|transect/quadratNew, data = rich2005%>%filter(func == "forb native"))
 summary(fit2005fn)
