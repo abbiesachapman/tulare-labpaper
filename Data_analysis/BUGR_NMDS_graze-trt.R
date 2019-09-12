@@ -386,18 +386,20 @@ cover.relrow.me <- data.frame(cover.mod.early /cover.rowsums.me)
 #cover.colmax<-sapply(cover.mod.early ,max)
 #cover.relcolmax <- data.frame(sweep(cover.Bio ,2,cover.colmax,'/'))
 #cover.pa <- cover.Bio %>% mutate_each(funs(ifelse(.>0,1,0)), 1:57)
-covercheck<-as.data.frame(cover.rowsums.me)
+mod.data.early$covercheck<-cover.rowsums.me#remove plots with very low cover?
 
 ######################
 #NMDS
 ######################
 #make bray-curtis dissimilarity matrix
-mod.bcd.early <- vegdist(cover.relrow.me)
-
-mod.mds.early<-metaMDS(mod.bcd.early , trace = TRUE, autotransform=F, trymax=100, k=5) #runs several with different starting configurations
-mod.mds.early #solution did not converge after 100 tries
+mod.bcd.early <- vegdist(cover.mod.early)
+dimcheckMDS(cover.mod.early, distance = "bray", k = 8, trymax = 20, autotransform = T) #check for optimal dimensions - choose when starts to flatten out
+mod.mds.early<-metaMDS(cover.mod.early, distance="bray", trace = TRUE, noshare=0.02, autotransform=T, trymax=100, k=8) #runs several with different starting configurations
+mod.mds.early #solution did not converge after 100 tries, try 1000 more runs
+mod.mds.early<-metaMDS(cover.mod.early, distance="bray", previous.best = mod.mds.early, noshare=0.02, trace = TRUE, autotransform=T, trymax=1000, k=8)
+mod.mds.early<-metaMDS(cover.mod.early, distance="bray", previous.best = mod.mds.early, noshare=0.02, trace = TRUE, autotransform=T, trymax=5000, k=8)
+mod.mds.early<-metaMDS(cover.mod.early, distance="bray", previous.best = mod.mds.early, noshare=0.02, trace = TRUE, autotransform=T, trymax=10000, k=8)
 summary(mod.mds.early)
-dimcheckMDS(cover.relrow.me, distance = "bray", k = 8, trymax = 20, autotransform = F) #check for optimal dimensions - choose when starts to flatten out
 
 #quick plot of results
 stressplot(mod.mds.early, mod.bcd.early) #stressplot to show fit
@@ -457,8 +459,8 @@ legend("topright",legend=levels(as.factor(shapes.e$year)), col="black", pch=Lsha
 fig1b<-ggplot(subset(spscoresall.mod.e, year==2005), aes(x=NMDS1, y=NMDS2, col=treatment, shape=as.factor(year)))+
   geom_point(cex=2)+
   ggtitle("b) 2005")+
-  xlim(-0.4,0.4)+
-  ylim(-0.4,0.4)+
+  xlim(-1,1)+
+  ylim(-1,1)+
   scale_shape_manual(values=c(16),guide = guide_legend(title = "Year"))+
   scale_color_manual(values=c("red", "orange", "forestgreen"), guide = guide_legend(title = "Treatment"), #change legend title
                      labels=c("Burned & Grazed", "Burned & Ungrazed", "Unburned & Ungrazed"))+ #change labels in the legend)+
@@ -470,8 +472,8 @@ fig1b
 fig1c<-ggplot(subset(spscoresall.mod.e, year==2006), aes(x=NMDS1, y=NMDS2, col=treatment, shape=as.factor(year)))+
   geom_point(cex=2)+
   ggtitle("c) 2006")+
-  xlim(-0.4,0.4)+
-  ylim(-0.4,0.4)+
+  xlim(-1,1)+
+  ylim(-1,1)+
   scale_shape_manual(values=c(17),guide = guide_legend(title = "Year"))+
   scale_color_manual(values=c("red", "orange", "forestgreen"), guide = guide_legend(title = "Treatment"), #change legend title
                      labels=c("Burned & Grazed", "Burned & Ungrazed", "Unburned & Ungrazed"))+ #change labels in the legend)+
@@ -484,8 +486,8 @@ fig1c+geom_text(subset(spscoresall.mod.e, year==2006), mapping=aes(x=NMDS1, y=NM
 fig1d<-ggplot(subset(spscoresall.mod.e, year==2007), aes(x=NMDS1, y=NMDS2, col=treatment, shape=as.factor(year)))+
   geom_point(cex=2)+
   ggtitle("d) 2007")+
-  xlim(-0.4,0.4)+
-  ylim(-0.4,0.4)+
+  xlim(-1,1)+
+  ylim(-1,1)+
   scale_shape_manual(values=c(8),guide = guide_legend(title = "Year"))+
   scale_color_manual(values=c("red", "orange", "forestgreen"), guide = guide_legend(title = "Treatment"), #change legend title
                      labels=c("Burned & Grazed", "Burned & Ungrazed", "Unburned & Ungrazed"))+ #change labels in the legend)+
@@ -497,8 +499,8 @@ fig1d
 fig1e<-ggplot(subset(spscoresall.mod.e, year==2008), aes(x=NMDS1, y=NMDS2, col=treatment, shape=as.factor(year)))+
   geom_point(cex=2)+
   ggtitle("e) 2008")+
-  xlim(-0.4,0.4)+
-  ylim(-0.4,0.4)+
+  xlim(-1,1)+
+  ylim(-1,1)+
   scale_shape_manual(values=c(15),guide = guide_legend(title = "Year"))+
   scale_color_manual(values=c("red", "orange","forestgreen"), guide = guide_legend(title = "Treatment"), #change legend title
                      labels=c("Burned & Grazed", "Burned & Ungrazed", "Unburned & Ungrazed"))+ #change labels in the legend)+
@@ -513,8 +515,8 @@ fig1e
 fig1f<-ggplot(spscoresall.mod.e, aes(x=NMDS1, y=NMDS2, col=mod.data.early$treatment, shape=as.factor(mod.data.early$year)))+
   geom_point(cex=2)+
   ggtitle("f)")+
-  xlim(-0.4,0.4)+
-  ylim(-0.4,0.4)+
+  xlim(-1,1)+
+  ylim(-1,1)+
   scale_shape_manual(values=c(16,17,8,15),guide = guide_legend(title = "Year:"))+
   scale_color_manual(values=c("red", "orange","forestgreen"), guide = guide_legend(title = "Treatment:"), #change legend title
                      labels=c("Burned & Grazed", "Burned & Ungrazed", "Unburned & Ungrazed"))+ #change labels in the legend)+
@@ -536,45 +538,45 @@ mylegend<-g_legend(fig1f)
 ##test for differences in treatment by year#######
 mod.2005<-subset(mod.data.early, year==2005)
 cover.2005<-mod.2005 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
-cover.rowsums.05 <- rowSums(cover.2005 [1:156])
-cover.relrow.05 <- data.frame(cover.2005/cover.rowsums.05)
-mod.bcd.05 <- vegdist(cover.relrow.05)
-permanova05<-adonis(cover.relrow.05~mod.2005$treatment,perm=100, method="bray")
+#cover.rowsums.05 <- rowSums(cover.2005 [1:156])
+#cover.relrow.05 <- data.frame(cover.2005/cover.rowsums.05)
+mod.bcd.05 <- vegdist(cover.2005)
+permanova05<-adonis(cover.2005~mod.2005$treatment,perm=1000, method="bray")
 permanova05
-pairwise.perm.manova(mod.bcd.05,mod.2005$treatment, nperm=100) #all three treatments differ in 2005
+pairwise.perm.manova(mod.bcd.05,mod.2005$treatment, nperm=1000) #all three treatments differ in 2005
 
 mod.2006<-subset(mod.data.early, year==2006)
 cover.2006<-mod.2006 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
-cover.rowsums.06 <- rowSums(cover.2006 [1:156])
-cover.relrow.06 <- data.frame(cover.2006/cover.rowsums.06)
-mod.bcd.06 <- vegdist(cover.relrow.06)
-permanova06<-adonis(cover.relrow.06~mod.2006$treatment, perm=100, method="bray")
+#cover.rowsums.06 <- rowSums(cover.2006 [1:156])
+#cover.relrow.06 <- data.frame(cover.2006/cover.rowsums.06)
+mod.bcd.06 <- vegdist(cover.2006)
+permanova06<-adonis(cover.2006~mod.2006$treatment, perm=1000, method="bray")
 permanova06
-pairwise.perm.manova(mod.bcd.06,mod.2006$treatment, nperm=100) #all three treatments differ in 2006
+pairwise.perm.manova(mod.bcd.06,mod.2006$treatment, nperm=1000) #all three treatments differ in 2006
 
 mod.2007<-subset(mod.data.early, year==2007)
 cover.2007<-mod.2007 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
-cover.rowsums.07 <- rowSums(cover.2007 [1:156])
-cover.relrow.07 <- data.frame(cover.2007/cover.rowsums.07)
-mod.bcd.07 <- vegdist(cover.relrow.07)
-permanova07<-adonis(cover.relrow.07~mod.2007$treatment, perm=100, method="bray")
+#cover.rowsums.07 <- rowSums(cover.2007 [1:156])
+#cover.relrow.07 <- data.frame(cover.2007/cover.rowsums.07)
+mod.bcd.07 <- vegdist(cover.2007)
+permanova07<-adonis(cover.2007~mod.2007$treatment, perm=1000, method="bray")
 permanova07
-pairwise.perm.manova(mod.bcd.07,mod.2007$treatment, nperm=100) #ungrazed communities are same, both differ from grazed
+pairwise.perm.manova(mod.bcd.07,mod.2007$treatment, nperm=1000) #ungrazed communities are same, both differ from grazed
 
 mod.2008<-subset(mod.data.early, year==2008)
 cover.2008<-mod.2008 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
-cover.rowsums.08 <- rowSums(cover.2008 [1:156])
-cover.relrow.08 <- data.frame(cover.2008/cover.rowsums.08)
-mod.bcd.08 <- vegdist(cover.relrow.08)
-permanova08<-adonis(cover.2008~mod.2008$treatment, perm=100, method="bray")
+#cover.rowsums.08 <- rowSums(cover.2008 [1:156])
+#cover.relrow.08 <- data.frame(cover.2008/cover.rowsums.08)
+mod.bcd.08 <- vegdist(cover.2008)
+permanova08<-adonis(cover.2008~mod.2008$treatment, perm=1000, method="bray")
 permanova08
-pairwise.perm.manova(mod.bcd.08,mod.2008$treatment, nperm=100) #ungrazed communities are same, both differ from grazed
+pairwise.perm.manova(mod.bcd.08,mod.2008$treatment, nperm=1000) #ungrazed communities are same, both differ from grazed
 
 
 #####################
 #successional vectors on summarized MODERATE data for burn (2005-2008)
 ####################
-mod_yr_burn<-all.dat %>% group_by(thermal, burn, graze, year, spname) %>% filter(thermal == "moderate", year>2004 & year<2009) %>% 
+mod_yr_burn<-all.dat %>% dplyr::group_by(thermal, burn, graze, year, spname) %>% filter(thermal == "moderate", year>2004 & year<2009) %>% 
   summarize(mean=mean(cover))%>% arrange(burn)%>%  arrange(graze)%>% arrange(year)%>%
   spread(spname, mean) 
 mod_yr_burn[is.na(mod_yr_burn)] <- 0 
@@ -591,12 +593,11 @@ vec.bcd <- vegdist(cover.relrow)
 dimcheckMDS(cover.relrow)#check for optimal dimensions
 
 #NMDS 
-vec.mds<-metaMDS(cover.relrow, trace = TRUE, autotransform = F, trymax=100, k=4) #runs several with different starting configurations
+vec.mds<-metaMDS(cover.relrow, distance="bray", trace = TRUE, autotransform = T, noshare=0.02, trymax=100, k=4) #runs several with different starting configurations
 #trace= TRUE will give output for step by step what its doing
 #default is 2 dimensions, can put k=4 for 4 dimensions
 vec.mds #solution converged after 20 tries
 summary(vec.mds)
-
 
 #quick plot of results
 stressplot(vec.mds, vec.bcd) #stressplot to show fit
@@ -643,7 +644,7 @@ legend("topleft",legend=levels(as.factor(mod_yr_burn$treatment)), col=Lcols.yr, 
 ############################
 #Indicator species for early MODERATE#
 ############################
-mod_vec_isa_early = multipatt(cover.relrow, mod_yr_burn$treatment, control=how(nperm=999))
+mod_vec_isa_early = multipatt(cover.yr, mod_yr_burn$treatment, control=how(nperm=999))
 summary(mod_vec_isa_early)
 
 ############################
@@ -653,7 +654,8 @@ summary(mod_vec_isa_early)
 #to plot indicator species (from above) on plot
 species.e<-as.data.frame(vec.mds$species)
 species.e$name<-row.names(species.e)
-spc.e<- species.e %>% filter(name == "Trifolium depauperatum"| name=="Crassula connata"| name=="Calandrinia ciliata"| name == "Rigiopappus leptoclodus" |name=="Poa secunda ssp. secunda"| name=="Festuca bromoides"|name=="Koeleria macrantha"| name=="Galium aparine"| name == "Rigiopappus leptoclodus" |name=="Festuca myuros"| name=="Layia gaillardiodes"| name=="Silene gallica"|name=="Athysanus pusilus"|name=="Sisyrinchium bellum"|name=="Epilobium sp."| name=="Chlorogalum pomeridianum"|name=="Sanicula bipinnatifida"|name=="Lessingia micradenia glabratai"|name=="Triteleia laxa"| name=="Allium serra"|name=="Plantago erecta"|name=="Lasthenia californica"|name=="Aphanes occidentalis"|name=="Erodium cicutarium"|name=="Gilia tricolor"|name=="Lepidium nitidum"| name=="Hemizonia congesta"| name=="Castilleja densiflora"| name=="Microseris douglasii"|name=="Agoseris heterophylla"|name=="Brodiaea spp."|name=="Hordeum murinum ssp. leporinum"|name=="Muilla maritima"|name=="Festuca perennis")
+spc.e<- species.e %>% filter(name == "Trifolium.depauperatum"| name=="Crassula.connata"| name=="Calandrinia.ciliata"| name == "Rigiopappus.leptoclodus" |name=="Poa.secunda.ssp..secunda"| name=="Festuca.bromoides"|name=="Koeleria.macrantha"| name=="Galium.aparine"| name == "Rigiopappus.leptoclodus" |name=="Festuca.myuros"| name=="Layia.gaillardiodes"| name=="Silene.gallica"|name=="Athysanus.pusilus"|name=="Sisyrinchium.bellum"|name=="Epilobium.sp."| name=="Chlorogalum.pomeridianum"|name=="Sanicula.bipinnatifida"|name=="Lessingia.micradenia.glabratai"|name=="Triteleia.laxa"| name=="Allium.serra"|name=="Plantago.erecta"|name=="Lasthenia.californica"|name=="Aphanes.occidentalis"|name=="Erodium.cicutarium"|name=="Gilia.tricolor"|name=="Lepidium.nitidum"| name=="Hemizonia.congesta"| name=="Castilleja.densiflora"| name=="Microseris.douglasii"|name=="Agoseris.heterophylla"|name=="Brodiaea.spp."|name=="Hordeum.murinum ssp..leporinum"|name=="Muilla.maritima"|name=="Festuca.perennis")
+#spc.e<- species.e %>% filter(name == "Trifolium depauperatum"| name=="Crassula connata"| name=="Calandrinia ciliata"| name == "Rigiopappus leptoclodus" |name=="Poa secunda ssp. secunda"| name=="Festuca bromoides"|name=="Koeleria macrantha"| name=="Galium aparine"| name == "Rigiopappus leptoclodus" |name=="Festuca myuros"| name=="Layia gaillardiodes"| name=="Silene gallica"|name=="Athysanus pusilus"|name=="Sisyrinchium bellum"|name=="Epilobium sp."| name=="Chlorogalum pomeridianum"|name=="Sanicula bipinnatifida"|name=="Lessingia micradenia glabratai"|name=="Triteleia laxa"| name=="Allium serra"|name=="Plantago erecta"|name=="Lasthenia californica"|name=="Aphanes occidentalis"|name=="Erodium cicutarium"|name=="Gilia tricolor"|name=="Lepidium nitidum"| name=="Hemizonia congesta"| name=="Castilleja densiflora"| name=="Microseris douglasii"|name=="Agoseris heterophylla"|name=="Brodiaea spp."|name=="Hordeum murinum ssp. leporinum"|name=="Muilla maritima"|name=="Festuca perennis")
 
 vec1<-ggplot(spscoresall.vec, aes(x=NMDS1, y=NMDS2))+
   geom_point(cex=3, aes(shape=as.factor(mod_yr_burn$year), col=mod_yr_burn$treatment))+
