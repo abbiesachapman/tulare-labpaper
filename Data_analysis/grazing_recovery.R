@@ -2,9 +2,7 @@
 # Objective: compare grazed and ungrazed plots as grazing was reintroduced
 # 2006-2008 = ungrazed plots are ungrazed, 2009-2012 = ungrazed plots have cattle reintroduced
 # all years = grazed plots are grazed
-library(ggplot2); theme_set(theme_classic())
-
-theme_set(theme_classic())
+library(ggplot2); theme_set(theme_bw())
 
 alldat<-read_csv(paste(datpath_clean, "/alldatsptrt.csv", sep="")) %>%
   select(-1)%>%
@@ -29,9 +27,12 @@ rich1<-rich%>%
   summarize(mean_rich = mean(richness), se_rich=calcSE(richness))
 
 ggplot(rich1, aes(year, mean_rich)) +
-  geom_line(aes(color=as.factor(trt)))+facet_wrap(~func) +
+  geom_line(aes(color=as.factor(trt)))+
+  geom_point(aes(color=as.factor(trt)))+
+  facet_wrap(~func) +
   geom_errorbar(aes(ymin=mean_rich-se_rich, ymax=mean_rich+se_rich, color=as.factor(trt)), width=.2)+
-  geom_vline(xintercept=2009)+geom_vline(xintercept=2005, color="red")
+  geom_vline(xintercept=2008.5)+geom_vline(xintercept=2004.5, color="red") +
+  labs(x = "Year", y = "Mean Species Richness", color = "Treatment")
 
 library(codyn)
 #plot time series of shannon diversity
@@ -54,9 +55,12 @@ shan1<-shan2%>%
   filter(!is.na(trt), !is.na(func), func!=("NA"), trt!="NA")
 
 ggplot(shan1, aes(year, meanShan)) +
-  geom_line(aes(color=as.factor(trt)))+facet_wrap(~func) +
+  geom_line(aes(color=as.factor(trt)))+
+  geom_point(aes(color=as.factor(trt)))+
+  facet_wrap(~func) +
   geom_errorbar(aes(ymin=meanShan-seShan, ymax=meanShan+seShan, color=as.factor(trt)), width=.2)+
-  geom_vline(xintercept=2009)+geom_vline(xintercept=2005, color="red")+ylab("Shannon Diversity")
+  geom_vline(xintercept=2008.5)+geom_vline(xintercept=2004.5, color="red")+ylab("Shannon Diversity") +
+  labs(x = "Year", y = "Mean Shannon Diversity", color = "Treatment")
 
 #plot timeseries of cover
 cov<-alldat%>%
@@ -76,7 +80,8 @@ ggplot(cov1, aes((year), meancov))+
   geom_line(aes(color=trt))+
   geom_point(aes(color=trt))+
   geom_errorbar(aes(ymin=meancov-se_cov, ymax=meancov+se_cov, color=trt), width=.2)+
-  facet_grid(~func) +geom_vline(xintercept=2009)+geom_vline(xintercept=2005, color="red")
+  facet_wrap(~func) +geom_vline(xintercept=2008.5)+geom_vline(xintercept=2004.5, color="red") +
+  labs(x = "Year", y = "Mean Cover (%)", color = "Treatment")
 
 ##########
 #Litter
@@ -106,7 +111,9 @@ litter <- joindat %>%
 ggplot(litter, aes(year, mean_litter)) +
   geom_line(aes(color=as.factor(trt))) +
   geom_point(aes(color=as.factor(trt))) +
-  geom_errorbar(aes(ymin=mean_litter-se_litter, ymax=mean_litter+se_litter, color=as.factor(trt)), width=.2)
+  geom_errorbar(aes(ymin=mean_litter-se_litter, ymax=mean_litter+se_litter, color=as.factor(trt)), width=.2) +
+  geom_vline(xintercept=2008.5)+geom_vline(xintercept=2004.5, color="red") +
+  labs(x = "Year", y = "Mean Litter Cover (%)", color = "Treatment")
 
 
 ##########
