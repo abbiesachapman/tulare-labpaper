@@ -1048,7 +1048,7 @@ fig1e
 
 fig1f<-ggplot(subset(spscoresall.mod.l, year==2012), aes(x=NMDS1, y=NMDS2, col=treatment, shape=as.factor(year)))+
   geom_point(cex=2)+
-  ggtitle("e) 2012")+
+  ggtitle("f) 2012")+
   xlim(-1,1)+
   ylim(-1,1)+
   scale_shape_manual(values=c(4),guide = guide_legend(title = "Year"))+
@@ -1072,7 +1072,7 @@ fig1g<-ggplot(spscoresall.mod.l, aes(x=NMDS1, y=NMDS2, col=spscoresall.mod.l$tre
   theme_bw()+
   #theme(legend.position="none")+
   theme(plot.title = element_text(color="black", size=14, face="bold.italic"))+
-  theme(legend.position="bottom", legend.title=element_text(size=10), legend.text=element_text(size=8), axis.text=element_text(size=8), axis.title=element_text(size=11))+
+  theme(legend.position="right", legend.spacing = unit(0.1, "cm"), legend.box = "horizontal",legend.title=element_text(size=8), legend.text=element_text(size=6), axis.text=element_text(size=6), axis.title=element_text(size=11))+
   theme(legend.background = element_rect(colour = 'black', fill = 'white', linetype='solid'))
 fig1g
 
@@ -1159,6 +1159,7 @@ cover.relrow <- data.frame(cover.yr /cover.rowsums)
 #make bray-curtis dissimilarity matrix
 vec.bcd <- vegdist(cover.yr)
 dimcheckMDS(cover.yr)#check for optimal dimensions
+#starts to flatten out around 5 or 6
 
 #NMDS 
 vec.mds<-metaMDS(cover.relrow, distance="bray", trace = TRUE, autotransform = T, noshare=0.02, trymax=100, k=6) #runs several with different starting configurations
@@ -1222,7 +1223,7 @@ summary(mod_vec_isa_late)
 #to plot indicator species (from above) on plot
 species.e<-as.data.frame(vec.mds$species)
 species.e$name<-row.names(species.e)
-spc.e<- species.e %>% filter(name == "Trifolium.depauperatum"| name=="Crassula.connata"| name=="Calandrinia.ciliata"| name == "Rigiopappus.leptoclodus" |name=="Poa.secunda.ssp..secunda"| name=="Festuca.bromoides"|name=="Koeleria.macrantha"| name=="Galium.aparine"| name == "Rigiopappus.leptoclodus" |name=="Festuca.myuros"| name=="Layia.gaillardiodes"| name=="Silene.gallica"|name=="Athysanus.pusilus"|name=="Sisyrinchium.bellum"|name=="Epilobium.sp."| name=="Chlorogalum.pomeridianum"|name=="Sanicula.bipinnatifida"|name=="Lessingia.micradenia.glabratai"|name=="Triteleia.laxa"| name=="Allium.serra"|name=="Plantago.erecta"|name=="Lasthenia.californica"|name=="Aphanes.occidentalis"|name=="Erodium.cicutarium"|name=="Gilia.tricolor"|name=="Lepidium.nitidum"| name=="Hemizonia.congesta"| name=="Castilleja.densiflora"| name=="Microseris.douglasii"|name=="Agoseris.heterophylla"|name=="Brodiaea.spp."|name=="Hordeum.murinum ssp..leporinum"|name=="Muilla.maritima"|name=="Festuca.perennis")
+spc.e<- species.e %>% filter(name == "Stellaria.nitens"| name=="Deschampsia.danthoniodes"| name=="Platystemon.californicus"| name == "Rigiopappus.leptoclodus" |name=="Microseris.douglasii"| name=="Agoseris.heterophylla"|name=="Sisyrinchium.bellum"| name=="Gilia.tricolor"| name == "Calandrinia.ciliata" |name=="Cryptantha.flaccida"| name=="Bromus.madritensis"| name=="Festuca.myuros"|name=="Calystegia.subacaulis"|name=="Hordeum.murinum.ssp..leporinum"|name=="Amsinckia.intermedia"| name=="Achillea.millefolium")
 #spc.e<- species.e %>% filter(name == "Trifolium depauperatum"| name=="Crassula connata"| name=="Calandrinia ciliata"| name == "Rigiopappus leptoclodus" |name=="Poa secunda ssp. secunda"| name=="Festuca bromoides"|name=="Koeleria macrantha"| name=="Galium aparine"| name == "Rigiopappus leptoclodus" |name=="Festuca myuros"| name=="Layia gaillardiodes"| name=="Silene gallica"|name=="Athysanus pusilus"|name=="Sisyrinchium bellum"|name=="Epilobium sp."| name=="Chlorogalum pomeridianum"|name=="Sanicula bipinnatifida"|name=="Lessingia micradenia glabratai"|name=="Triteleia laxa"| name=="Allium serra"|name=="Plantago erecta"|name=="Lasthenia californica"|name=="Aphanes occidentalis"|name=="Erodium cicutarium"|name=="Gilia tricolor"|name=="Lepidium nitidum"| name=="Hemizonia congesta"| name=="Castilleja densiflora"| name=="Microseris douglasii"|name=="Agoseris heterophylla"|name=="Brodiaea spp."|name=="Hordeum murinum ssp. leporinum"|name=="Muilla maritima"|name=="Festuca perennis")
 
 vec1<-ggplot(spscoresall.vec, aes(x=NMDS1, y=NMDS2))+
@@ -1253,9 +1254,11 @@ lay <- rbind(c(1,1,1,1),
              c(4,4,5,5),
              c(4,4,5,5),
              c(4,4,5,5),
-             c(6,6,6,6))
-grid.arrange(vec1, fig1b, fig1c, fig1d, fig1e, mylegend, layout_matrix = lay) #put panel together
-
+             c(6,6,7,7),
+             c(6,6,7,7),
+             c(6,6,7,7))
+grid.arrange(vec1, fig1b, fig1c, fig1d, fig1e, fig1f, mylegend, layout_matrix = lay) #put panel together
+#save as 800w x 1200l
 
 
 
