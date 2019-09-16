@@ -1141,7 +1141,7 @@ mod_isa_12 = multipatt(cover.2012, mod.2012$treatment, control=how(nperm=999))
 summary(mod_isa_12)
 
 #####################
-#successional vectors on summarized MODERATE data for burn (2005-2008)
+#successional vectors on summarized MODERATE data for graze (2008-2012)
 ####################
 mod_yr_graze<-all.dat %>% dplyr::group_by(thermal, burn, graze, year, spname) %>% filter(thermal == "moderate", year>2007 & year<2013) %>% 
   summarize(mean=mean(cover))%>% arrange(burn)%>%  arrange(graze)%>% arrange(year)%>%
