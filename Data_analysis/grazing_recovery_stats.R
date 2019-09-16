@@ -352,9 +352,10 @@ summary(fit2005fn)
 allcov<-lme(cover~graze, random = ~1|transect/quadratNew, random = ~1|year, data = rich2005%>%filter(func == "forb native"))
 summary(fit2005fn)
 
-allshan<-lme(Shannon~grazed*burn, random = ~1|as.factor(transectNew) + as.factor(year), data = shan3%>%filter(func == "forb native"))
+allshan<-lme(Shannon~grazed*burn, random = list(~1|transectNew, ~1|year), data = shan3%>%filter(func == "forb native"))
 summary(allshan)
 
+##example from onoline
 lme(y ~ p_gender*t_gender + part_gen, data=grdata,
     + random = list(~ p_gender | therapist, ~ 1 | group))
 
