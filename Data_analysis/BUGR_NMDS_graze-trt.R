@@ -942,13 +942,13 @@ cover.Biodrop.mod.late<-cover.mod.late[rowSums(cover.mod.late[, (1:156)]) ==0, ]
 #NMDS
 ######################
 #make bray-curtis dissimilarity matrix
-mod.bcd.late <- vegdist(cover.relrow.ml)
+mod.bcd.late <- vegdist(cover.mod.late)
 
 #check for optimal number of dimensions (optimum is when scree plot flattens out/break in slope, we'd also like the stress to be under 10% or 0.10)
-dimcheckMDS(cover.relrow.ml, distance = "bray", k = 8, trymax = 20, autotransform = F)
+dimcheckMDS(cover.mod.late, distance = "bray", k = 6, trymax = 20, autotransform = F)
 #starts to flatten out around dimension 5 or 6? no convergence
 
-mod.mds.late<-metaMDS(cover.relrow.ml, trace = TRUE, autotransform=F, trymax=100, k=4) #runs several with different starting configurations
+mod.mds.late<-metaMDS(cover.mod.late, distance="bray", trace = TRUE, noshare=0.02, autotransform=F, trymax=100, k=6) #runs several with different starting configurations
 #trace= TRUE will give output for step by step what its doing
 #default is 2 dimensions, k=4 for 4 dimensions
 mod.mds.late #no solution reached
@@ -961,6 +961,8 @@ orditorp(mod.mds.late,display="sites",cex=0.8,air=0.01)
 
 #store scores in new dataframe
 mod.trt.late <- mod.data.late %>%
+  unite(treatment, c(burn, graze), remove=FALSE, sep = " ")
+mod.data.late <- mod.data.late %>%
   unite(treatment, c(burn, graze), remove=FALSE, sep = " ")
 spscores1.mod.l<-scores(mod.mds.late,display="sites",choices=1)
 spscores2.mod.l<-scores(mod.mds.late,display="sites",choices=2)
@@ -1059,7 +1061,7 @@ fig1f<-ggplot(subset(spscoresall.mod.l, year==2012), aes(x=NMDS1, y=NMDS2, col=t
 #theme(legend.background = element_rect(colour = 'black', fill = 'white', linetype='solid'))
 fig1f
 
-fig1g<-ggplot(spscoresall.mod.l, aes(x=NMDS1, y=NMDS2, col=mod.data.late$treatment, shape=as.factor(mod.data.late$year)))+
+fig1g<-ggplot(spscoresall.mod.l, aes(x=NMDS1, y=NMDS2, col=spscoresall.mod.l$treatment, shape=as.factor(mod.data.late$year)))+
   geom_point(cex=2)+
   ggtitle("g)")+
   xlim(-1,1)+
@@ -1083,7 +1085,7 @@ g_legend<-function(a.gplot){
 mylegend<-g_legend(fig1g)
 
 ##test for differences in treatment by year#######
-mod.2008<-subset(mod.data.early, year==2008)
+mod.2008<-subset(mod.data.late, year==2008)
 cover.2008<-mod.2008 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
 #cover.rowsums.05 <- rowSums(cover.2005 [1:156])
 #cover.relrow.05 <- data.frame(cover.2005/cover.rowsums.05)
@@ -1094,7 +1096,7 @@ pairwise.perm.manova(mod.bcd.08,mod.2008$treatment, nperm=1000) #all three treat
 mod_isa_08 = multipatt(cover.2008, mod.2008$treatment, control=how(nperm=999))
 summary(mod_isa_08)
 
-mod.2009<-subset(mod.data.early, year==2009)
+mod.2009<-subset(mod.data.late, year==2009)
 cover.2009<-mod.2009 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
 #cover.rowsums.06 <- rowSums(cover.2006 [1:156])
 #cover.relrow.06 <- data.frame(cover.2006/cover.rowsums.06)
@@ -1105,7 +1107,7 @@ pairwise.perm.manova(mod.bcd.09,mod.2009$treatment, nperm=1000) #all three treat
 mod_isa_09 = multipatt(cover.2009, mod.2009$treatment, control=how(nperm=999))
 summary(mod_isa_09)
 
-mod.2010<-subset(mod.data.early, year==2010)
+mod.2010<-subset(mod.data.late, year==2010)
 cover.2010<-mod.2010 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
 #cover.rowsums.07 <- rowSums(cover.2007 [1:156])
 #cover.relrow.07 <- data.frame(cover.2007/cover.rowsums.07)
@@ -1116,7 +1118,7 @@ pairwise.perm.manova(mod.bcd.10,mod.2010$treatment, nperm=1000) #ungrazed commun
 mod_isa_10 = multipatt(cover.2010, mod.2010$treatment, control=how(nperm=999))
 summary(mod_isa_10)
 
-mod.2011<-subset(mod.data.early, year==2011)
+mod.2011<-subset(mod.data.late, year==2011)
 cover.2011<-mod.2011 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
 #cover.rowsums.08 <- rowSums(cover.2008 [1:156])
 #cover.relrow.08 <- data.frame(cover.2008/cover.rowsums.08)
@@ -1127,7 +1129,7 @@ pairwise.perm.manova(mod.bcd.11,mod.2011$treatment, nperm=1000) #ungrazed commun
 mod_isa_11 = multipatt(cover.2011, mod.2011$treatment, control=how(nperm=999))
 summary(mod_isa_11)
 
-mod.2012<-subset(mod.data.early, year==2012)
+mod.2012<-subset(mod.data.late, year==2012)
 cover.2012<-mod.2012 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
 #cover.rowsums.08 <- rowSums(cover.2008 [1:156])
 #cover.relrow.08 <- data.frame(cover.2008/cover.rowsums.08)
@@ -1154,11 +1156,11 @@ cover.relrow <- data.frame(cover.yr /cover.rowsums)
 #yr.env<-merge(env,mod_yr) %>% dplyr::select(NH4, NO3, totalN, ppt, temp)
 
 #make bray-curtis dissimilarity matrix
-vec.bcd <- vegdist(cover.relrow)
-dimcheckMDS(cover.relrow)#check for optimal dimensions
+vec.bcd <- vegdist(cover.yr)
+dimcheckMDS(cover.yr)#check for optimal dimensions
 
 #NMDS 
-vec.mds<-metaMDS(cover.relrow, distance="bray", trace = TRUE, autotransform = T, noshare=0.02, trymax=100, k=4) #runs several with different starting configurations
+vec.mds<-metaMDS(cover.relrow, distance="bray", trace = TRUE, autotransform = F, noshare=0.02, trymax=100, k=6) #runs several with different starting configurations
 #trace= TRUE will give output for step by step what its doing
 #default is 2 dimensions, can put k=4 for 4 dimensions
 vec.mds #solution converged after 20 tries
@@ -1227,8 +1229,8 @@ vec1<-ggplot(spscoresall.vec, aes(x=NMDS1, y=NMDS2))+
   ggtitle("a)")+
   scale_color_manual(values=c("red", "orange","forestgreen"), guide = guide_legend(title = "Treatment"), #change legend title
                      labels=c("Burned & Grazed", "Burned & Ungrazed", "Unburned & Ungrazed"))+ #change labels in the legend)+
-  scale_shape_manual(values=c(16,17,8,15,18),guide = guide_legend(title = "Year"))+
-  geom_path(arrow=arrow(), aes(col=mod_yr_burn$treatment))+
+  scale_shape_manual(values=c(16,17,8,15,4),guide = guide_legend(title = "Year"))+
+  geom_path(arrow=arrow(), aes(col=mod_yr_graze$treatment))+
   theme_bw()+
   theme(legend.position="none")+
   theme(plot.title = element_text(color="black", size=14, face="bold.italic"))
