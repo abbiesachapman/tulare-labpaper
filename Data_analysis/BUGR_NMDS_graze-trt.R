@@ -1083,7 +1083,7 @@ g_legend<-function(a.gplot){
 mylegend<-g_legend(fig1g)
 
 ##test for differences in treatment by year#######
-mod.2008<-subset(mod.data.early, year==2008)
+mod.2008<-subset(mod.data.late, year==2008)
 cover.2008<-mod.2008 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
 #cover.rowsums.05 <- rowSums(cover.2005 [1:156])
 #cover.relrow.05 <- data.frame(cover.2005/cover.rowsums.05)
@@ -1094,7 +1094,7 @@ pairwise.perm.manova(mod.bcd.08,mod.2008$treatment, nperm=1000) #all three treat
 mod_isa_08 = multipatt(cover.2008, mod.2008$treatment, control=how(nperm=999))
 summary(mod_isa_08)
 
-mod.2009<-subset(mod.data.early, year==2009)
+mod.2009<-subset(mod.data.late, year==2009)
 cover.2009<-mod.2009 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
 #cover.rowsums.06 <- rowSums(cover.2006 [1:156])
 #cover.relrow.06 <- data.frame(cover.2006/cover.rowsums.06)
@@ -1105,7 +1105,7 @@ pairwise.perm.manova(mod.bcd.09,mod.2009$treatment, nperm=1000) #all three treat
 mod_isa_09 = multipatt(cover.2009, mod.2009$treatment, control=how(nperm=999))
 summary(mod_isa_09)
 
-mod.2010<-subset(mod.data.early, year==2010)
+mod.2010<-subset(mod.data.late, year==2010)
 cover.2010<-mod.2010 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
 #cover.rowsums.07 <- rowSums(cover.2007 [1:156])
 #cover.relrow.07 <- data.frame(cover.2007/cover.rowsums.07)
@@ -1116,7 +1116,7 @@ pairwise.perm.manova(mod.bcd.10,mod.2010$treatment, nperm=1000) #ungrazed commun
 mod_isa_10 = multipatt(cover.2010, mod.2010$treatment, control=how(nperm=999))
 summary(mod_isa_10)
 
-mod.2011<-subset(mod.data.early, year==2011)
+mod.2011<-subset(mod.data.late, year==2011)
 cover.2011<-mod.2011 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
 #cover.rowsums.08 <- rowSums(cover.2008 [1:156])
 #cover.relrow.08 <- data.frame(cover.2008/cover.rowsums.08)
@@ -1127,7 +1127,7 @@ pairwise.perm.manova(mod.bcd.11,mod.2011$treatment, nperm=1000) #ungrazed commun
 mod_isa_11 = multipatt(cover.2011, mod.2011$treatment, control=how(nperm=999))
 summary(mod_isa_11)
 
-mod.2012<-subset(mod.data.early, year==2012)
+mod.2012<-subset(mod.data.late, year==2012)
 cover.2012<-mod.2012 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
 #cover.rowsums.08 <- rowSums(cover.2008 [1:156])
 #cover.relrow.08 <- data.frame(cover.2008/cover.rowsums.08)
@@ -1139,7 +1139,7 @@ mod_isa_12 = multipatt(cover.2012, mod.2012$treatment, control=how(nperm=999))
 summary(mod_isa_12)
 
 #####################
-#successional vectors on summarized MODERATE data for burn (2005-2008)
+#successional vectors on summarized MODERATE data for graze (2008-2012)
 ####################
 mod_yr_graze<-all.dat %>% dplyr::group_by(thermal, burn, graze, year, spname) %>% filter(thermal == "moderate", year>2007 & year<2013) %>% 
   summarize(mean=mean(cover))%>% arrange(burn)%>%  arrange(graze)%>% arrange(year)%>%
