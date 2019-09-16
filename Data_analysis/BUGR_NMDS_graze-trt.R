@@ -715,7 +715,7 @@ mod.env.late<-merge(env,mod.data.late) %>% dplyr::select(NH4, NO3, totalN, ppt, 
 
 #check count of graze and burn factor
 mod.data.late %>% 
-  group_by(graze, burn) %>%
+  group_by(graze, burn, transect) %>%
   summarise(no_rows = length(graze))
 
 plotnames<-mod.data.late[,1]
@@ -729,7 +729,6 @@ cover.mod.late<-cover.mod.late[-c(122),]
 cover.rowsums.ml <- rowSums(cover.mod.late [1:156])
 cover.relrow.ml <- data.frame(cover.mod.late /cover.rowsums.ml)
 
-
 #check for empty rows
 cover.Biodrop.mod.late<-cover.mod.late[rowSums(cover.mod.late[, (1:156)]) ==0, ] #if no empty rows, next step not needed
 #cover.Biodrop.gb<-cover.gb[rowSums(cover.gb[, (1:157)])  >0 ]#remove empty rows
@@ -738,12 +737,12 @@ cover.Biodrop.mod.late<-cover.mod.late[rowSums(cover.mod.late[, (1:156)]) ==0, ]
 #NMDS
 ######################
 #make bray-curtis dissimilarity matrix
-mod.bcd.late <- vegdist(cover.relrow.ml)
+mod.bcd.late <- vegdist(cover.mod.late)
 
 #check for optimal number of dimensions (optimum is when scree plot flattens out/break in slope, we'd also like the stress to be under 10% or 0.10)
-dimcheckMDS(cover.relrow.ml, distance = "bray", k = 8, trymax = 20, autotransform = F)
+dimcheckMDS(cover.mod.late, distance = "bray", k = 8, trymax = 20, autotransform = F)
 
-mod.mds.late<-metaMDS(cover.relrow.ml, trace = TRUE, autotransform=F, trymax=100, k=4) #runs several with different starting configurations
+mod.mds.late<-metaMDS(cover.mod.late, trace = TRUE, autotransform=F, noshare=0.01, trymax=100, k=4) #runs several with different starting configurations
 #trace= TRUE will give output for step by step what its doing
 #default is 2 dimensions, k=4 for 4 dimensions
 mod.mds.late #no solution reached
@@ -766,7 +765,7 @@ spscoresall.mod.l<-data.frame(year,treatment,spscores1.mod.l,spscores2.mod.l)
 ############################
 #Indicator species for late MODERATE#
 ############################
-mod_trt_isa_late = multipatt(cover.relrow.ml, mod.trt.late$treatment, control=how(nperm=999))
+mod_trt_isa_late = multipatt(cover.mod.late, mod.trt.late$treatment, control=how(nperm=999))
 summary(mod_trt_isa_late)
 
 #make  plot colored based on burn/graze, shapes on year
