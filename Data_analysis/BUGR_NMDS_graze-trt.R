@@ -1092,7 +1092,7 @@ cover.2008<-mod.2008 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-gr
 mod.bcd.08 <- vegdist(cover.2008)
 permanova08<-adonis(cover.2008~mod.2008$treatment,perm=1000, method="bray")
 permanova08
-pairwise.perm.manova(mod.bcd.08,mod.2008$treatment, nperm=1000) #all three treatments differ in 2005
+pairwise.perm.manova(mod.bcd.08,mod.2008$treatment, nperm=1000) #ungrazed communities are the same
 mod_isa_08 = multipatt(cover.2008, mod.2008$treatment, control=how(nperm=999))
 summary(mod_isa_08)
 
@@ -1103,7 +1103,7 @@ cover.2009<-mod.2009 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-gr
 mod.bcd.09 <- vegdist(cover.2009)
 permanova09<-adonis(cover.2009~mod.2009$treatment, perm=1000, method="bray")
 permanova09
-pairwise.perm.manova(mod.bcd.09,mod.2009$treatment, nperm=1000) #all three treatments differ in 2006
+pairwise.perm.manova(mod.bcd.09,mod.2009$treatment, nperm=1000) #all communities differ
 mod_isa_09 = multipatt(cover.2009, mod.2009$treatment, control=how(nperm=999))
 summary(mod_isa_09)
 
@@ -1114,7 +1114,7 @@ cover.2010<-mod.2010 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-gr
 mod.bcd.10 <- vegdist(cover.2010)
 permanova10<-adonis(cover.2010~mod.2010$treatment, perm=1000, method="bray")
 permanova10
-pairwise.perm.manova(mod.bcd.10,mod.2010$treatment, nperm=1000) #ungrazed communities are same, both differ from grazed
+pairwise.perm.manova(mod.bcd.10,mod.2010$treatment, nperm=1000) #all communities differ
 mod_isa_10 = multipatt(cover.2010, mod.2010$treatment, control=how(nperm=999))
 summary(mod_isa_10)
 
@@ -1125,7 +1125,7 @@ cover.2011<-mod.2011 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-gr
 mod.bcd.11 <- vegdist(cover.2011)
 permanova11<-adonis(cover.2011~mod.2011$treatment, perm=1000, method="bray")
 permanova11
-pairwise.perm.manova(mod.bcd.11,mod.2011$treatment, nperm=1000) #ungrazed communities are same, both differ from grazed
+pairwise.perm.manova(mod.bcd.11,mod.2011$treatment, nperm=1000) #all communities differ
 mod_isa_11 = multipatt(cover.2011, mod.2011$treatment, control=how(nperm=999))
 summary(mod_isa_11)
 
@@ -1136,7 +1136,7 @@ cover.2012<-mod.2012 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-gr
 mod.bcd.12 <- vegdist(cover.2012)
 permanova12<-adonis(cover.2012~mod.2012$treatment, perm=1000, method="bray")
 permanova12
-pairwise.perm.manova(mod.bcd.12,mod.2012$treatment, nperm=1000) #ungrazed communities are same, both differ from grazed
+pairwise.perm.manova(mod.bcd.12,mod.2012$treatment, nperm=1000) #all communities differ
 mod_isa_12 = multipatt(cover.2012, mod.2012$treatment, control=how(nperm=999))
 summary(mod_isa_12)
 
@@ -1144,6 +1144,7 @@ summary(mod_isa_12)
 #successional vectors on summarized MODERATE data for graze (2008-2012)
 ####################
 mod_yr_graze<-all.dat %>% dplyr::group_by(thermal, burn, graze, year, spname) %>% filter(thermal == "moderate", year>2007 & year<2013) %>% 
+  filter(quadratNew!="THM1-1" & year !="2009") %>% dplyr::select(-X1)%>%
   summarize(mean=mean(cover))%>% arrange(burn)%>%  arrange(graze)%>% arrange(year)%>%
   spread(spname, mean) 
 mod_yr_graze[is.na(mod_yr_graze)] <- 0 
@@ -1160,7 +1161,7 @@ vec.bcd <- vegdist(cover.yr)
 dimcheckMDS(cover.yr)#check for optimal dimensions
 
 #NMDS 
-vec.mds<-metaMDS(cover.relrow, distance="bray", trace = TRUE, autotransform = F, noshare=0.02, trymax=100, k=6) #runs several with different starting configurations
+vec.mds<-metaMDS(cover.relrow, distance="bray", trace = TRUE, autotransform = T, noshare=0.02, trymax=100, k=6) #runs several with different starting configurations
 #trace= TRUE will give output for step by step what its doing
 #default is 2 dimensions, can put k=4 for 4 dimensions
 vec.mds #solution converged after 20 tries
