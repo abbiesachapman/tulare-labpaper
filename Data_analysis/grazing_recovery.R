@@ -68,18 +68,29 @@ cov<-alldat%>%
   mutate(func=paste(type, status))%>%
   mutate(trt=paste(graze, burn))%>%
   filter(cover != 0, spname !="Unknown", spname!="Moss") %>%
-  group_by(year, quadratNew, trt, func, spcode, spname)%>%
+  group_by(year, quadratNew, trt, func)%>%
   summarize(sumcov=sum(cover))%>%
   filter(!is.na(trt), !is.na(func))%>%
-  mutate(prepost=ifelse(year<2009, "pre", "post"))
+  mutate(prepost=ifelse(year<2009, "pre", "post"))%>%
+  group_by(year, prepost, quadratNew, trt)%>%
+  mutate(totcov=sum(sumcov))%>%
+  mutate(relcov=sumcov/totcov)
 cov1<-cov%>%
   group_by(year, trt, func, prepost)%>%
-  summarize(meancov=mean(sumcov), se_cov=calcSE(sumcov))
+  summarize(meancov=mean(sumcov), se_cov=calcSE(sumcov), meanrelcov=mean(relcov), se_relcov=calcSE(relcov))
+
 
 ggplot(cov1, aes((year), meancov))+
   geom_line(aes(color=trt))+
   geom_point(aes(color=trt))+
   geom_errorbar(aes(ymin=meancov-se_cov, ymax=meancov+se_cov, color=trt), width=.2)+
+  facet_wrap(~func) +geom_vline(xintercept=2008.5)+geom_vline(xintercept=2004.5, color="red") +
+  labs(x = "Year", y = "Mean Cover (%)", color = "Treatment")
+
+ggplot(cov1, aes((year), meanrelcov))+
+  geom_line(aes(color=trt))+
+  geom_point(aes(color=trt))+
+  geom_errorbar(aes(ymin=meanrelcov-se_relcov, ymax=meanrelcov+se_relcov, color=trt), width=.2)+
   facet_wrap(~func) +geom_vline(xintercept=2008.5)+geom_vline(xintercept=2004.5, color="red") +
   labs(x = "Year", y = "Mean Cover (%)", color = "Treatment")
 
