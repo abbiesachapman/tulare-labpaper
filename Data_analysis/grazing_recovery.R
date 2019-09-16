@@ -93,7 +93,7 @@ ggplot(cov1, aes((year), meanrelcov))+
   geom_point(aes(color=trt))+
   geom_errorbar(aes(ymin=meanrelcov-se_relcov, ymax=meanrelcov+se_relcov, color=trt), width=.2)+
   facet_wrap(~func) +geom_vline(xintercept=2008.5)+geom_vline(xintercept=2004.5, color="red") +
-  labs(x = "Year", y = "Mean Cover (%)", color = "Treatment")
+  labs(x = "Year", y = "Mean Relative Cover", color = "Treatment")
 
 ##########
 #Litter
