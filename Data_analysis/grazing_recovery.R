@@ -113,6 +113,7 @@ calcSE<-function(x){
 
 #take avg litter and se
 litter <- joindat %>%
+  filter(year != "2005") %>%
   filter(type != "NA", status != "NA") %>% #remove NAs
   mutate(trt=paste(graze, burn)) %>%
   group_by(trt, year) %>%
