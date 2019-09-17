@@ -3,14 +3,7 @@ library(readr)
 library(sjstats) #standardized effect size cohen's f
 library(nlme) #linear mixed models
 
-#load updated master data
-alldat<-read_csv(paste(datpath_clean, "/alldatsptrt.csv", sep="")) %>%
-  select(-1)%>%
-  filter(transect%in%c("THBUGM1", "THBUGM2", "THM1", "THM2", "THM3", "THM4", "THUBUGM1", "THUBUGM2"))%>%
-  filter(!quadratNew%in%c("THM1-1", "THM3-3", "THM1-10"))%>%
-  filter(thermal=="moderate")%>%
-  group_by(year, spname, spcode, quadratNew, status, type, transect, burn, graze)%>%
-  summarize(cover=sum(cover))
+#load updated master data, "alldat", in grazing_recovery.R
 
 ########
 #one-way ANOVA analyze within each year 
@@ -109,6 +102,15 @@ cov<-alldat%>%
   mutate(totcov=sum(sumcov))%>%
   mutate(relcov=sumcov/totcov)
 
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2005, func == "forb native")))
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2006, func == "forb native")))
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2007, func == "forb native")))
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2008, func == "forb native")))
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2009, func == "forb native")))
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2010, func == "forb native")))
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2011, func == "forb native")))
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2012, func == "forb native")))
+
 cov2005 <- cov %>%
   filter(year == 2005) %>%
   filter(trt != "ungrazed unburned")
@@ -174,6 +176,15 @@ anova_stats(anova(lm(sumcov~trt, data = cov2012%>%filter(func == "grass native")
 shan3 <- shan2 %>%
   mutate(trt1 = trt) %>%
   separate(trt, into=c("grazed", "burn"), sep=" ")
+
+TukeyHSD(aov(Shannon~trt, data = shan2%>%filter(year == 2005, func == "forb native")))
+TukeyHSD(aov(Shannon~trt, data = shan2%>%filter(year == 2006, func == "forb native")))
+TukeyHSD(aov(Shannon~trt, data = shan2%>%filter(year == 2007, func == "forb native")))
+TukeyHSD(aov(Shannon~trt, data = shan2%>%filter(year == 2008, func == "forb native")))
+TukeyHSD(aov(Shannon~trt, data = shan2%>%filter(year == 2009, func == "forb native")))
+TukeyHSD(aov(Shannon~trt, data = shan2%>%filter(year == 2010, func == "forb native")))
+TukeyHSD(aov(Shannon~trt, data = shan2%>%filter(year == 2011, func == "forb native")))
+TukeyHSD(aov(Shannon~trt, data = shan2%>%filter(year == 2012, func == "forb native")))
 
 shan2005 <- shan3%>%
   filter(year == 2005) %>%
@@ -241,6 +252,15 @@ lit <- joindat %>%
   mutate(trt=paste(graze, burn)) %>%
   ungroup() %>%
   select(quadratNew, year, trt, transect, burn, graze, litter)
+
+TukeyHSD(aov(litter~trt, data = lit%>%filter(year == 2005)))
+TukeyHSD(aov(litter~trt, data = lit%>%filter(year == 2006)))
+TukeyHSD(aov(litter~trt, data = lit%>%filter(year == 2007)))
+TukeyHSD(aov(litter~trt, data = lit%>%filter(year == 2008)))
+TukeyHSD(aov(litter~trt, data = lit%>%filter(year == 2009)))
+TukeyHSD(aov(litter~trt, data = lit%>%filter(year == 2010)))
+TukeyHSD(aov(litter~trt, data = lit%>%filter(year == 2011)))
+TukeyHSD(aov(litter~trt, data = lit%>%filter(year == 2012)))
 
 lit2005 <- lit%>%
   filter(year == 2005) %>%
