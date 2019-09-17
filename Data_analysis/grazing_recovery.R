@@ -10,17 +10,18 @@ alldat<-read_csv(paste(datpath_clean, "/alldatsptrt.csv", sep="")) %>%
   filter(!quadratNew%in%c("THM1-1", "THM3-3", "THM1-10"))%>%
   filter(thermal=="moderate")%>%
   group_by(year, spname, spcode, quadratNew, status, type, transect, burn, graze)%>%
-  summarize(cover=sum(cover))%>%
-  filter(cover!=0)
+  summarize(cover=sum(cover))
 
+#plot timeseries of richness 
 #plot timeseries of richness 
 rich <- alldat %>%
   filter(type!="NA", status!="NA")%>%
   mutate(func=paste(type, status))%>%
   mutate(trt=paste(graze, burn))%>%
-  filter(cover != 0, spname !="Unknown", spname!="Moss") %>%
+  mutate(present=ifelse(cover>0, 1, 0))%>%
+  filter(spname !="Unknown", spname!="Moss") %>%
   group_by(year, quadratNew, trt, func)%>%
-  summarize(richness = length(unique(spname)))%>%
+  summarize(richness = sum(present))%>%
   mutate(prepost=ifelse(year<2009, "pre", "post"))
 
 rich1<-rich%>%
