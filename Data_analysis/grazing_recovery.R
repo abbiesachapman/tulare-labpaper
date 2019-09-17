@@ -13,7 +13,6 @@ alldat<-read_csv(paste(datpath_clean, "/alldatsptrt.csv", sep="")) %>%
   summarize(cover=sum(cover))
 
 #plot timeseries of richness 
-#plot timeseries of richness 
 rich <- alldat %>%
   filter(type!="NA", status!="NA")%>%
   mutate(func=paste(type, status))%>%
