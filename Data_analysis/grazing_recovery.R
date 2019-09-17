@@ -69,7 +69,7 @@ cov<-alldat%>%
   filter(type!="NA", status!="NA")%>%
   mutate(func=paste(type, status))%>%
   mutate(trt=paste(graze, burn))%>%
-  filter(cover != 0, spname !="Unknown", spname!="Moss") %>%
+  filter(spname !="Unknown", spname!="Moss") %>%
   group_by(year, quadratNew, trt, func)%>%
   summarize(sumcov=sum(cover))%>%
   filter(!is.na(trt), !is.na(func))%>%
