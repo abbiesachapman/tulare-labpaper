@@ -346,13 +346,10 @@ summary(fitpostfn)
 
 
 # all years??
-allrich<-lme(richness~graze, random = ~1|transect/quadratNew, random = ~1|year, data = rich2005%>%filter(func == "forb native"))
-summary(fit2005fn)
-
-allcov<-lme(cover~graze, random = ~1|transect/quadratNew, random = ~1|year, data = rich2005%>%filter(func == "forb native"))
-summary(fit2005fn)
-
 allshan<-lme(Shannon~grazed+burn, random = list(~1|transectNew, ~1|year), data = shan3%>%filter(func == "forb native"))
+summary(allshan)
+
+allshan<-lme(Shannon~trt1, random = list(~1|transectNew, ~1|year), data = shan3%>%filter(func == "forb native"))
 summary(allshan)
 
 ##example from onoline
