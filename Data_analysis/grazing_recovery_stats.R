@@ -10,8 +10,7 @@ alldat<-read_csv(paste(datpath_clean, "/alldatsptrt.csv", sep="")) %>%
   filter(!quadratNew%in%c("THM1-1", "THM3-3", "THM1-10"))%>%
   filter(thermal=="moderate")%>%
   group_by(year, spname, spcode, quadratNew, status, type, transect, burn, graze)%>%
-  summarize(cover=sum(cover))%>%
-  filter(cover!=0)
+  summarize(cover=sum(cover))
 
 ########
 #one-way ANOVA analyze within each year 
