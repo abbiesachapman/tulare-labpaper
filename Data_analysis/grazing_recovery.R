@@ -182,11 +182,12 @@ f6 <- ggplot(prism_grow%>%filter(year%in%c(2005:2012)), aes(year, prcp)) +
         geom_bar(stat = "identity", fill = "lightgrey") +
         labs(x = "Year", y = "Mean Annual Precipitation (mm)")
 
-ggarrange(f1, f2, f3, f4, f5, f6, ncol = 2, nrow = 1, 
-          common.legend = TRUE, legend = "right",
-          align = "v",labels = c("a) native forb", "b) non-native grass",
-                                 "c) native forb", "d) non-native grass",
-                                 "e) litter", "f)precipitation"))
+ggarrange(f1, f2, f3, f4, f5, f6, ncol = 2, nrow = 3, 
+          common.legend = TRUE, legend = "right", 
+          font.label = list(size = 12),
+          align = "v",labels = c("a) Native forb", "b) Non-native grass",
+                                 "c) Native forb", "d) Non-native grass",
+                                 "e) Litter", "f) Precipitation"))
 
 
 ##########
