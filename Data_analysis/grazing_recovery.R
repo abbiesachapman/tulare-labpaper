@@ -30,7 +30,7 @@ rich1<-rich%>%
 ggplot(rich1, aes(year, mean_rich)) +
   geom_line(aes(color=as.factor(trt)))+
   geom_point(aes(color=as.factor(trt)))+
-  facet_wrap(~func) +
+  facet_wrap(~func, scales="free") +
   geom_errorbar(aes(ymin=mean_rich-se_rich, ymax=mean_rich+se_rich, color=as.factor(trt)), width=.2)+
   geom_vline(xintercept=2008.5)+geom_vline(xintercept=2004.5, color="red") +
   labs(x = "Year", y = "Mean Species Richness", color = "Treatment")
