@@ -96,6 +96,12 @@ ggplot(cov1, aes((year), meanrelcov))+
   facet_wrap(~func) +geom_vline(xintercept=2008.5)+geom_vline(xintercept=2004.5, color="red") +
   labs(x = "Year", y = "Mean Relative Cover", color = "Treatment")
 
+#raw data
+ggplot(cov, aes((year), relcov))+
+  geom_point(aes(color=trt))+
+  facet_wrap(~func) +geom_vline(xintercept=2008.5)+geom_vline(xintercept=2004.5, color="red") +
+  labs(x = "Year", y = "Relative Cover", color = "Treatment")
+
 ##########
 #Litter
 ##########
