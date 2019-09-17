@@ -133,6 +133,61 @@ ggplot(litter, aes(year, mean_litter)) +
   geom_vline(xintercept=2008.5)+geom_vline(xintercept=2004.5, color="red") +
   labs(x = "Year", y = "Mean Litter Cover (%)", color = "Treatment")
 
+##########
+#Publication figure
+##########
+library(ggpubr)
+f1 <- ggplot(rich1%>%filter(func == "forb native", year%in%c(2005:2012)), aes(year, mean_rich)) +
+        geom_line(aes(color=as.factor(trt))) +
+        geom_point(aes(color=as.factor(trt))) +
+        geom_errorbar(aes(ymin=mean_rich-se_rich, ymax=mean_rich+se_rich, color=as.factor(trt)), width=.2)+
+        geom_vline(xintercept=2008.5, color = "grey66", lty=2)+geom_vline(xintercept=2004.5, color="grey66", lty=2) +
+        labs(x = "Year", y = "Mean Species Richness", color = "Treatment")+
+        scale_color_manual(values= c("grey0", "grey36", "grey60"))
+
+f2 <- ggplot(rich1%>%filter(func == "grass non-native", year%in%c(2005:2012)), aes(year, mean_rich)) +
+        geom_line(aes(color=as.factor(trt))) +
+        geom_point(aes(color=as.factor(trt))) +
+        geom_errorbar(aes(ymin=mean_rich-se_rich, ymax=mean_rich+se_rich, color=as.factor(trt)), width=.2)+
+        geom_vline(xintercept=2008.5, color = "grey66", lty=2)+geom_vline(xintercept=2004.5, color="grey66", lty=2) +
+        labs(x = "Year", y = "Mean Species Richness", color = "Treatment")+
+        scale_color_manual(values= c("grey0", "grey36", "grey60"))
+
+f3 <- ggplot(cov1%>%filter(func == "forb native", year%in%c(2005:2012)), aes((year), meanrelcov))+
+        geom_line(aes(color=trt))+
+        geom_point(aes(color=trt))+
+        geom_errorbar(aes(ymin=meanrelcov-se_relcov, ymax=meanrelcov+se_relcov, color=trt), width=.2)+
+        geom_vline(xintercept=2008.5, color = "grey66", lty=2)+geom_vline(xintercept=2004.5, color = "grey66", lty=2) +
+        labs(x = "Year", y = "Mean Relative Cover (%)", color = "Treatment") +
+        scale_color_manual(values= c("grey0", "grey36", "grey60"))
+
+f4 <- ggplot(cov1%>%filter(func == "grass non-native", year%in%c(2005:2012)), aes((year), meanrelcov))+
+        geom_line(aes(color=trt))+
+        geom_point(aes(color=trt))+
+        geom_errorbar(aes(ymin=meanrelcov-se_relcov, ymax=meanrelcov+se_relcov, color=trt), width=.2)+
+        geom_vline(xintercept=2008.5, color = "grey66", lty=2)+geom_vline(xintercept=2004.5, color = "grey66", lty=2) +
+        labs(x = "Year", y = "Mean Relative Cover (%)", color = "Treatment") +
+        scale_color_manual(values= c("grey0", "grey36", "grey60"))
+
+f5 <- ggplot(litter%>%filter(year%in%c(2005:2012)), aes(year, mean_litter)) +
+        geom_line(aes(color=as.factor(trt))) +
+        geom_point(aes(color=as.factor(trt))) +
+        geom_errorbar(aes(ymin=mean_litter-se_litter, ymax=mean_litter+se_litter, color=as.factor(trt)), width=.2) +
+        geom_vline(xintercept=2008.5, color = "grey66", lty =2)+geom_vline(xintercept=2004.5, color="grey66", lty = 2) +
+        labs(x = "Year", y = "Mean Litter Cover (%)", color = "Treatment") +
+        scale_color_manual(values= c("grey0", "grey36", "grey60"))
+
+#load "prism grow" from BUGR_timeseries.R
+f6 <- ggplot(prism_grow%>%filter(year%in%c(2005:2012)), aes(year, prcp)) +
+        geom_bar(stat = "identity", fill = "lightgrey") +
+        labs(x = "Year", y = "Mean Annual Precipitation (mm)")
+
+ggarrange(f1, f2, f3, f4, f5, f6, ncol = 2, nrow = 1, 
+          common.legend = TRUE, legend = "right",
+          align = "v",labels = c("a) native forb", "b) non-native grass",
+                                 "c) native forb", "d) non-native grass",
+                                 "e) litter", "f)precipitation"))
+
 
 ##########
 # Indicator Species
