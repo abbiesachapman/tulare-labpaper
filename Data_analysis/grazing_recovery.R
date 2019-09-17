@@ -15,13 +15,12 @@ alldat<-read_csv(paste(datpath_clean, "/alldatsptrt.csv", sep="")) %>%
 #plot timeseries of richness 
 rich <- alldat %>%
   filter(type!="NA", status!="NA")%>%
+  filter(spname !="Unknown", spname!="Moss") %>%
   mutate(func=paste(type, status))%>%
   mutate(trt=paste(graze, burn))%>%
   mutate(present=ifelse(cover>0, 1, 0))%>%
-  filter(spname !="Unknown", spname!="Moss") %>%
-  group_by(year, quadratNew, trt, func)%>%
-  summarize(richness = sum(present))%>%
-  mutate(prepost=ifelse(year<2009, "pre", "post"))
+  group_by(year, quadratNew, func, trt, type, status, burn, graze, transect, present)%>%
+  summarize(richness = sum(present))
 
 rich1<-rich%>%
   group_by(year, trt, func, prepost) %>%
@@ -69,15 +68,15 @@ cov<-alldat%>%
   mutate(func=paste(type, status))%>%
   mutate(trt=paste(graze, burn))%>%
   filter(spname !="Unknown", spname!="Moss") %>%
-  group_by(year, quadratNew, trt, func)%>%
+  group_by(year, quadratNew, trt, func, burn, graze, transect)%>%
   summarize(sumcov=sum(cover))%>%
-  filter(!is.na(trt), !is.na(func))%>%
-  mutate(prepost=ifelse(year<2009, "pre", "post"))%>%
-  group_by(year, prepost, quadratNew, trt)%>%
+  filter(!is.na(trt), !is.na(func), !is.na(sumcov)) %>%
+  group_by(year, quadratNew, trt)%>%
   mutate(totcov=sum(sumcov))%>%
   mutate(relcov=sumcov/totcov)
+
 cov1<-cov%>%
-  group_by(year, trt, func, prepost)%>%
+  group_by(year, trt, func)%>%
   summarize(meancov=mean(sumcov), se_cov=calcSE(sumcov), meanrelcov=mean(relcov), se_relcov=calcSE(relcov))
 
 

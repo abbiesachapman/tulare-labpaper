@@ -12,25 +12,18 @@ library(nlme) #linear mixed models
 ########
 
 #Richness
-rich2 <- alldat %>%
-  filter(type!="NA", status!="NA")%>%
-  filter(spname !="Unknown", spname!="Moss") %>%
-  mutate(func=paste(type, status))%>%
-  mutate(trt=paste(graze, burn))%>%
-  mutate(present=ifelse(cover>0, 1, 0))%>%
-  group_by(year, quadratNew, func, trt, type, status, burn, graze, transect, present)%>%
-  summarize(richness = sum(present))
+#load "rich" from grazing_recovery.R
 
-TukeyHSD(aov(richness~trt, data = rich2%>%filter(year == 2005, func == "forb native")))
-TukeyHSD(aov(richness~trt, data = rich2%>%filter(year == 2006, func == "forb native")))
-TukeyHSD(aov(richness~trt, data = rich2%>%filter(year == 2007, func == "forb native")))
-TukeyHSD(aov(richness~trt, data = rich2%>%filter(year == 2008, func == "forb native")))
-TukeyHSD(aov(richness~trt, data = rich2%>%filter(year == 2009, func == "forb native")))
-TukeyHSD(aov(richness~trt, data = rich2%>%filter(year == 2010, func == "forb native")))
-TukeyHSD(aov(richness~trt, data = rich2%>%filter(year == 2011, func == "forb native")))
-TukeyHSD(aov(richness~trt, data = rich2%>%filter(year == 2012, func == "forb native")))
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2005, func == "forb native")))
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2006, func == "forb native")))
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2007, func == "forb native")))
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2008, func == "forb native")))
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2009, func == "forb native")))
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2010, func == "forb native")))
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2011, func == "forb native")))
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2012, func == "forb native")))
 
-rich2005 <- rich2 %>%
+rich2005 <- rich %>%
   filter(trt != "ungrazed unburned") %>%
   filter(year == 2005)
 anova_stats(anova(lm(richness~graze, data = rich2005%>%filter(func == "forb native"))))
@@ -38,7 +31,7 @@ anova_stats(anova(lm(richness~graze, data = rich2005%>%filter(func == "grass non
 anova_stats(anova(lm(richness~graze, data = rich2005%>%filter(func == "forb non-native"))))
 anova_stats(anova(lm(richness~graze, data = rich2005%>%filter(func == "grass native"))))
 
-rich2006 <- rich2 %>%
+rich2006 <- rich %>%
   filter(trt != "ungrazed unburned") %>%
   filter(year == 2006)
 anova_stats(anova(lm(richness~graze, data = rich2006%>%filter(func == "forb native"))))
@@ -46,7 +39,7 @@ anova_stats(anova(lm(richness~graze, data = rich2006%>%filter(func == "grass non
 anova_stats(anova(lm(richness~graze, data = rich2006%>%filter(func == "forb non-native"))))
 anova_stats(anova(lm(richness~graze, data = rich2006%>%filter(func == "grass native"))))
 
-rich2007 <- rich2 %>%
+rich2007 <- rich %>%
   filter(trt != "ungrazed unburned") %>%
   filter(year == 2007)
 anova_stats(anova(lm(richness~graze, data = rich2007%>%filter(func == "forb native"))))
@@ -54,7 +47,7 @@ anova_stats(anova(lm(richness~graze, data = rich2007%>%filter(func == "grass non
 anova_stats(anova(lm(richness~graze, data = rich2007%>%filter(func == "forb non-native"))))
 anova_stats(anova(lm(richness~graze, data = rich2007%>%filter(func == "grass native"))))
 
-rich2008 <- rich2 %>%
+rich2008 <- rich %>%
   filter(trt != "ungrazed unburned") %>%
   filter(year == 2008)
 anova_stats(anova(lm(richness~graze, data = rich2008%>%filter(func == "forb native"))))
@@ -62,28 +55,28 @@ anova_stats(anova(lm(richness~graze, data = rich2008%>%filter(func == "grass non
 anova_stats(anova(lm(richness~graze, data = rich2008%>%filter(func == "forb non-native"))))
 anova_stats(anova(lm(richness~graze, data = rich2008%>%filter(func == "grass native"))))
 
-rich2009 <- rich2 %>%
+rich2009 <- rich %>%
   filter(year == 2009)
 anova_stats(anova(lm(richness~trt, data = rich2009%>%filter(func == "forb native"))))
 anova_stats(anova(lm(richness~trt, data = rich2009%>%filter(func == "grass non-native"))))
 anova_stats(anova(lm(richness~trt, data = rich2009%>%filter(func == "forb non-native"))))
 anova_stats(anova(lm(richness~trt, data = rich2009%>%filter(func == "grass native"))))
 
-rich2010 <- rich2 %>%
+rich2010 <- rich %>%
   filter(year == 2010)
 anova_stats(anova(lm(richness~trt, data = rich2010%>%filter(func == "forb native"))))
 anova_stats(anova(lm(richness~trt, data = rich2010%>%filter(func == "grass non-native"))))
 anova_stats(anova(lm(richness~trt, data = rich2010%>%filter(func == "forb non-native"))))
 anova_stats(anova(lm(richness~trt, data = rich2010%>%filter(func == "grass native"))))
 
-rich2011 <- rich2 %>%
+rich2011 <- rich %>%
   filter(year == 2011)
 anova_stats(anova(lm(richness~trt, data = rich2011%>%filter(func == "forb native"))))
 anova_stats(anova(lm(richness~trt, data = rich2011%>%filter(func == "grass non-native"))))
 anova_stats(anova(lm(richness~trt, data = rich2011%>%filter(func == "forb non-native"))))
 anova_stats(anova(lm(richness~trt, data = rich2011%>%filter(func == "grass native"))))
 
-rich2012 <- rich2 %>%
+rich2012 <- rich %>%
   filter(year == 2012)
 anova_stats(anova(lm(richness~trt, data = rich2012%>%filter(func == "forb native"))))
 anova_stats(anova(lm(richness~trt, data = rich2012%>%filter(func == "grass non-native"))))
@@ -91,16 +84,7 @@ anova_stats(anova(lm(richness~trt, data = rich2012%>%filter(func == "forb non-na
 anova_stats(anova(lm(richness~trt, data = rich2012%>%filter(func == "grass native"))))
 
 #cover
-cov<-alldat%>%
-  filter(type!="NA", status!="NA")%>%
-  mutate(func=paste(type, status))%>%
-  mutate(trt=paste(graze, burn))%>%
-  filter(spname !="Unknown", spname!="Moss") %>%
-  group_by(year, quadratNew, trt, func, spcode, spname, burn, graze, transect)%>%
-  summarize(sumcov=sum(cover))%>%
-  filter(!is.na(trt), !is.na(func)) %>%
-  mutate(totcov=sum(sumcov))%>%
-  mutate(relcov=sumcov/totcov)
+#load "cov" from grazing_recovery.R
 
 TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2005, func == "forb native")))
 TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2006, func == "forb native")))
@@ -172,7 +156,7 @@ anova_stats(anova(lm(sumcov~trt, data = cov2012%>%filter(func == "forb non-nativ
 anova_stats(anova(lm(sumcov~trt, data = cov2012%>%filter(func == "grass native"))))
 
 #evenness
-#pull in object "shan2" from grazing recovery
+#load object "shan2" from grazing_recovery.R
 shan3 <- shan2 %>%
   mutate(trt1 = trt) %>%
   separate(trt, into=c("grazed", "burn"), sep=" ")
@@ -301,7 +285,7 @@ anova_stats(anova(lm(litter~trt, data = lit2012)))
 ########
 #one-way ANOVA analyze two blocks of years: 2005-2008 and 2008-2012 
 ########
-rich3 <- rich2 %>%
+rich3 <- rich %>%
   filter(trt != "ungrazed unburned") %>%
   filter(year%in%c(2005, 2006, 2007, 2008))
 
@@ -310,7 +294,7 @@ anova_stats(anova(lm(richness~graze, data = rich3%>%filter(func == "grass non-na
 anova_stats(anova(lm(richness~graze, data = rich3%>%filter(func == "forb non-native"))))
 anova_stats(anova(lm(richness~graze, data = rich3%>%filter(func == "grass native"))))
 
-rich4 <- rich2 %>%
+rich4 <- rich %>%
   filter(year%in%c(2008:2012))
 
 anova_stats(anova(lm(richness~trt, data = rich4%>%filter(func == "forb native"))))
