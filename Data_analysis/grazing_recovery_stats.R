@@ -28,6 +28,15 @@ rich2 <- alldat %>%
   group_by(year, quadratNew, func, trt, type, status, burn, graze, transect, present)%>%
   summarize(richness = sum(present))
 
+TukeyHSD(aov(richness~trt, data = rich2%>%filter(year == 2005, func == "forb native")))
+TukeyHSD(aov(richness~trt, data = rich2%>%filter(year == 2006, func == "forb native")))
+TukeyHSD(aov(richness~trt, data = rich2%>%filter(year == 2007, func == "forb native")))
+TukeyHSD(aov(richness~trt, data = rich2%>%filter(year == 2008, func == "forb native")))
+TukeyHSD(aov(richness~trt, data = rich2%>%filter(year == 2009, func == "forb native")))
+TukeyHSD(aov(richness~trt, data = rich2%>%filter(year == 2010, func == "forb native")))
+TukeyHSD(aov(richness~trt, data = rich2%>%filter(year == 2011, func == "forb native")))
+TukeyHSD(aov(richness~trt, data = rich2%>%filter(year == 2012, func == "forb native")))
+
 rich2005 <- rich2 %>%
   filter(trt != "ungrazed unburned") %>%
   filter(year == 2005)
