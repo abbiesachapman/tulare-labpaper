@@ -21,12 +21,12 @@ alldat<-read_csv(paste(datpath_clean, "/alldatsptrt.csv", sep="")) %>%
 #Richness
 rich2 <- alldat %>%
   filter(type!="NA", status!="NA")%>%
-  filter(cover != 0, spname !="Unknown", spname!="Moss") %>%
+  filter(spname !="Unknown", spname!="Moss") %>%
   mutate(func=paste(type, status))%>%
   mutate(trt=paste(graze, burn))%>%
-  group_by(year, quadratNew, func, trt, type, status, burn, graze, transect)%>%
-  summarize(richness = length(unique(spname)))%>%
-  mutate(prepost=ifelse(year<2009, "pre", "post"))
+  mutate(present=ifelse(cover>0, 1, 0))%>%
+  group_by(year, quadratNew, func, trt, type, status, burn, graze, transect, present)%>%
+  summarize(richness = sum(present))
 
 rich2005 <- rich2 %>%
   filter(trt != "ungrazed unburned") %>%
@@ -93,11 +93,12 @@ cov<-alldat%>%
   filter(type!="NA", status!="NA")%>%
   mutate(func=paste(type, status))%>%
   mutate(trt=paste(graze, burn))%>%
-  filter(cover != 0, spname !="Unknown", spname!="Moss") %>%
+  filter(spname !="Unknown", spname!="Moss") %>%
   group_by(year, quadratNew, trt, func, spcode, spname, burn, graze, transect)%>%
   summarize(sumcov=sum(cover))%>%
-  filter(!is.na(trt), !is.na(func))%>%
-  mutate(prepost=ifelse(year<2009, "pre", "post"))
+  filter(!is.na(trt), !is.na(func)) %>%
+  mutate(totcov=sum(sumcov))%>%
+  mutate(relcov=sumcov/totcov)
 
 cov2005 <- cov %>%
   filter(year == 2005) %>%
