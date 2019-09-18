@@ -375,22 +375,13 @@ lay <- rbind(c(1,1,1,1),
              c(6,6,6,6))
 grid.arrange(vec1, fig1b, fig1c, fig1d, fig1e, mylegend, layout_matrix = lay) #put panel together
 
-
+################
+##Test effects of grazing reintroduction
 ###MODERATE#####
 ###late years####
 #create wide data, first filter so year is 2005 to 2008
 mod.data.late<- all.dat %>% dplyr::select(-X1, -spcode) %>% filter(year>2007 & year < 2013) %>% filter(thermal=="moderate") %>% spread(spname, cover)
 mod.data.late[is.na(mod.data.late)] <- 0 #replace NAs with 0 (species not counted in plots have NAs when wide dataset created)
-
-#Import environmental data - NADP pinnacles deposition data and NOAA San Jose temperature data
-env <- read_csv(paste(datpath_clean, "/NTN-CA66-deposition.csv", sep=""))
-env<-env %>% rename(year=yr) %>% filter(year>2008 & year < 2013)
-temp <- read_csv(paste(datpath_clean, "/san_jose_clim.csv", sep=""),skip=9)
-temp <- temp %>% rename(year=DATE, temp=TAVG) %>% filter(year>2008 & year <2012) %>% dplyr::select(year, temp)
-env<-merge(env,temp)
-
-#merge env to match full data
-mod.env.late<-merge(env,mod.data.late) %>% dplyr::select(NH4, NO3, totalN, ppt, temp)
 
 #check count of graze and burn factor
 mod.data.late %>% 
