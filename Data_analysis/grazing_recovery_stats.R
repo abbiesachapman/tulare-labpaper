@@ -3,14 +3,7 @@ library(readr)
 library(sjstats) #standardized effect size cohen's f
 library(nlme) #linear mixed models
 
-#load updated master data
-alldat<-read_csv(paste(datpath_clean, "/alldatsptrt.csv", sep="")) %>%
-  select(-1)%>%
-  filter(transect%in%c("THBUGM1", "THBUGM2", "THM1", "THM2", "THM3", "THM4", "THUBUGM1", "THUBUGM2"))%>%
-  filter(thermal=="moderate")%>%
-  group_by(year, spname, spcode, quadratNew, status, type, transect, burn, graze)%>%
-  summarize(cover=sum(cover))%>%
-  filter(cover!=0)
+#load updated master data, "alldat", in grazing_recovery.R
 
 ########
 #one-way ANOVA analyze within each year 
@@ -19,16 +12,18 @@ alldat<-read_csv(paste(datpath_clean, "/alldatsptrt.csv", sep="")) %>%
 ########
 
 #Richness
-rich2 <- alldat %>%
-  filter(type!="NA", status!="NA")%>%
-  filter(cover != 0, spname !="Unknown", spname!="Moss") %>%
-  mutate(func=paste(type, status))%>%
-  mutate(trt=paste(graze, burn))%>%
-  group_by(year, quadratNew, func, trt, type, status, burn, graze, transect)%>%
-  summarize(richness = length(unique(spname)))%>%
-  mutate(prepost=ifelse(year<2009, "pre", "post"))
+#load "rich" from grazing_recovery.R
 
-rich2005 <- rich2 %>%
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2005, func == "forb native")))
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2006, func == "forb native")))
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2007, func == "forb native")))
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2008, func == "forb native")))
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2009, func == "forb native")))
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2010, func == "forb native")))
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2011, func == "forb native")))
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2012, func == "forb native")))
+
+rich2005 <- rich %>%
   filter(trt != "ungrazed unburned") %>%
   filter(year == 2005)
 anova_stats(anova(lm(richness~graze, data = rich2005%>%filter(func == "forb native"))))
@@ -36,7 +31,7 @@ anova_stats(anova(lm(richness~graze, data = rich2005%>%filter(func == "grass non
 anova_stats(anova(lm(richness~graze, data = rich2005%>%filter(func == "forb non-native"))))
 anova_stats(anova(lm(richness~graze, data = rich2005%>%filter(func == "grass native"))))
 
-rich2006 <- rich2 %>%
+rich2006 <- rich %>%
   filter(trt != "ungrazed unburned") %>%
   filter(year == 2006)
 anova_stats(anova(lm(richness~graze, data = rich2006%>%filter(func == "forb native"))))
@@ -44,7 +39,7 @@ anova_stats(anova(lm(richness~graze, data = rich2006%>%filter(func == "grass non
 anova_stats(anova(lm(richness~graze, data = rich2006%>%filter(func == "forb non-native"))))
 anova_stats(anova(lm(richness~graze, data = rich2006%>%filter(func == "grass native"))))
 
-rich2007 <- rich2 %>%
+rich2007 <- rich %>%
   filter(trt != "ungrazed unburned") %>%
   filter(year == 2007)
 anova_stats(anova(lm(richness~graze, data = rich2007%>%filter(func == "forb native"))))
@@ -52,7 +47,7 @@ anova_stats(anova(lm(richness~graze, data = rich2007%>%filter(func == "grass non
 anova_stats(anova(lm(richness~graze, data = rich2007%>%filter(func == "forb non-native"))))
 anova_stats(anova(lm(richness~graze, data = rich2007%>%filter(func == "grass native"))))
 
-rich2008 <- rich2 %>%
+rich2008 <- rich %>%
   filter(trt != "ungrazed unburned") %>%
   filter(year == 2008)
 anova_stats(anova(lm(richness~graze, data = rich2008%>%filter(func == "forb native"))))
@@ -60,28 +55,28 @@ anova_stats(anova(lm(richness~graze, data = rich2008%>%filter(func == "grass non
 anova_stats(anova(lm(richness~graze, data = rich2008%>%filter(func == "forb non-native"))))
 anova_stats(anova(lm(richness~graze, data = rich2008%>%filter(func == "grass native"))))
 
-rich2009 <- rich2 %>%
+rich2009 <- rich %>%
   filter(year == 2009)
 anova_stats(anova(lm(richness~trt, data = rich2009%>%filter(func == "forb native"))))
 anova_stats(anova(lm(richness~trt, data = rich2009%>%filter(func == "grass non-native"))))
 anova_stats(anova(lm(richness~trt, data = rich2009%>%filter(func == "forb non-native"))))
 anova_stats(anova(lm(richness~trt, data = rich2009%>%filter(func == "grass native"))))
 
-rich2010 <- rich2 %>%
+rich2010 <- rich %>%
   filter(year == 2010)
 anova_stats(anova(lm(richness~trt, data = rich2010%>%filter(func == "forb native"))))
 anova_stats(anova(lm(richness~trt, data = rich2010%>%filter(func == "grass non-native"))))
 anova_stats(anova(lm(richness~trt, data = rich2010%>%filter(func == "forb non-native"))))
 anova_stats(anova(lm(richness~trt, data = rich2010%>%filter(func == "grass native"))))
 
-rich2011 <- rich2 %>%
+rich2011 <- rich %>%
   filter(year == 2011)
 anova_stats(anova(lm(richness~trt, data = rich2011%>%filter(func == "forb native"))))
 anova_stats(anova(lm(richness~trt, data = rich2011%>%filter(func == "grass non-native"))))
 anova_stats(anova(lm(richness~trt, data = rich2011%>%filter(func == "forb non-native"))))
 anova_stats(anova(lm(richness~trt, data = rich2011%>%filter(func == "grass native"))))
 
-rich2012 <- rich2 %>%
+rich2012 <- rich %>%
   filter(year == 2012)
 anova_stats(anova(lm(richness~trt, data = rich2012%>%filter(func == "forb native"))))
 anova_stats(anova(lm(richness~trt, data = rich2012%>%filter(func == "grass non-native"))))
@@ -89,15 +84,16 @@ anova_stats(anova(lm(richness~trt, data = rich2012%>%filter(func == "forb non-na
 anova_stats(anova(lm(richness~trt, data = rich2012%>%filter(func == "grass native"))))
 
 #cover
-cov<-alldat%>%
-  filter(type!="NA", status!="NA")%>%
-  mutate(func=paste(type, status))%>%
-  mutate(trt=paste(graze, burn))%>%
-  filter(cover != 0, spname !="Unknown", spname!="Moss") %>%
-  group_by(year, quadratNew, trt, func, spcode, spname, burn, graze, transect)%>%
-  summarize(sumcov=sum(cover))%>%
-  filter(!is.na(trt), !is.na(func))%>%
-  mutate(prepost=ifelse(year<2009, "pre", "post"))
+#load "cov" from grazing_recovery.R
+
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2005, func == "forb native")))
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2006, func == "forb native")))
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2007, func == "forb native")))
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2008, func == "forb native")))
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2009, func == "forb native")))
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2010, func == "forb native")))
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2011, func == "forb native")))
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2012, func == "forb native")))
 
 cov2005 <- cov %>%
   filter(year == 2005) %>%
@@ -160,10 +156,19 @@ anova_stats(anova(lm(sumcov~trt, data = cov2012%>%filter(func == "forb non-nativ
 anova_stats(anova(lm(sumcov~trt, data = cov2012%>%filter(func == "grass native"))))
 
 #evenness
-#pull in object "shan2" from grazing recovery
+#load object "shan2" from grazing_recovery.R
 shan3 <- shan2 %>%
   mutate(trt1 = trt) %>%
   separate(trt, into=c("grazed", "burn"), sep=" ")
+
+TukeyHSD(aov(Shannon~trt, data = shan2%>%filter(year == 2005, func == "forb native")))
+TukeyHSD(aov(Shannon~trt, data = shan2%>%filter(year == 2006, func == "forb native")))
+TukeyHSD(aov(Shannon~trt, data = shan2%>%filter(year == 2007, func == "forb native")))
+TukeyHSD(aov(Shannon~trt, data = shan2%>%filter(year == 2008, func == "forb native")))
+TukeyHSD(aov(Shannon~trt, data = shan2%>%filter(year == 2009, func == "forb native")))
+TukeyHSD(aov(Shannon~trt, data = shan2%>%filter(year == 2010, func == "forb native")))
+TukeyHSD(aov(Shannon~trt, data = shan2%>%filter(year == 2011, func == "forb native")))
+TukeyHSD(aov(Shannon~trt, data = shan2%>%filter(year == 2012, func == "forb native")))
 
 shan2005 <- shan3%>%
   filter(year == 2005) %>%
@@ -232,6 +237,15 @@ lit <- joindat %>%
   ungroup() %>%
   select(quadratNew, year, trt, transect, burn, graze, litter)
 
+TukeyHSD(aov(litter~trt, data = lit%>%filter(year == 2005)))
+TukeyHSD(aov(litter~trt, data = lit%>%filter(year == 2006)))
+TukeyHSD(aov(litter~trt, data = lit%>%filter(year == 2007)))
+TukeyHSD(aov(litter~trt, data = lit%>%filter(year == 2008)))
+TukeyHSD(aov(litter~trt, data = lit%>%filter(year == 2009)))
+TukeyHSD(aov(litter~trt, data = lit%>%filter(year == 2010)))
+TukeyHSD(aov(litter~trt, data = lit%>%filter(year == 2011)))
+TukeyHSD(aov(litter~trt, data = lit%>%filter(year == 2012)))
+
 lit2005 <- lit%>%
   filter(year == 2005) %>%
   filter(trt != "ungrazed unburned")
@@ -271,7 +285,7 @@ anova_stats(anova(lm(litter~trt, data = lit2012)))
 ########
 #one-way ANOVA analyze two blocks of years: 2005-2008 and 2008-2012 
 ########
-rich3 <- rich2 %>%
+rich3 <- rich %>%
   filter(trt != "ungrazed unburned") %>%
   filter(year%in%c(2005, 2006, 2007, 2008))
 
@@ -280,7 +294,7 @@ anova_stats(anova(lm(richness~graze, data = rich3%>%filter(func == "grass non-na
 anova_stats(anova(lm(richness~graze, data = rich3%>%filter(func == "forb non-native"))))
 anova_stats(anova(lm(richness~graze, data = rich3%>%filter(func == "grass native"))))
 
-rich4 <- rich2 %>%
+rich4 <- rich %>%
   filter(year%in%c(2008:2012))
 
 anova_stats(anova(lm(richness~trt, data = rich4%>%filter(func == "forb native"))))
@@ -334,12 +348,92 @@ anova_stats(anova(lm(litter~trt, data = lit_post)))
 #nest quadrats within transects
 ########
 
-#richness
+# richness by year
+richrich<-rich%>%
+  separate(quadratNew, into=c("quadrat", "transect2"), sep="-") 
+### I tried to do it with quadrat nested but i get the singularity error again:
+richrich_NF2005<-lme(richness~trt, random = list(~1|quadrat/transect, ~1|year), data = subset(richrich, func=="forb native"&year==2005))
 
-fit2005fn<- lme(richness~graze, random = ~1|transect/quadratNew, data = rich2005%>%filter(func == "forb native"))
-summary(fit2005fn)
-fit2005ge<- lme(richness~graze, random = ~1|transect/quadratNew, data = rich2005%>%filter(func == "grass non-native"))
-summary(fit2005ge)
 
-fitpostfn <- lme(richness~graze+burn, random = ~1|transect/quadratNew, data = rich4%>%filter(func == "forb native"))
-summary(fitpostfn)
+rich_NF2005<-lme(richness~trt, random = list(~1|quadratNew, ~1|year), data = subset(rich, func=="forb native"&year==2005))
+rich_NF2006<-lme(richness~trt, random = list(~1|quadratNew, ~1|year), data = subset(rich, func=="forb native"&year==2006))
+rich_NF2007<-lme(richness~trt, random = list(~1|quadratNew, ~1|year), data = subset(rich, func=="forb native"&year==2007))
+rich_NF2008<-lme(richness~trt, random = list(~1|quadratNew, ~1|year), data = subset(rich, func=="forb native"&year==2008))
+rich_NF2009<-lme(richness~trt, random = list(~1|quadratNew, ~1|year), data = subset(rich, func=="forb native"&year==2009))
+rich_NF2010<-lme(richness~trt, random = list(~1|quadratNew, ~1|year), data = subset(rich, func=="forb native"&year==2010))
+rich_NF2011<-lme(richness~trt, random = list(~1|quadratNew, ~1|year), data = subset(rich, func=="forb native"&year==2011))
+rich_NF2012<-lme(richness~trt, random = list(~1|quadratNew, ~1|year), data = subset(rich, func=="forb native"&year==2012))
+
+rich_IG2005<-lme(richness~trt, random = list(~1|quadratNew, ~1|year), data = subset(rich, func=="grass non-native"&year==2005))
+rich_IG2006<-lme(richness~trt, random = list(~1|quadratNew, ~1|year), data = subset(rich, func=="grass non-native"&year==2006))
+rich_IG2007<-lme(richness~trt, random = list(~1|quadratNew, ~1|year), data = subset(rich, func=="grass non-native"&year==2007))
+rich_IG2008<-lme(richness~trt, random = list(~1|quadratNew, ~1|year), data = subset(rich, func=="grass non-native"&year==2008))
+rich_IG2009<-lme(richness~trt, random = list(~1|quadratNew, ~1|year), data = subset(rich, func=="grass non-native"&year==2009))
+rich_IG2010<-lme(richness~trt, random = list(~1|quadratNew, ~1|year), data = subset(rich, func=="grass non-native"&year==2010))
+rich_IG2011<-lme(richness~trt, random = list(~1|quadratNew, ~1|year), data = subset(rich, func=="grass non-native"&year==2011))
+rich_IG2012<-lme(richness~trt, random = list(~1|quadratNew, ~1|year), data = subset(rich, func=="grass non-native"&year==2012))
+
+summary(rich_NF2005)
+summary(rich_NF2006)
+summary(rich_NF2007)
+summary(rich_NF2008)
+summary(rich_NF2009)
+summary(rich_NF2010)
+summary(rich_NF2011)
+summary(rich_NF2012)
+
+summary(rich_IG2005)
+summary(rich_IG2006)
+summary(rich_IG2007)
+summary(rich_IG2008)
+summary(rich_IG2009)
+summary(rich_IG2010)
+summary(rich_IG2011)
+summary(rich_IG2012)
+
+# cover by year
+covcov<-cov%>%
+  separate(quadratNew, into=c("quadrat", "transect2"), sep="-") 
+      ### I tried to do it with quadrat nested but i get the singularity error again:
+cov_NF2005<-lme(relcov~trt, random = list(~1|quadrat/transect, ~1|year), data = subset(covcov, func=="forb native"&year==2005))
+
+cov_NF2005<-lme(relcov~trt, random = list(~1|quadratNew, ~1|year), data = subset(cov, func=="forb native"&year==2005))
+cov_NF2006<-lme(relcov~trt, random = list(~1|quadratNew, ~1|year), data = subset(cov, func=="forb native"&year==2006))
+cov_NF2007<-lme(relcov~trt, random = list(~1|quadratNew, ~1|year), data = subset(cov, func=="forb native"&year==2007))
+cov_NF2008<-lme(relcov~trt, random = list(~1|quadratNew, ~1|year), data = subset(cov, func=="forb native"&year==2008))
+cov_NF2009<-lme(relcov~trt, random = list(~1|quadratNew, ~1|year), data = subset(cov, func=="forb native"&year==2009))
+cov_NF2010<-lme(relcov~trt, random = list(~1|quadratNew, ~1|year), data = subset(cov, func=="forb native"&year==2010))
+cov_NF2011<-lme(relcov~trt, random = list(~1|quadratNew, ~1|year), data = subset(cov, func=="forb native"&year==2011))
+cov_NF2012<-lme(relcov~trt, random = list(~1|quadratNew, ~1|year), data = subset(cov, func=="forb native"&year==2012))
+
+cov_IG2005<-lme(relcov~trt, random = list(~1|quadratNew, ~1|year), data = subset(cov, func=="grass non-native"&year==2005))
+cov_IG2006<-lme(relcov~trt, random = list(~1|quadratNew, ~1|year), data = subset(cov, func=="grass non-native"&year==2006))
+cov_IG2007<-lme(relcov~trt, random = list(~1|quadratNew, ~1|year), data = subset(cov, func=="grass non-native"&year==2007))
+cov_IG2008<-lme(relcov~trt, random = list(~1|quadratNew, ~1|year), data = subset(cov, func=="grass non-native"&year==2008))
+cov_IG2009<-lme(relcov~trt, random = list(~1|quadratNew, ~1|year), data = subset(cov, func=="grass non-native"&year==2009))
+cov_IG2010<-lme(relcov~trt, random = list(~1|quadratNew, ~1|year), data = subset(cov, func=="grass non-native"&year==2010))
+cov_IG2011<-lme(relcov~trt, random = list(~1|quadratNew, ~1|year), data = subset(cov, func=="grass non-native"&year==2011))
+cov_IG2012<-lme(relcov~trt, random = list(~1|quadratNew, ~1|year), data = subset(cov, func=="grass non-native"&year==2012))
+
+summary(cov_NF2005)
+summary(cov_NF2006)
+summary(cov_NF2007)
+summary(cov_NF2008)
+summary(cov_NF2009)
+summary(cov_NF2010)
+summary(cov_NF2011)
+summary(cov_NF2012)
+
+summary(cov_IG2005)
+summary(cov_IG2006)
+summary(cov_IG2007)
+summary(cov_IG2008)
+summary(cov_IG2009)
+summary(cov_IG2010)
+summary(cov_IG2011)
+summary(cov_IG2012)
+
+##example from onoline
+lme(y ~ p_gender*t_gender + part_gen, data=grdata,
+    + random = list(~ p_gender | therapist, ~ 1 | group))
+
