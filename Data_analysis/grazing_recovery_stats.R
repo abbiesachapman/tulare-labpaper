@@ -437,3 +437,65 @@ summary(cov_IG2012)
 lme(y ~ p_gender*t_gender + part_gen, data=grdata,
     + random = list(~ p_gender | therapist, ~ 1 | group))
 
+##plot lme stats
+
+lmestats<-read_csv(paste(datpath_clean, "/Grazing_recovery_stats_lme.csv", sep=""))%>%
+  select(-Test)%>%
+  rename("p"="p-value", "p1"="p-value_1", "t"="t-value", "t1"="t-value_1", "ugub"="ungrazed unburned", "ugb"="ungrazed burned")
+
+lmestats<-lmestats%>%
+  mutate(p=ifelse(p<.05, .05, ifelse(p<.1, .1, NA)))%>%
+  mutate(p1=ifelse(p1<.05, .05, ifelse(p1<.1, .1, NA)))
+  
+lme1<-ggplot(subset(lmestats, func=="native forb"&response=="cover"), aes(year, ugb*100)) +geom_line(color="blue") +geom_point(color="blue") +
+  geom_line(aes(year, ugub*100), color="red") +geom_point(aes(year, ugub*100), color="red") +
+  geom_point(aes(year-.1, y=-p*100),shape=8, color="blue")+geom_point(aes(year+.1,y=-p1*100),shape=8, color="red")+
+  geom_hline(yintercept=0) +
+  annotate("text", x= 2004.75, y = .5, label = "fire", size = 3) +
+  annotate("text", x= 2009, y = .5, label = "grazing", size = 3)+
+  geom_vline(xintercept=2008.5, color = "grey66", lty =2)+
+  geom_vline(xintercept=2004.5, color="grey66", lty = 2)+
+  xlab("")+ylab("% Cover Effect Size vs Burned-Grazed")
+
+lme2<-ggplot(subset(lmestats, func=="non-native grass"&response=="cover"), aes(year, ugb*100)) +geom_line(color="blue") +geom_point(color="blue") +
+  geom_line(aes(year, ugub*100), color="red") +geom_point(aes(year, ugub*100), color="red") +
+  geom_point(aes(year-.1, y=p*100),shape=8, color="blue")+geom_point(aes(year+.1,y=p1*100),shape=8, color="red")+
+  geom_hline(yintercept=0) +
+  annotate("text", x= 2004.75, y = .5, label = "fire", size = 3) +
+  annotate("text", x= 2009, y = .5, label = "grazing", size = 3)+
+  geom_vline(xintercept=2008.5, color = "grey66", lty =2)+
+  geom_vline(xintercept=2004.5, color="grey66", lty = 2)+
+  xlab("")+ylab("")
+
+
+lme3<-ggplot(subset(lmestats, func=="native forb"&response=="richness"), aes(year, ugb)) +geom_line(color="blue") +geom_point(color="blue") +
+  geom_line(aes(year, ugub), color="red") +geom_point(aes(year, ugub), color="red") +
+  geom_point(aes(year-.1, y=p*10),shape=8, color="blue")+geom_point(aes(year+.1,y=p1*10),shape=8, color="red")+
+  geom_hline(yintercept=0) +
+  annotate("text", x= 2004.75, y = .5, label = "fire", size = 3) +
+  annotate("text", x= 2009, y = .5, label = "grazing", size = 3)+
+  geom_vline(xintercept=2008.5, color = "grey66", lty =2)+
+  geom_vline(xintercept=2004.5, color="grey66", lty = 2)+
+  xlab("")+ylab("Richness Effect Size vs Burned-Grazed")
+
+
+lme4<-ggplot(subset(lmestats, func=="non-native grass"&response=="richness"), aes(year, ugb)) +geom_line(color="blue") +geom_point(color="blue") +
+  geom_line(aes(year, ugub), color="red") +geom_point(aes(year, ugub), color="red") +
+  geom_point(aes(year-.1, y=p),shape=8, color="blue")+geom_point(aes(year+.1,y=p1),shape=8, color="red")+
+  geom_hline(yintercept=0) +
+  annotate("text", x= 2004.75, y = .5, label = "fire", size = 3) +
+  annotate("text", x= 2009, y = .5, label = "grazing", size = 3)+
+  geom_vline(xintercept=2008.5, color = "grey66", lty =2)+
+  geom_vline(xintercept=2004.5, color="grey66", lty = 2)+
+  xlab("")+ylab("")
+
+
+ggarrange(lme1, lme2, lme3, lme4,  ncol = 2, nrow = 2, 
+          labels = c("a) Native forb cover", "b) Non-native grass cover",
+                     "c) Native forb richness", "d) Non-native grass richness"),
+          common.legend = TRUE, legend = "right", 
+          font.label = list(size = 10),
+          hjust = c(-0.5, -0.35, -0.5, -0.35))
+  
+
+                                                     
