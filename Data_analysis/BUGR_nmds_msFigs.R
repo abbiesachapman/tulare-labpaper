@@ -453,59 +453,64 @@ g_legend<-function(a.gplot){
 mylegend<-g_legend(fig1g)
 
 ##test for differences in treatment by year#######
-mod.2008<-subset(mod.data.late, year==2008)
+mod.2008<-subset(mod.data.late, year==2008) %>%
+  unite(treatment, c(burn, graze), remove=FALSE, sep = " ")
 cover.2008<-mod.2008 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
-#cover.rowsums.05 <- rowSums(cover.2005 [1:156])
-#cover.relrow.05 <- data.frame(cover.2005/cover.rowsums.05)
-mod.bcd.08 <- vegdist(cover.2008)
-permanova08<-adonis(cover.2008~mod.2008$treatment,perm=1000, method="bray")
+cover.rowsums.08 <- rowSums(cover.2008 [1:156])
+cover.relrow.08 <- data.frame(cover.2008/cover.rowsums.08)
+mod.bcd.08 <- vegdist(cover.relrow.08)
+permanova08<-adonis(cover.relrow.08~mod.2008$treatment,perm=1000, method="bray")
 permanova08
 pairwise.perm.manova(mod.bcd.08,mod.2008$treatment, nperm=1000) #ungrazed communities are the same
-mod_isa_08 = multipatt(cover.2008, mod.2008$treatment, control=how(nperm=999))
+mod_isa_08 = multipatt(cover.relrow.08, mod.2008$treatment, control=how(nperm=999))
 summary(mod_isa_08)
 
-mod.2009<-subset(mod.data.late, year==2009)
+mod.2009<-subset(mod.data.late, year==2009) %>%
+  unite(treatment, c(burn, graze), remove=FALSE, sep = " ")
 cover.2009<-mod.2009 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
-#cover.rowsums.06 <- rowSums(cover.2006 [1:156])
-#cover.relrow.06 <- data.frame(cover.2006/cover.rowsums.06)
-mod.bcd.09 <- vegdist(cover.2009)
-permanova09<-adonis(cover.2009~mod.2009$treatment, perm=1000, method="bray")
+cover.rowsums.09 <- rowSums(cover.2009 [1:156])
+cover.relrow.09 <- data.frame(cover.2009/cover.rowsums.09)
+mod.bcd.09 <- vegdist(cover.relrow.09)
+permanova09<-adonis(cover.relrow.09~mod.2009$treatment, perm=1000, method="bray")
 permanova09
 pairwise.perm.manova(mod.bcd.09,mod.2009$treatment, nperm=1000) #all communities differ
-mod_isa_09 = multipatt(cover.2009, mod.2009$treatment, control=how(nperm=999))
+mod_isa_09 = multipatt(cover.relrow.09, mod.2009$treatment, control=how(nperm=999))
 summary(mod_isa_09)
 
-mod.2010<-subset(mod.data.late, year==2010)
+mod.2010<-subset(mod.data.late, year==2010) %>%
+  unite(treatment, c(burn, graze), remove=FALSE, sep = " ")
 cover.2010<-mod.2010 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
-#cover.rowsums.07 <- rowSums(cover.2007 [1:156])
-#cover.relrow.07 <- data.frame(cover.2007/cover.rowsums.07)
-mod.bcd.10 <- vegdist(cover.2010)
-permanova10<-adonis(cover.2010~mod.2010$treatment, perm=1000, method="bray")
+cover.rowsums.10 <- rowSums(cover.2010 [1:156])
+cover.relrow.10 <- data.frame(cover.2010/cover.rowsums.10)
+mod.bcd.10 <- vegdist(cover.relrow.10)
+permanova10<-adonis(cover.relrow.10~mod.2010$treatment, perm=1000, method="bray")
 permanova10
 pairwise.perm.manova(mod.bcd.10,mod.2010$treatment, nperm=1000) #all communities differ
-mod_isa_10 = multipatt(cover.2010, mod.2010$treatment, control=how(nperm=999))
+mod_isa_10 = multipatt(cover.relrow.10, mod.2010$treatment, control=how(nperm=999))
 summary(mod_isa_10)
 
-mod.2011<-subset(mod.data.late, year==2011)
+mod.2011<-subset(mod.data.late, year==2011) %>%
+  unite(treatment, c(burn, graze), remove=FALSE, sep = " ")
 cover.2011<-mod.2011 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
-#cover.rowsums.08 <- rowSums(cover.2008 [1:156])
-#cover.relrow.08 <- data.frame(cover.2008/cover.rowsums.08)
-mod.bcd.11 <- vegdist(cover.2011)
-permanova11<-adonis(cover.2011~mod.2011$treatment, perm=1000, method="bray")
+cover.rowsums.11 <- rowSums(cover.2011 [1:156])
+cover.relrow.11 <- data.frame(cover.2011/cover.rowsums.11)
+mod.bcd.11 <- vegdist(cover.relrow.11)
+permanova11<-adonis(cover.relrow.11~mod.2011$treatment, perm=1000, method="bray")
 permanova11
 pairwise.perm.manova(mod.bcd.11,mod.2011$treatment, nperm=1000) #all communities differ
-mod_isa_11 = multipatt(cover.2011, mod.2011$treatment, control=how(nperm=999))
+mod_isa_11 = multipatt(cover.relrow.11, mod.2011$treatment, control=how(nperm=999))
 summary(mod_isa_11)
 
-mod.2012<-subset(mod.data.late, year==2012)
+mod.2012<-subset(mod.data.late, year==2012) %>%
+  unite(treatment, c(burn, graze), remove=FALSE, sep = " ")
 cover.2012<-mod.2012 %>% dplyr::select(-quadratNew,-treatment,-thermal,-burn,-graze, -year, -transect)
 cover.rowsums.12 <- rowSums(cover.2012 [1:156])
 cover.relrow.12 <- data.frame(cover.2012/cover.rowsums.12)
-mod.bcd.12 <- vegdist(cover.2012) #replace cover.12 with cover.relrow.12
-permanova12<-adonis(cover.2012~mod.2012$treatment, perm=1000, method="bray")
+mod.bcd.12 <- vegdist(cover.relrow.12) 
+permanova12<-adonis(cover.relrow.12~mod.2012$treatment, perm=1000, method="bray")
 permanova12
 pairwise.perm.manova(mod.bcd.12,mod.2012$treatment, nperm=1000) #all communities differ
-mod_isa_12 = multipatt(cover.2012, mod.2012$treatment, control=how(nperm=999))
+mod_isa_12 = multipatt(cover.relrow.12, mod.2012$treatment, control=how(nperm=999))
 summary(mod_isa_12)
 
 #####################
