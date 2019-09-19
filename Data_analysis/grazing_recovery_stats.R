@@ -23,6 +23,15 @@ TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2010, func == "forb nati
 TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2011, func == "forb native")))
 TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2012, func == "forb native")))
 
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2005, func == "grass non-native")))
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2006, func == "grass non-native")))
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2007, func == "grass non-native")))
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2008, func == "grass non-native")))
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2009, func == "grass non-native")))
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2010, func == "grass non-native")))
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2011, func == "grass non-native")))
+TukeyHSD(aov(richness~trt, data = rich%>%filter(year == 2012, func == "grass non-native")))
+
 rich2005 <- rich %>%
   filter(trt != "ungrazed unburned") %>%
   filter(year == 2005)
@@ -95,6 +104,14 @@ TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2010, func == "forb native"
 TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2011, func == "forb native")))
 TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2012, func == "forb native")))
 
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2005, func == "grass non-native")))
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2006, func == "grass non-native")))
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2007, func == "grass non-native")))
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2008, func == "grass non-native")))
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2009, func == "grass non-native")))
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2010, func == "grass non-native")))
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2011, func == "grass non-native")))
+TukeyHSD(aov(relcov~trt, data = cov%>%filter(year == 2012, func == "grass non-native")))
 cov2005 <- cov %>%
   filter(year == 2005) %>%
   filter(trt != "ungrazed unburned")
