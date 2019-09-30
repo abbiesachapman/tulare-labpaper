@@ -325,7 +325,20 @@ ggarrange(f1b, f2b, f3b, f4b, f5b, f6b,  ncol = 2, nrow = 3,
           common.legend = TRUE, legend = "bottom", 
           font.label = list(size = 10),
           hjust = c(-0.5, -0.35, -0.5, -0.35, -0.9, -0.5))
-
+###
+#Litter and native forb regression
+###
+forb_rich <- rich %>%
+  filter(func == "forb native")
+rich_litter <- left_join(forb_rich, envdat) %>%
+  filter(year%in%c(2006:2012)) %>%
+  filter(litter != "NA")
+ggplot(rich_litter, aes(litter, richness)) +
+  geom_point(aes(color=as.factor(trt))) +
+  labs(x = "Litter Cover (%)", y = "Native Forb Richness", color = "Treatment") +
+  geom_smooth(method = lm, se = FALSE, color = "black") + 
+  theme_classic() +
+  scale_color_manual(values= c("grey0", "grey36", "grey65"))
 ##########
 # Indicator Species
 ###########
