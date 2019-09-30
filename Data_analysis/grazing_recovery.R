@@ -382,6 +382,20 @@ ggplot(rich_litter, aes(litter, richness)) +
   geom_smooth(method = lm, se = FALSE, color = "black") + 
   theme_classic() +
   scale_color_manual(values= c("grey0", "grey36", "grey65"))
+anova(lm(richness ~litter, rich_litter))
+
+cov_rich <- cov %>%
+  filter(func == "forb native")
+cov_litter <- left_join(cov_rich, envdat) %>%
+  filter(year%in%c(2005:2012)) %>%
+  filter(relcov != "NA")
+ggplot(cov_litter, aes(litter, relcov)) +
+  geom_jitter(aes(color = as.factor(trt))) +
+  labs(x = "Litter Cover (%)", y = "Native Forb Cover (%)", color = "Treatment") +
+  geom_smooth(method = "lm",  se = FALSE, color = "black") +
+  theme_classic() +
+  scale_color_manual(values= c("grey0", "grey36", "grey65"))
+anova(lm(relcov ~litter, cov_litter))
 ##########
 # Indicator Species
 ###########
