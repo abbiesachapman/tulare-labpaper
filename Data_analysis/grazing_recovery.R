@@ -212,9 +212,6 @@ ggarrange(f1, f2, f3, f4, f5, f6,  ncol = 2, nrow = 3,
           font.label = list(size = 10),
           hjust = c(-0.5, -0.35, -0.5, -0.35, -0.9, -0.5))
 
-exp = list("Distribution of"~bar(x),
-           "under"~H[0],
-           hat(mu)~"is the mean")
 #####
 # Publication v2: with significance:
 f1b <- ggplot(subset(rich1, func == "forb native"&year%in%c(2005:2008)), aes(year, mean_rich)) +
@@ -233,7 +230,10 @@ f1b <- ggplot(subset(rich1, func == "forb native"&year%in%c(2005:2008)), aes(yea
   scale_fill_manual(values = c("grey0", "grey85", "grey100")) +
   
   annotate("text", x= 2004.5, y = 2, label = "fire", size = 3) +
-  annotate("text", x= 2008.5, y = 2, label = expression(atop("cattle", "reintroduced", size = 3))) +
+  annotate(geom = 'text', x= 2008.5, y = 2, 
+           label = "atop(cattle, reintroduced)", 
+           parse = TRUE, size=3)+
+  
   
   geom_segment(aes(x=2004.5, y=1.5, xend=2004.5, yend=.5), arrow=arrow(length = unit(0.03, "npc"))) + 
   geom_segment(aes(x=2008.5, y=1.5, xend=2008.5, yend=.5), arrow=arrow(length = unit(0.03, "npc"))) + 
@@ -325,24 +325,6 @@ ggarrange(f1b, f2b, f3b, f4b, f5b, f6b,  ncol = 2, nrow = 3,
           common.legend = TRUE, legend = "bottom", 
           font.label = list(size = 10),
           hjust = c(-0.5, -0.35, -0.5, -0.35, -0.9, -0.5))
-
-
-####
-#Native forb litter regression figure
-####
-
-forb_rich <- rich %>%
-  filter(func == "forb native")
-rich_litter <- left_join(forb_rich, envdat) %>%
-  filter(year%in%c(2006:2012)) %>%
-  filter(litter != "NA")
-ggplot(rich_litter, aes(litter, richness)) +
-  geom_point(aes(color=as.factor(trt))) +
-  labs(x = "Litter Cover (%)", y = "Native Forb Richness", color = "Treatment") +
-  geom_smooth(method = lm, se = FALSE, color = "black") + 
-  theme_classic() +
-  scale_color_manual(values= c("grey0", "grey36", "grey65"))
-
 ##########
 # Indicator Species
 ###########
