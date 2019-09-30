@@ -325,6 +325,7 @@ ggarrange(f1b, f2b, f3b, f4b, f5b, f6b,  ncol = 2, nrow = 3,
           common.legend = TRUE, legend = "bottom", 
           font.label = list(size = 10),
           hjust = c(-0.5, -0.35, -0.5, -0.35, -0.9, -0.5))
+
 ##########
 # Indicator Species
 ###########
