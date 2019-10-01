@@ -376,8 +376,8 @@ forb_rich <- rich %>%
 rich_litter <- left_join(forb_rich, envdat) %>%
   filter(year%in%c(2006:2012)) %>%
   filter(litter != "NA")
-ggplot(rich_litter, aes(litter, richness)) +
-  geom_point(aes(color=as.factor(trt))) +
+richfig <- ggplot(rich_litter, aes(litter, richness)) +
+  geom_jitter(aes(color=as.factor(trt))) +
   labs(x = "Litter Cover (%)", y = "Native Forb Richness", color = "Treatment") +
   geom_smooth(method = lm, se = FALSE, color = "black") + 
   theme_classic() +
@@ -396,6 +396,15 @@ ggplot(cov_litter, aes(litter, relcov)) +
   theme_classic() +
   scale_color_manual(values= c("grey0", "grey36", "grey65"))
 anova(lm(relcov ~litter, cov_litter))
+
+ggarrange(f1, f2, f3, f4, f5, f6,  ncol = 2, nrow = 3, 
+          labels = c("a) Native forb", "b) Non-native grass",
+                     "c) Native forb", "d) Non-native grass", "e) Litter", "f) Precipitation"),
+          common.legend = TRUE, legend = "bottom", 
+          font.label = list(size = 10),
+          hjust = c(-0.5, -0.35, -0.5, -0.35, -0.9, -0.5))
+
+
 ##########
 # Indicator Species
 ###########
