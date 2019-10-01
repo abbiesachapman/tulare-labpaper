@@ -369,33 +369,76 @@ ggarrange(f1b, f2b, f3b, f4b, f5b, f6b,  ncol = 2, nrow = 3,
           font.label = list(size = 10),
           hjust = c(-0.5, -0.35, -0.5, -0.35, -0.9, -0.5))
 ###
-#Litter and native forb regression
+#Litter, precip and native forb regression
 ###
+
+preiplag<-prism_lag%>%
+  group_by(year, prcp)%>%
+  summarize()
+
 forb_rich <- rich %>%
   filter(func == "forb native")
 rich_litter <- left_join(forb_rich, envdat) %>%
   filter(year%in%c(2006:2012)) %>%
   filter(litter != "NA")
-richfig <- ggplot(rich_litter, aes(litter, richness)) +
+rich.lit.fig <- ggplot(rich_litter, aes(litter, richness)) +
   geom_jitter(aes(color=as.factor(trt))) +
   labs(x = "Litter Cover (%)", y = "Native Forb Richness", color = "Treatment") +
   geom_smooth(method = lm, se = FALSE, color = "black") + 
   theme_classic() +
   scale_color_manual(values= c("grey0", "grey36", "grey65"))
 anova(lm(richness ~litter, rich_litter))
+rich_precip<-left_join(rich_litter, preiplag)
+rich.prec.fig<-ggplot(rich_precip, aes(prcp, richness)) +
+                        geom_jitter(aes(color=as.factor(trt))) +
+                        labs(x = "Prior year Precip", y = "Native Forb Richness", color = "Treatment") +
+                        geom_smooth(aes(color=as.factor(trt)), method = lm, se = FALSE) + 
+                        theme_classic() +
+                        scale_color_manual(values= c("grey0", "grey36", "grey65"))
+
+
 
 cov_rich <- cov %>%
   filter(func == "forb native")
 cov_litter <- left_join(cov_rich, envdat) %>%
-  filter(year%in%c(2005:2012)) %>%
+  filter(year%in%c(2006:2012)) %>%
   filter(relcov != "NA")
-ggplot(cov_litter, aes(litter, relcov)) +
+cov.lit.fig<-ggplot(cov_litter, aes(litter, relcov)) +
   geom_jitter(aes(color = as.factor(trt))) +
   labs(x = "Litter Cover (%)", y = "Native Forb Cover (%)", color = "Treatment") +
   geom_smooth(method = "lm",  se = FALSE, color = "black") +
   theme_classic() +
   scale_color_manual(values= c("grey0", "grey36", "grey65"))
 anova(lm(relcov ~litter, cov_litter))
+cov_precip<-left_join(cov_litter, preiplag)
+cov.prec.fig<-ggplot(cov_precip, aes(prcp, relcov)) +
+  geom_jitter(aes(color=as.factor(trt))) +
+  labs(x = "Prior year Precip", y = "Native Forb Cover (%)", color = "Treatment") +
+  geom_smooth(aes(color=as.factor(trt)), method = lm, se = FALSE) + 
+  theme_classic() +
+  scale_color_manual(values= c("grey0", "grey36", "grey65"))
+
+litprec<-ggplot(cov_precip, aes(prcp, log(litter))) +
+  geom_jitter(aes(color=as.factor(trt))) +
+  labs(x = "Prior year Precip", y = "Log Litter", color = "Treatment") +
+  geom_smooth(aes(color=as.factor(trt)), method = lm, se = FALSE) + 
+  theme_classic() +
+  scale_color_manual(values= c("grey0", "grey36", "grey65"))
+
+litprec<-ggplot(cov_precip, aes(prcp, log(litter))) +
+  geom_jitter(aes(color=as.factor(trt))) +
+  labs(x = "Prior year Precip", y = "Log(Litter % Cover)", color = "Treatment") +
+  geom_smooth(aes(color=as.factor(trt)), method = lm, se = FALSE) + 
+  theme_classic() +
+  scale_color_manual(values= c("grey0", "grey36", "grey65"))
+
+ggarrange(rich.lit.fig, cov.lit.fig, rich.prec.fig, cov.prec.fig, litprec, ncol=2, nrow=3, 
+  common.legend = TRUE, legend = "bottom", 
+  font.label = list(size = 10),
+  hjust = c(-0.5, -0.35, -0.5, -0.35, -0.9, -0.5))
+
+
+
 
 ggarrange(f1, f2, f3, f4, f5, f6,  ncol = 2, nrow = 3, 
           labels = c("a) Native forb", "b) Non-native grass",
