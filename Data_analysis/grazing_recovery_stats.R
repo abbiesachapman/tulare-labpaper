@@ -410,7 +410,14 @@ summary(rich_IG2012)
 covcov<-cov%>%
   separate(quadratNew, into=c("transect2", "quadrat"), sep="-") 
 
+covcov2<-covcov%>%
+  ungroup()%>%
+  mutate(trt=as.factor(trt))
+covcov2$trt <- factor(covcov2$trt, levels = c("ungrazed burned", "ungrazed unburned", "grazed burned"))
+
 cov_NF2005<-lme(relcov~trt, random = ~1|transect2/quadrat, data = subset(covcov, func=="forb native"&year==2005))
+cov_NF2005.2<-lme(relcov~trt, random = ~1|transect2/quadrat, data = subset(covcov2, func=="forb native"&year==2005))
+
 cov_NF2006<-lme(relcov~trt, random = ~1|transect2/quadrat, data = subset(covcov, func=="forb native"&year==2006))
 cov_NF2007<-lme(relcov~trt, random = ~1|transect2/quadrat, data = subset(covcov, func=="forb native"&year==2007))
 cov_NF2008<-lme(relcov~trt, random = ~1|transect2/quadrat, data = subset(covcov, func=="forb native"&year==2008))
@@ -429,6 +436,8 @@ cov_IG2011<-lme(relcov~trt, random = ~1|transect2/quadrat, data = subset(covcov,
 cov_IG2012<-lme(relcov~trt, random = ~1|transect2/quadrat, data = subset(covcov, func=="grass non-native"&year==2012))
 
 summary(cov_NF2005)
+summary(cov_NF2005.2)
+
 summary(cov_NF2006)
 summary(cov_NF2007)
 summary(cov_NF2008)
