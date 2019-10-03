@@ -369,6 +369,11 @@ anova_stats(anova(lm(litter~trt, data = lit_post)))
 # richness by year
 richrich<-rich%>%
   separate(quadratNew, into=c("transect2", "quadrat"), sep="-") 
+#set the intercept to ungrazed burned for the third pair comparison
+richrich2<-richrich%>%
+  ungroup()%>%
+  mutate(trt=as.factor(trt))
+richrich2$trt <- factor(richrich2$trt, levels = c("ungrazed burned", "ungrazed unburned", "grazed burned"))
 
 rich_NF2005<-lme(richness~trt, random = ~1|transect2/quadrat, data = subset(richrich, func=="forb native"&year==2005))
 rich_NF2006<-lme(richness~trt, random = ~1|transect2/quadrat, data = subset(richrich, func=="forb native"&year==2006))
