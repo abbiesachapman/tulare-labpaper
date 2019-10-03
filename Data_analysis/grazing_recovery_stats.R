@@ -364,6 +364,8 @@ anova_stats(anova(lm(litter~trt, data = lit_post)))
 #grazed and burned as fixed effects, quadrats nested within transects as random
 ########
 
+#load "rich" from grazing_recovery.R
+
 # richness by year
 richrich<-rich%>%
   separate(quadratNew, into=c("transect2", "quadrat"), sep="-") 
@@ -405,9 +407,13 @@ summary(rich_IG2011)
 summary(rich_IG2012)
 
 # cover by year
+
+#load "cov" from grazing_recovery.R
+
 covcov<-cov%>%
   separate(quadratNew, into=c("transect2", "quadrat"), sep="-") 
 
+#set the intercept to ungrazed burned for the third pair comparison
 covcov2<-covcov%>%
   ungroup()%>%
   mutate(trt=as.factor(trt))
