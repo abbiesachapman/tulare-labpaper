@@ -2,6 +2,7 @@ library(tidyverse)
 library(readr)
 library(sjstats) #standardized effect size cohen's f
 library(nlme) #linear mixed models
+library(lme4) # added to make nesting easier
 
 #load updated master data, "alldat", in grazing_recovery.R
 
@@ -374,6 +375,12 @@ richrich2<-richrich%>%
   ungroup()%>%
   mutate(trt=as.factor(trt))
 richrich2$trt <- factor(richrich2$trt, levels = c("ungrazed burned", "ungrazed unburned", "grazed burned"))
+
+## Saw issue posted on GitHub regarding nesting quadrats in transects and wanted to try and help.
+## Based on an online search, it might be worth trying:
+example<- lmer(richness~trt + (1|quadrat)+(1|transect2), data = subset(richrich, func = "forb native" &year == 2005))
+## I think your suggestion could also work, so maybe just see if the results are the same?
+## Though please note you know your data best and feel free to ignore this if inappropriate and double-check it works for your research question.
 
 rich_NF2005<-lme(richness~trt, random = ~1|transect2/quadrat, data = subset(richrich, func=="forb native"&year==2005))
 rich_NF2005.2<-lme(richness~trt, random = ~1|transect2/quadrat, data = subset(richrich2, func=="forb native"&year==2005))
